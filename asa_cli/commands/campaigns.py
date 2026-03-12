@@ -515,8 +515,10 @@ def update_campaign(
         changes.append(f"Name: {campaign.get('name')} -> {name}")
 
     if budget:
-        updates["dailyBudgetAmount"] = {"amount": str(budget), "currency": "USD"}
-        old_budget = campaign.get("dailyBudgetAmount", {}).get("amount", "?")
+        current_budget = campaign.get("dailyBudgetAmount", {})
+        currency = current_budget.get("currency") or client.get_org_currency()
+        updates["dailyBudgetAmount"] = {"amount": str(budget), "currency": currency}
+        old_budget = current_budget.get("amount", "?")
         changes.append(f"Daily Budget: ${old_budget} -> ${budget}")
 
     if status:

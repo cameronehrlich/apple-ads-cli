@@ -148,7 +148,13 @@ def update_adgroup(
         changes.append(f"Name → {name}")
 
     if bid is not None:
-        updates["defaultBidAmount"] = {"amount": str(bid), "currency": "USD"}
+        # Preserve campaign/org currency instead of hardcoding USD
+        campaign = client.get_campaign(campaign_id)
+        campaign_currency = (
+            campaign.get("dailyBudgetAmount", {}).get("currency") if campaign else None
+        )
+        currency = campaign_currency or client.get_org_currency()
+        updates["defaultBidAmount"] = {"amount": str(bid), "currency": currency}
         changes.append(f"Default Bid → ${bid}")
 
     if search_match is not None:

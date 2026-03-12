@@ -31,6 +31,7 @@ class SearchAdsClient:
         self.app_config = app_config or get_current_app_config()
         self._access_token: Optional[str] = None
         self._token_expiry: Optional[float] = None
+        self._currency: Optional[str] = None
 
     def _create_client_secret(self) -> str:
         """Create a JWT client secret for Apple OAuth.
@@ -205,6 +206,28 @@ class SearchAdsClient:
             raise ValueError("No credentials configured.")
         return self.credentials.org_id
 
+    def get_org_currency(self) -> str:
+        """Detect organization currency from existing campaigns (fallback: USD)."""
+        if self._currency:
+            return self._currency
+
+        try:
+            response = self._request("GET", "/campaigns", params={"limit": 1, "offset": 0})
+            campaigns = response.get("data", []) if isinstance(response, dict) else []
+            if campaigns:
+                campaign = campaigns[0]
+                daily_budget = campaign.get("dailyBudgetAmount", {})
+                currency = daily_budget.get("currency")
+                if currency:
+                    self._currency = str(currency)
+                    return self._currency
+        except Exception:
+            # Best-effort only; fall back to USD below
+            pass
+
+        self._currency = "USD"
+        return self._currency
+
     # =========================================================================
     # Campaign Operations
     # =========================================================================
@@ -239,11 +262,12 @@ class SearchAdsClient:
             raise ValueError("No app config. Run 'asa config setup' first.")
 
         try:
+            currency = self.get_org_currency()
             campaign_data = {
                 "name": name,
                 "adamId": self.app_config.app_id,
-                "budgetAmount": {"amount": str(budget), "currency": "USD"},
-                "dailyBudgetAmount": {"amount": str(daily_budget or budget), "currency": "USD"},
+                "budgetAmount": {"amount": str(budget), "currency": currency},
+                "dailyBudgetAmount": {"amount": str(daily_budget or budget), "currency": currency},
                 "countriesOrRegions": countries,
                 "status": status,
                 "supplySources": ["APPSTORE_SEARCH_RESULTS"],
@@ -317,9 +341,10 @@ class SearchAdsClient:
 
             start_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000")
 
+            currency = self.get_org_currency()
             ad_group_data = {
                 "name": name,
-                "defaultBidAmount": {"amount": str(default_bid), "currency": "USD"},
+                "defaultBidAmount": {"amount": str(default_bid), "currency": currency},
                 "automatedKeywordsOptIn": search_match_enabled,
                 "pricingModel": "CPC",
                 "startTime": start_time,
@@ -338,7 +363,7 @@ class SearchAdsClient:
                 }
 
             if cpa_goal:
-                ad_group_data["cpaGoal"] = {"amount": str(cpa_goal), "currency": "USD"}
+                ad_group_data["cpaGoal"] = {"amount": str(cpa_goal), "currency": currency}
 
             response = self._request(
                 "POST", f"/campaigns/{campaign_id}/adgroups", data=ad_group_data
@@ -413,11 +438,12 @@ class SearchAdsClient:
 
         default_bid = bid_amount or (self.app_config.default_bid if self.app_config else 1.50)
 
+        currency = self.get_org_currency()
         keyword_objects = [
             {
                 "text": kw.strip().lower(),
                 "matchType": match_type.value,
-                "bidAmount": {"amount": str(default_bid), "currency": "USD"},
+                "bidAmount": {"amount": str(default_bid), "currency": currency},
             }
             for kw in keywords
             if kw.strip()
@@ -543,8 +569,9 @@ class SearchAdsClient:
         """Update bid amount for a keyword."""
         try:
             # Use bulk update endpoint with keyword object including ID
+            currency = self.get_org_currency()
             update_data = [
-                {"id": keyword_id, "bidAmount": {"amount": str(bid_amount), "currency": "USD"}}
+                {"id": keyword_id, "bidAmount": {"amount": str(bid_amount), "currency": currency}}
             ]
             response = self._request(
                 "PUT",
