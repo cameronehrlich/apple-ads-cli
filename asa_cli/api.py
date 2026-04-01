@@ -211,22 +211,17 @@ class SearchAdsClient:
         if self._currency:
             return self._currency
 
-        try:
-            response = self._request("GET", "/campaigns", params={"limit": 1, "offset": 0})
-            campaigns = response.get("data", []) if isinstance(response, dict) else []
-            if campaigns:
-                campaign = campaigns[0]
-                daily_budget = campaign.get("dailyBudgetAmount", {})
-                currency = daily_budget.get("currency")
-                if currency:
-                    self._currency = str(currency)
-                    return self._currency
-        except Exception:
-            # Best-effort only; fall back to USD below
-            pass
+        response = self._request("GET", "/campaigns", params={"limit": 1, "offset": 0})
+        campaigns = response.get("data", []) if isinstance(response, dict) else []
+        if campaigns:
+            campaign = campaigns[0]
+            daily_budget = campaign.get("dailyBudgetAmount", {})
+            currency = daily_budget.get("currency")
+            if currency:
+                self._currency = str(currency)
+                return self._currency
 
-        self._currency = "USD"
-        return self._currency
+        return "USD"
 
     # =========================================================================
     # Campaign Operations

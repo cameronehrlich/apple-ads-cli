@@ -519,7 +519,7 @@ def update_campaign(
         currency = current_budget.get("currency") or client.get_org_currency()
         updates["dailyBudgetAmount"] = {"amount": str(budget), "currency": currency}
         old_budget = current_budget.get("amount", "?")
-        changes.append(f"Daily Budget: ${old_budget} -> ${budget}")
+        changes.append(f"Daily Budget: {old_budget} {currency} -> {budget} {currency}")
 
     if status:
         status_upper = status.upper()

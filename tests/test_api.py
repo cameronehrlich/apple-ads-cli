@@ -1,6 +1,6 @@
 """Tests for API client module."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -262,6 +262,38 @@ class TestCampaignOperations:
             results = mock_client.get_ad_groups(123)
 
         assert len(results) == 2
+
+
+class TestOrgCurrencyDetection:
+    """Tests for org currency detection and caching."""
+
+    def test_get_org_currency_caches_detected_currency(self, mock_client):
+        """Test a discovered currency is cached for later calls."""
+        response = {
+            "data": [{"dailyBudgetAmount": {"amount": "10", "currency": "EUR"}}],
+        }
+
+        with patch.object(mock_client, "_request", return_value=response) as mock_request:
+            assert mock_client.get_org_currency() == "EUR"
+            assert mock_client.get_org_currency() == "EUR"
+
+        assert mock_client._currency == "EUR"
+        assert mock_request.call_count == 1
+
+    def test_get_org_currency_does_not_cache_usd_fallback(self, mock_client):
+        """Test the USD fallback is returned without populating the cache."""
+        with patch.object(mock_client, "_request", return_value={"data": []}) as mock_request:
+            assert mock_client.get_org_currency() == "USD"
+            assert mock_client.get_org_currency() == "USD"
+
+        assert mock_client._currency is None
+        assert mock_request.call_count == 2
+
+    def test_get_org_currency_propagates_request_errors(self, mock_client):
+        """Test request errors surface to the caller."""
+        with patch.object(mock_client, "_request", side_effect=RuntimeError("boom")):
+            with pytest.raises(RuntimeError, match="boom"):
+                mock_client.get_org_currency()
 
     def test_get_negative_keywords_uses_pagination(self, mock_client):
         """Test get_negative_keywords uses pagination."""

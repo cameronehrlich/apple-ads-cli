@@ -155,7 +155,7 @@ def update_adgroup(
         )
         currency = campaign_currency or client.get_org_currency()
         updates["defaultBidAmount"] = {"amount": str(bid), "currency": currency}
-        changes.append(f"Default Bid → ${bid}")
+        changes.append(f"Default Bid → {bid} {currency}")
 
     if search_match is not None:
         updates["automatedKeywordsOptIn"] = search_match
