@@ -1,11 +1,11 @@
 """Tests for custom/impression share reports and additional report types."""
 
-from datetime import datetime, timedelta
+from datetime import datetime
 from unittest.mock import patch
 
 import pytest
 
-from asa_cli.api import SearchAdsClient
+from asa_cli.api import SearchAdsAPIError, SearchAdsClient
 from asa_cli.config import AppConfig, Credentials
 
 
@@ -384,11 +384,10 @@ class TestKeywordAdGroupReport:
         assert result == []
 
     def test_keyword_adgroup_report_api_error(self, mock_client):
-        """Test handling of API error in keyword adgroup report."""
+        """API errors must not be misreported as an empty keyword report."""
         with patch.object(mock_client, "_request", side_effect=Exception("Error")):
-            result = mock_client.get_keyword_adgroup_report(123, 456)
-
-        assert result == []
+            with pytest.raises(SearchAdsAPIError, match="Failed to fetch keyword report"):
+                mock_client.get_keyword_adgroup_report(123, 456)
 
     def test_keyword_adgroup_report_multiple_keywords(self, mock_client):
         """Test keyword report with multiple keywords and varying recommendations."""

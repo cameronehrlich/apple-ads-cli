@@ -15,6 +15,11 @@ console = Console()
 # Apple OAuth endpoints
 TOKEN_URL = "https://appleid.apple.com/auth/oauth2/token"
 API_BASE_URL = "https://api.searchads.apple.com/api/v5"
+REQUEST_TIMEOUT = (10, 30)
+
+
+class SearchAdsAPIError(RuntimeError):
+    """Raised when an Apple Ads request fails without returning valid data."""
 
 
 class SearchAdsClient:
@@ -81,15 +86,21 @@ class SearchAdsClient:
             "scope": "searchadsorg",
         }
 
-        response = requests.post(TOKEN_URL, data=data)
+        try:
+            response = requests.post(TOKEN_URL, data=data, timeout=REQUEST_TIMEOUT)
+        except requests.RequestException as exc:
+            raise SearchAdsAPIError(f"Failed to reach Apple OAuth: {exc}") from exc
 
         if response.status_code != 200:
-            raise ConnectionError(
+            raise SearchAdsAPIError(
                 f"Failed to get access token: {response.status_code} - {response.text}"
             )
 
-        token_data = response.json()
-        self._access_token = token_data["access_token"]
+        try:
+            token_data = response.json()
+            self._access_token = token_data["access_token"]
+        except (ValueError, KeyError) as exc:
+            raise SearchAdsAPIError("Apple OAuth returned an invalid token response") from exc
         # Token typically valid for 1 hour, refresh 5 min early
         self._token_expiry = time.time() + token_data.get("expires_in", 3600) - 300
 
@@ -134,13 +145,19 @@ class SearchAdsClient:
         if not skip_org_context:
             headers["X-AP-Context"] = f"orgId={self.credentials.org_id}"
 
-        response = requests.request(
-            method=method,
-            url=url,
-            headers=headers,
-            json=data,
-            params=params,
-        )
+        try:
+            response = requests.request(
+                method=method,
+                url=url,
+                headers=headers,
+                json=data,
+                params=params,
+                timeout=REQUEST_TIMEOUT,
+            )
+        except requests.RequestException as exc:
+            raise SearchAdsAPIError(
+                f"Apple Ads API request failed for {method} {endpoint}: {exc}"
+            ) from exc
 
         # Handle auth failures with retry
         if response.status_code == 401 and _retry_count < max_retries:
@@ -154,12 +171,17 @@ class SearchAdsClient:
         if response.status_code >= 400:
             error_msg = f"API error {response.status_code}: {response.text}"
             console.print(f"[red]{error_msg}[/red]")
-            raise Exception(error_msg)
+            raise SearchAdsAPIError(error_msg)
 
         if response.status_code == 204:  # No content
             return {}
 
-        return response.json()
+        try:
+            return response.json()
+        except ValueError as exc:
+            raise SearchAdsAPIError(
+                f"Apple Ads API returned invalid JSON for {method} {endpoint}"
+            ) from exc
 
     def _get_all_paginated(
         self, endpoint: str, params: Optional[dict] = None, limit: int = 1000
@@ -214,11 +236,7 @@ class SearchAdsClient:
 
     def get_campaigns(self) -> list[dict[str, Any]]:
         """Get all campaigns for the organization (handles pagination)."""
-        try:
-            return self._get_all_paginated("/campaigns")
-        except Exception as e:
-            console.print(f"[red]Error fetching campaigns: {e}[/red]")
-            return []
+        return self._get_all_paginated("/campaigns")
 
     def get_campaign(self, campaign_id: int) -> Optional[dict[str, Any]]:
         """Get a specific campaign by ID."""
@@ -301,7 +319,7 @@ class SearchAdsClient:
             A dict summarising the created campaign, ad groups, keyword
             counts, and negative counts.
         """
-        from datetime import datetime, timezone, timedelta
+        from datetime import datetime, timedelta, timezone
 
         src = self._request("GET", f"/campaigns/{source_campaign_id}").get("data")
         if not src:
@@ -423,11 +441,7 @@ class SearchAdsClient:
 
     def get_ad_groups(self, campaign_id: int) -> list[dict[str, Any]]:
         """Get all ad groups for a campaign (handles pagination)."""
-        try:
-            return self._get_all_paginated(f"/campaigns/{campaign_id}/adgroups")
-        except Exception as e:
-            console.print(f"[red]Error fetching ad groups for campaign {campaign_id}: {e}[/red]")
-            return []
+        return self._get_all_paginated(f"/campaigns/{campaign_id}/adgroups")
 
     def create_ad_group(
         self,
@@ -512,16 +526,12 @@ class SearchAdsClient:
             ad_group_id: Ad group ID
             include_deleted: If False (default), filters out deleted keywords
         """
-        try:
-            keywords = self._get_all_paginated(
-                f"/campaigns/{campaign_id}/adgroups/{ad_group_id}/targetingkeywords"
-            )
-            if not include_deleted:
-                keywords = [kw for kw in keywords if not kw.get("deleted", False)]
-            return keywords
-        except Exception as e:
-            console.print(f"[red]Error fetching keywords: {e}[/red]")
-            return []
+        keywords = self._get_all_paginated(
+            f"/campaigns/{campaign_id}/adgroups/{ad_group_id}/targetingkeywords"
+        )
+        if not include_deleted:
+            keywords = [kw for kw in keywords if not kw.get("deleted", False)]
+        return keywords
 
     def add_keywords(
         self,
@@ -1015,8 +1025,7 @@ class SearchAdsClient:
 
             return rows
         except Exception as e:
-            console.print(f"[red]Error fetching campaign report: {e}[/red]")
-            return []
+            raise SearchAdsAPIError(f"Failed to fetch campaign report: {e}") from e
 
     def get_keyword_report(
         self,
@@ -1048,8 +1057,9 @@ class SearchAdsClient:
             )
             return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
         except Exception as e:
-            console.print(f"[red]Error fetching keyword report: {e}[/red]")
-            return []
+            raise SearchAdsAPIError(
+                f"Failed to fetch keyword report for campaign {campaign_id}: {e}"
+            ) from e
 
     def get_ad_group_report(
         self,
@@ -1119,8 +1129,9 @@ class SearchAdsClient:
             )
             return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
         except Exception as e:
-            console.print(f"[red]Error fetching search terms report: {e}[/red]")
-            return []
+            raise SearchAdsAPIError(
+                f"Failed to fetch search terms report for campaign {campaign_id}: {e}"
+            ) from e
 
     def get_impression_share_report(
         self,
@@ -2019,11 +2030,10 @@ class SearchAdsClient:
             )
             return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
         except Exception as e:
-            console.print(
-                f"[red]Error fetching keyword report for campaign {campaign_id} "
-                f"ad group {ad_group_id}: {e}[/red]"
-            )
-            return []
+            raise SearchAdsAPIError(
+                f"Failed to fetch keyword report for campaign {campaign_id} "
+                f"ad group {ad_group_id}: {e}"
+            ) from e
 
     # =========================================================================
     # Search Term within Ad Group Reports

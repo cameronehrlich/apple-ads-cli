@@ -3,8 +3,9 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
-from asa_cli.api import SearchAdsClient
+from asa_cli.api import REQUEST_TIMEOUT, SearchAdsAPIError, SearchAdsClient
 from asa_cli.config import AppConfig, Credentials, MatchType
 
 
@@ -130,6 +131,65 @@ class TestPagination:
             results = mock_client.get_keywords(123, 456, include_deleted=True)
 
         assert len(results) == 2
+
+
+class TestRequestFailures:
+    """Tests for bounded requests and fail-closed API errors."""
+
+    def test_api_request_uses_bounded_timeout(self, mock_client):
+        response = MagicMock(status_code=200)
+        response.json.return_value = {"data": []}
+
+        with patch.object(mock_client, "_get_access_token", return_value="mock_token"):
+            with patch("asa_cli.api.requests.request", return_value=response) as request:
+                mock_client._request("GET", "/campaigns")
+
+        assert request.call_args.kwargs["timeout"] == REQUEST_TIMEOUT
+
+    def test_api_network_error_raises_typed_error(self, mock_client):
+        with patch.object(mock_client, "_get_access_token", return_value="mock_token"):
+            with patch(
+                "asa_cli.api.requests.request",
+                side_effect=requests.Timeout("timed out"),
+            ):
+                with pytest.raises(SearchAdsAPIError, match="GET /campaigns"):
+                    mock_client._request("GET", "/campaigns")
+
+    def test_oauth_network_error_raises_typed_error(self, mock_client):
+        with patch.object(mock_client, "_create_client_secret", return_value="secret"):
+            with patch(
+                "asa_cli.api.requests.post",
+                side_effect=requests.Timeout("timed out"),
+            ):
+                with pytest.raises(SearchAdsAPIError, match="Apple OAuth"):
+                    mock_client._get_access_token()
+
+    def test_campaign_list_error_is_not_converted_to_empty_data(self, mock_client):
+        with patch.object(
+            mock_client,
+            "_get_all_paginated",
+            side_effect=SearchAdsAPIError("unavailable"),
+        ):
+            with pytest.raises(SearchAdsAPIError, match="unavailable"):
+                mock_client.get_campaigns()
+
+    @pytest.mark.parametrize(
+        ("method_name", "args"),
+        [
+            ("get_campaign_report", (123,)),
+            ("get_keyword_report", (123,)),
+            ("get_search_terms_report", (123,)),
+            ("get_keyword_adgroup_report", (123, 456)),
+        ],
+    )
+    def test_weekly_report_errors_fail_closed(self, mock_client, method_name, args):
+        with patch.object(
+            mock_client,
+            "_request",
+            side_effect=SearchAdsAPIError("unavailable"),
+        ):
+            with pytest.raises(SearchAdsAPIError, match="unavailable"):
+                getattr(mock_client, method_name)(*args)
 
 
 class TestNegativeKeywordsErrorHandling:

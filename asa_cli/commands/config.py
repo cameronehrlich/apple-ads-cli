@@ -9,7 +9,6 @@ from rich.table import Table
 from ..config import (
     CONFIG_FILE,
     CREDENTIALS_FILE,
-    get_active_app_config,
     get_app_slug,
     load_app_config,
     load_credentials,
@@ -131,7 +130,7 @@ def show_config():
 
 @app.command("test")
 def test_connection():
-    """Test API connection with current credentials."""
+    """Test API access; exits nonzero on authentication or transport failure."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
@@ -154,14 +153,14 @@ def test_connection():
     except ImportError as e:
         console.print(f"[red]Missing dependency: {e}[/red]")
         console.print("  Run: pip install -e . (from the apple-search-ads directory)")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Connection failed: {e}[/red]")
         console.print("\nTroubleshooting:")
         console.print("  1. Verify your credentials in Apple Ads dashboard")
         console.print("  2. Ensure private key file exists and is readable")
         console.print("  3. Check that your API user has appropriate permissions")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command("add-app")
