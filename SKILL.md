@@ -218,6 +218,7 @@ asa config test
 | `asa optimize --min-impressions 100` | Min impressions to consider a term |
 | `asa optimize --exclude "term1,term2"` | Exclude specific terms from analysis |
 | `asa optimize --target brand` | Target campaign type (default: category) |
+| `asa optimize --negative-scope managed` | Explicitly block losers across all managed campaigns (default: Discovery only) |
 | `asa optimize --auto-approve` | Skip confirmation prompts |
 | `asa optimize --json` | Output results as JSON (implies --dry-run) |
 
@@ -298,7 +299,7 @@ The `asa optimize` command automatically:
 2. Identifies winners (≥2 installs, CPA ≤ $5)
 3. Identifies losers (≥$1 spend, 0 installs)
 4. Promotes winners to target campaign (adds as exact + negative in Discovery)
-5. Blocks losers across all managed campaigns
+5. Blocks losers in Discovery by default (`--negative-scope managed` is explicit)
 
 **Option 2: Manual**
 
