@@ -237,7 +237,7 @@ asa optimize --auto-approve
 2. Identifies **winners**: ≥2 installs, CPA ≤ $5
 3. Identifies **losers**: ≥$1 spend, 0 installs
 4. Promotes winners → exact match in target campaign + negative in Discovery
-5. Blocks losers → negative in all managed campaigns
+5. Blocks losers in Discovery by default (`--negative-scope managed` is explicit)
 
 ```bash
 # Customize thresholds
