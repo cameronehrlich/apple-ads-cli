@@ -5,8 +5,6 @@ import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
-import pytest
-
 from asa_cli.config import (
     CAMPAIGN_STRUCTURE,
     CAMPAIGN_TYPE_NAMES,
@@ -25,7 +23,6 @@ from asa_cli.config import (
     save_app_config,
     save_credentials,
     save_multi_app_config,
-    set_current_app,
 )
 
 

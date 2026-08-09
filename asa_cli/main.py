@@ -7,7 +7,18 @@ from rich.console import Console
 from rich.panel import Panel
 
 from . import __version__
-from .commands import acl, adgroups, ads, budget, campaigns, config, geo, keywords, optimize, reports
+from .commands import (
+    acl,
+    adgroups,
+    ads,
+    budget,
+    campaigns,
+    config,
+    geo,
+    keywords,
+    optimize,
+    reports,
+)
 from .config import set_current_app
 
 app = typer.Typer(
@@ -93,6 +104,8 @@ Apple's recommended 4-campaign structure.
     asa reports summary         - Performance summary across campaigns
     asa reports keywords        - Keyword performance report
     asa reports search-terms    - Discover new keywords and negatives
+    asa reports impression-share - True async Apple impression-share report
+    asa reports ads --json      - Stable complete-window ad performance
     asa reports custom          - Create async custom report
     asa reports custom-list     - List custom reports
     asa reports custom-get      - Get/download custom report
@@ -113,6 +126,7 @@ Apple's recommended 4-campaign structure.
   [bold cyan]Ads:[/bold cyan]
     asa ads list                - List ad variations
     asa ads create              - Create an ad variation
+    asa ads experiment          - Validate/apply an existing CPP manifest
     asa ads delete              - Delete an ad variation
     asa ads creatives           - List creative sets
     asa ads product-pages       - List product page results

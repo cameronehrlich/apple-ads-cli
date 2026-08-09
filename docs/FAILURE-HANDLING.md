@@ -13,8 +13,12 @@ For unattended use, run `asa config test` as a preflight and treat any nonzero
 exit as a hard stop. A successful preflight with zero campaigns is valid and is
 reported as zero campaigns.
 
-This policy currently covers the campaign, ad-group, keyword, campaign-report,
-keyword-report, search-term-report, and keyword-within-ad-group reads used by the
-optimizer and recurring reporting workflow. Other legacy convenience methods may
-still return `None` or an empty list after printing an error; callers should not
-use those paths as autonomous mutation evidence until they are migrated.
+This policy covers campaign, ad-group, keyword, campaign-report, keyword-report,
+ad-group-report, search-term-report, ad-report, custom-report, and keyword-within-
+ad-group reads used by recurring reporting. Stable `--json` commands therefore do
+not convert a failed request into a healthy empty report.
+
+Ad creation and CPP experiment attachment require immediate readback of the ad's
+name, creative ID, and status. A mutation response without matching readback exits
+nonzero and must be treated as unverified. The CLI does not attempt an automatic
+rollback because a second mutation may be unsafe to retry.

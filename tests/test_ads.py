@@ -1,6 +1,6 @@
 """Tests for ad variation and creative management."""
 
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 import pytest
 
@@ -229,7 +229,7 @@ class TestAdOperations:
         conditions = [{"field": "status", "operator": "EQUALS", "values": ["ENABLED"]}]
 
         with patch.object(mock_client, "_request", return_value=mock_response) as mock_req:
-            results = mock_client.find_ads(conditions=conditions)
+            mock_client.find_ads(conditions=conditions)
 
         call_args = mock_req.call_args
         data = call_args[1].get("data") or call_args[0][2]
@@ -372,7 +372,7 @@ class TestCreativeOperations:
         conditions = [{"field": "state", "operator": "EQUALS", "values": ["VALID"]}]
 
         with patch.object(mock_client, "_request", return_value=mock_response) as mock_req:
-            results = mock_client.find_creatives(conditions=conditions)
+            mock_client.find_creatives(conditions=conditions)
 
         call_args = mock_req.call_args
         data = call_args[1].get("data") or call_args[0][2]
@@ -483,7 +483,7 @@ class TestRejectionReasonsAndAssets:
         conditions = [{"field": "creativeId", "operator": "EQUALS", "values": ["1"]}]
 
         with patch.object(mock_client, "_request", return_value=mock_response) as mock_req:
-            results = mock_client.find_rejection_reasons(conditions=conditions)
+            mock_client.find_rejection_reasons(conditions=conditions)
 
         call_args = mock_req.call_args
         data = call_args[1].get("data") or call_args[0][2]
@@ -520,7 +520,7 @@ class TestRejectionReasonsAndAssets:
         conditions = [{"field": "type", "operator": "EQUALS", "values": ["SCREENSHOT"]}]
 
         with patch.object(mock_client, "_request", return_value=mock_response) as mock_req:
-            results = mock_client.find_app_assets(999999, conditions=conditions)
+            mock_client.find_app_assets(999999, conditions=conditions)
 
         call_args = mock_req.call_args
         data = call_args[1].get("data") or call_args[0][2]

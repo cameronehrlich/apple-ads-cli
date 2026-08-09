@@ -155,13 +155,12 @@ asa config test
 | `asa reports keywords --sort cpa` | Sort by CPA |
 | `asa reports adgroups --all` | Ad group performance for all campaigns |
 | `asa reports adgroups --campaign <ID>` | Ad group performance for specific campaign |
-| `asa reports impression-share --all` | Impression share / Share of Voice report |
-| `asa reports impression-share --min-impressions 50` | Filter by minimum impressions |
+| `asa reports impression-share --adam-id <ID>` | True async Apple impression-share report |
+| `asa reports impression-share --report-id <ID>` | Immediately download an existing completed report |
 | `asa reports search-terms` | All search terms |
 | `asa reports search-terms --winners` | Terms to promote (good CPA) |
 | `asa reports search-terms --negatives` | Terms to block (spend, no installs) |
-| `asa reports custom --days 90` | Create async custom report |
-| `asa reports custom --days 90 --granularity WEEKLY` | Custom report with weekly granularity |
+| `asa reports custom --days 30` | Create async custom report (30-day maximum) |
 | `asa reports custom-list` | List all custom reports (pending/completed) |
 | `asa reports custom-get <ID>` | Get or download a custom report by ID |
 | `asa reports ads` | Ad-level performance report |
@@ -189,7 +188,9 @@ asa config test
 | Command | Description |
 |---------|-------------|
 | `asa ads list --campaign <ID>` | List ad variations |
-| `asa ads create --campaign <ID> --ad-group <ID>` | Create an ad variation |
+| `asa ads create <NAME> --campaign <ID> --adgroup <ID> --creative <ID>` | Create and verify an ad variation |
+| `asa ads experiment <MANIFEST>` | Validate an existing CPP attachment manifest (read-only default) |
+| `asa ads experiment <MANIFEST> --apply` | Attach and immediately verify the treatment ad |
 | `asa ads delete <AD_ID> --campaign <ID> --ad-group <ID>` | Delete an ad variation |
 | `asa ads creatives --campaign <ID> --ad-group <ID>` | List creative sets |
 | `asa ads product-pages` | List product page results |
@@ -409,7 +410,7 @@ Full Apple Search Ads Campaign Management API v5 coverage — 72 API methods acr
 
 **Bulk Operations**: The CLI uses Apple's bulk API endpoints for keyword operations (enable, pause, delete, update bid, bulk bid updates). More efficient than individual requests.
 
-**Custom Reports**: Async reports support up to 90-day date ranges. The CLI automatically polls for completion (10s intervals, 5 min timeout) with a spinner.
+**Custom Reports**: Async impression-share reports support custom windows up to 30 days. The CLI downloads completed results immediately because Apple download URLs expire quickly.
 
 **Bid Recommendations**: Extracted from the `insights.bidRecommendation.suggestedBidAmount` field in keyword reports. Color-coded: green (at/above), yellow (slightly below), red (significantly below).
 

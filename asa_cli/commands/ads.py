@@ -1,5 +1,7 @@
-"""Ad variation and creative management commands."""
+"""Ad variation, creative, and CPP experiment commands."""
 
+import json
+from pathlib import Path
 from typing import Optional
 
 import typer
@@ -9,6 +11,7 @@ from rich.table import Table
 
 from ..api import SearchAdsClient
 from ..config import get_current_app_config, load_credentials
+from ..experiments import CPPExperimentManifest, load_experiment_manifest
 
 app = typer.Typer(help="Ad variation and creative management commands")
 console = Console()
@@ -68,8 +71,9 @@ def create_ad(
     creative_id: int = typer.Option(..., "--creative", help="Creative ID"),
     name: str = typer.Argument(..., help="Ad name"),
     status: str = typer.Option("ENABLED", "--status", "-s", help="Initial status (ENABLED or PAUSED)"),
+    dry_run: bool = typer.Option(False, "--dry-run", help="Validate and show the attachment only"),
 ):
-    """Create a new ad in an ad group."""
+    """Create an ad and require immediate readback of its attachment."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
@@ -82,12 +86,21 @@ def create_ad(
 
     client = SearchAdsClient(credentials)
 
-    console.print(f"\nCreating ad:")
+    console.print("\nCreating ad:")
     console.print(f"  Name: [cyan]{name}[/cyan]")
     console.print(f"  Campaign: [cyan]{campaign_id}[/cyan]")
     console.print(f"  Ad Group: [cyan]{ad_group_id}[/cyan]")
     console.print(f"  Creative: [cyan]{creative_id}[/cyan]")
     console.print(f"  Status: [cyan]{status_upper}[/cyan]")
+
+    creative = client.get_creative(creative_id)
+    if not creative:
+        console.print(f"[red]Creative {creative_id} was not found or could not be read.[/red]")
+        raise typer.Exit(1)
+
+    if dry_run:
+        console.print("[yellow]Dry run: no ad was created.[/yellow]")
+        return
 
     with console.status("[bold blue]Creating ad..."):
         ad = client.create_ad(
@@ -98,13 +111,150 @@ def create_ad(
             status=status_upper,
         )
 
-    if ad:
-        console.print(f"\n[green]Ad created successfully![/green]")
-        console.print(f"  ID: [cyan]{ad.get('id')}[/cyan]")
-        console.print(f"  Name: [cyan]{ad.get('name')}[/cyan]")
-    else:
+    if not ad or not ad.get("id"):
         console.print("[red]Failed to create ad.[/red]")
         raise typer.Exit(1)
+
+    verified = client.get_ad(campaign_id, ad_group_id, ad.get("id"))
+    expected = {
+        "name": name,
+        "creativeId": creative_id,
+        "status": status_upper,
+    }
+    if not verified or any(verified.get(key) != value for key, value in expected.items()):
+        console.print(
+            "[red]Ad creation returned, but immediate readback did not confirm name, "
+            "creative, and status. Treat the mutation as unverified.[/red]"
+        )
+        raise typer.Exit(1)
+
+    console.print("\n[green]Ad created and verified.[/green]")
+    console.print(f"  ID: [cyan]{verified.get('id')}[/cyan]")
+    console.print(f"  Name: [cyan]{verified.get('name')}[/cyan]")
+
+
+def _load_manifest_or_exit(path: Path) -> CPPExperimentManifest:
+    try:
+        return load_experiment_manifest(path)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+
+
+def _validate_cpp_creative(
+    client: SearchAdsClient, manifest: CPPExperimentManifest
+) -> dict:
+    creative = client.get_creative(manifest.treatment.creative_id)
+    if not creative:
+        raise ValueError(
+            f"Creative {manifest.treatment.creative_id} was not found or could not be read"
+        )
+    if str(creative.get("adamId")) != str(manifest.adam_id):
+        raise ValueError("Creative Adam ID does not match the experiment manifest")
+    if creative.get("productPageId") != manifest.custom_product_page_id:
+        raise ValueError("Creative is not linked to the manifest custom product page")
+    if creative.get("state") not in (None, "VALID"):
+        raise ValueError(f"Creative is not valid (state: {creative.get('state')})")
+    return creative
+
+
+@app.command("experiment")
+def apply_experiment(
+    manifest_path: Path = typer.Argument(
+        ..., exists=True, readable=True, help="Versioned CPP experiment JSON manifest"
+    ),
+    apply: bool = typer.Option(
+        False, "--apply", help="Create the treatment ad; default is read-only dry run"
+    ),
+    json_output: bool = typer.Option(False, "--json", help="Emit stable machine-readable JSON"),
+):
+    """Validate or attach an existing ASC custom product page creative.
+
+    App Store Connect authoring remains outside this command. Without
+    ``--apply`` this command performs read-only validation only.
+    """
+    credentials = load_credentials()
+    if not credentials:
+        console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
+        raise typer.Exit(1)
+
+    manifest = _load_manifest_or_exit(manifest_path)
+    client = SearchAdsClient(credentials)
+    try:
+        creative = _validate_cpp_creative(client, manifest)
+    except ValueError as exc:
+        console.print(f"[red]{exc}[/red]")
+        raise typer.Exit(1) from exc
+
+    treatment = manifest.treatment
+    verified_ad = None
+    action = "validated"
+    if treatment.ad_id is not None:
+        verified_ad = client.get_ad(
+            manifest.campaign_id, manifest.ad_group_id, treatment.ad_id
+        )
+        if not verified_ad or verified_ad.get("creativeId") != treatment.creative_id:
+            console.print(
+                "[red]Manifest treatment ad readback did not confirm the expected creative.[/red]"
+            )
+            raise typer.Exit(1)
+        action = "already_attached"
+    elif apply:
+        created = client.create_ad(
+            manifest.campaign_id,
+            manifest.ad_group_id,
+            treatment.creative_id,
+            treatment.name,
+            treatment.initial_status,
+        )
+        if not created or not created.get("id"):
+            console.print("[red]Apple Ads did not return a created treatment ad.[/red]")
+            raise typer.Exit(1)
+        verified_ad = client.get_ad(
+            manifest.campaign_id, manifest.ad_group_id, created.get("id")
+        )
+        expected = {
+            "name": treatment.name,
+            "creativeId": treatment.creative_id,
+            "status": treatment.initial_status,
+        }
+        if not verified_ad or any(
+            verified_ad.get(field) != value for field, value in expected.items()
+        ):
+            console.print(
+                "[red]Treatment ad creation returned, but readback did not confirm the "
+                "manifest attachment. Treat the mutation as unverified.[/red]"
+            )
+            raise typer.Exit(1)
+        action = "created_and_verified"
+    else:
+        action = "dry_run"
+
+    payload = {
+        "schema_version": 1,
+        "experiment_id": manifest.experiment_id,
+        "action": action,
+        "mutated": action == "created_and_verified",
+        "hypothesis": manifest.hypothesis,
+        "app_store": {
+            "adam_id": manifest.adam_id,
+            "custom_product_page_id": manifest.custom_product_page_id,
+        },
+        "apple_ads": {
+            "campaign_id": manifest.campaign_id,
+            "ad_group_id": manifest.ad_group_id,
+            "creative_id": creative.get("id"),
+            "ad_id": verified_ad.get("id") if verified_ad else None,
+            "status": verified_ad.get("status") if verified_ad else treatment.initial_status,
+        },
+    }
+    if json_output:
+        typer.echo(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False))
+    else:
+        console.print(
+            f"[green]Experiment {manifest.experiment_id}: {action.replace('_', ' ')}.[/green]"
+        )
+        if action == "dry_run":
+            console.print("[yellow]No Apple Ads mutation was performed. Use --apply to attach.[/yellow]")
 
 
 @app.command("delete")
@@ -128,7 +278,7 @@ def delete_ad(
         console.print(f"[red]Ad {ad_id} not found.[/red]")
         raise typer.Exit(1)
 
-    console.print(f"\n[bold red]WARNING: About to delete ad:[/bold red]")
+    console.print("\n[bold red]WARNING: About to delete ad:[/bold red]")
     console.print(f"  Name: {ad.get('name', 'Unknown')}")
     console.print(f"  ID: {ad_id}")
 
@@ -164,7 +314,7 @@ def list_creatives(
             console.print(f"[red]Creative {creative_id} not found.[/red]")
             raise typer.Exit(1)
 
-        console.print(f"\n[bold]Creative Details[/bold]")
+        console.print("\n[bold]Creative Details[/bold]")
         console.print(f"  ID: [cyan]{creative.get('id')}[/cyan]")
         console.print(f"  Name: [cyan]{creative.get('name', 'Unknown')}[/cyan]")
         console.print(f"  Type: [cyan]{creative.get('type', '-')}[/cyan]")
