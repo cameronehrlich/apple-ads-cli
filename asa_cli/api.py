@@ -1155,9 +1155,9 @@ class SearchAdsClient:
     def get_keyword_recommendations(
         self,
         app_id: str,
-        campaign_id: int | None = None,
-        ad_group_id: int | None = None,
-        keywords: list[str] | None = None,
+        campaign_id: Optional[int] = None,
+        ad_group_id: Optional[int] = None,
+        keywords: Optional[list[str]] = None,
     ) -> list[dict[str, Any]]:
         """Get keyword recommendations with search popularity scores.
 
