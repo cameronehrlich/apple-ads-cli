@@ -21,6 +21,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
-      - run: uv sync --locked --extra dev
+      # This project intentionally does not commit uv.lock; resolve the tested
+      # Python matrix from the package metadata on each run.
+      - run: uv sync --extra dev
       - run: uv run ruff check .
       - run: uv run pytest -q
