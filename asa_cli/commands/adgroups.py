@@ -110,7 +110,7 @@ def create_adgroup(
         )
 
     if ad_group:
-        console.print(f"\n[green]Ad group created successfully![/green]")
+        console.print("\n[green]Ad group created successfully![/green]")
         console.print(f"  ID: [cyan]{ad_group.get('id')}[/cyan]")
         console.print(f"  Name: [cyan]{ad_group.get('name')}[/cyan]")
     else:
@@ -245,7 +245,7 @@ def delete_adgroup(
         console.print(f"[red]Ad group {adgroup_id} not found in campaign {campaign_id}.[/red]")
         raise typer.Exit(1)
 
-    console.print(f"\n[bold red]WARNING: About to delete ad group:[/bold red]")
+    console.print("\n[bold red]WARNING: About to delete ad group:[/bold red]")
     console.print(f"  Name: {ad_group.get('name', 'Unknown')}")
     console.print(f"  ID: {adgroup_id}")
 

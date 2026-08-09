@@ -322,7 +322,6 @@ def audit_campaigns(
 
     for ctype in CampaignType:
         count = len(managed_campaigns[ctype])
-        expected_ad_groups = CAMPAIGN_STRUCTURE[ctype].ad_groups
 
         if count == 0:
             status = "[red]MISSING[/red]"
@@ -492,7 +491,7 @@ def create_campaign(
         )
 
     if campaign:
-        console.print(f"\n[green]Campaign created successfully![/green]")
+        console.print("\n[green]Campaign created successfully![/green]")
         console.print(f"  ID: [cyan]{campaign.get('id')}[/cyan]")
         console.print(f"  Name: [cyan]{campaign.get('name')}[/cyan]")
     else:
@@ -706,7 +705,7 @@ def delete_campaign(
             raise typer.Exit(1)
 
         campaign_name = campaign.get("name", "Unknown")
-        console.print(f"\n[bold red]WARNING: About to delete campaign:[/bold red]")
+        console.print("\n[bold red]WARNING: About to delete campaign:[/bold red]")
         console.print(f"  Name: {campaign_name}")
         console.print(f"  ID: {campaign_id}")
 

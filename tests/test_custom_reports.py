@@ -1,7 +1,7 @@
 """Tests for custom/impression share reports and additional report types."""
 
 from datetime import datetime
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -119,13 +119,12 @@ class TestCreateCustomReport:
             assert "selector" not in data
 
     def test_create_custom_report_api_error(self, mock_client):
-        """Test handling of API error during report creation."""
+        """Test API errors fail closed during report creation."""
         with patch.object(mock_client, "_request", side_effect=Exception("Rate limited")):
-            result = mock_client.create_custom_report(
-                name="Test", start_time="2024-01-01", end_time="2024-01-30"
-            )
-
-        assert result is None
+            with pytest.raises(SearchAdsAPIError, match="Rate limited"):
+                mock_client.create_custom_report(
+                    name="Test", start_time="2024-01-01", end_time="2024-01-30"
+                )
 
 
 class TestGetCustomReport:
@@ -182,11 +181,10 @@ class TestGetCustomReport:
         assert result["state"] == "FAILED"
 
     def test_get_custom_report_api_error(self, mock_client):
-        """Test handling of API error when fetching report."""
+        """Test API errors fail closed when fetching a report."""
         with patch.object(mock_client, "_request", side_effect=Exception("Not found")):
-            result = mock_client.get_custom_report("nonexistent-id")
-
-        assert result is None
+            with pytest.raises(SearchAdsAPIError, match="Not found"):
+                mock_client.get_custom_report("nonexistent-id")
 
     def test_get_custom_report_calls_correct_endpoint(self, mock_client):
         """Test that get_custom_report uses the correct endpoint."""
@@ -237,11 +235,29 @@ class TestGetAllCustomReports:
             assert params["limit"] == 50
 
     def test_get_all_custom_reports_api_error(self, mock_client):
-        """Test handling of API error when listing reports."""
+        """Test API errors fail closed when listing reports."""
         with patch.object(mock_client, "_request", side_effect=Exception("Server error")):
-            results = mock_client.get_all_custom_reports()
+            with pytest.raises(SearchAdsAPIError, match="Server error"):
+                mock_client.get_all_custom_reports()
 
-        assert results == []
+
+class TestDownloadCustomReport:
+    def test_download_uses_bounded_timeout_and_decodes_csv(self, mock_client):
+        response = MagicMock()
+        response.content = b"Date,Search Term\n2024-01-01,screenshot\n"
+
+        with patch("asa_cli.api.requests.get", return_value=response) as get:
+            result = mock_client.download_custom_report(
+                "https://example.com/impression-share.csv"
+            )
+
+        assert result.startswith("Date,Search Term")
+        assert get.call_args.kwargs["timeout"] == (10, 30)
+        response.raise_for_status.assert_called_once()
+
+    def test_download_rejects_non_https_uri(self, mock_client):
+        with pytest.raises(SearchAdsAPIError, match="HTTPS"):
+            mock_client.download_custom_report("http://example.com/report.csv")
 
 
 class TestGetAdReport:
@@ -314,11 +330,10 @@ class TestGetAdReport:
             assert "granularity" not in data
 
     def test_get_ad_report_api_error(self, mock_client):
-        """Test handling of API error in ad report."""
+        """Test API errors fail closed in ad reports."""
         with patch.object(mock_client, "_request", side_effect=Exception("Error")):
-            result = mock_client.get_ad_report(123)
-
-        assert result == []
+            with pytest.raises(SearchAdsAPIError, match="campaign 123"):
+                mock_client.get_ad_report(123)
 
 
 class TestKeywordAdGroupReport:
@@ -501,11 +516,10 @@ class TestSearchTermsAdGroupReport:
         assert result == []
 
     def test_search_terms_adgroup_report_api_error(self, mock_client):
-        """Test handling of API error in search terms report."""
+        """Test API errors fail closed in search-term reports."""
         with patch.object(mock_client, "_request", side_effect=Exception("Error")):
-            result = mock_client.get_search_terms_adgroup_report(123, 456)
-
-        assert result == []
+            with pytest.raises(SearchAdsAPIError, match="campaign 123"):
+                mock_client.get_search_terms_adgroup_report(123, 456)
 
     def test_search_terms_adgroup_report_no_metrics_false(self, mock_client):
         """Test that returnRecordsWithNoMetrics is False for search terms."""
@@ -522,16 +536,15 @@ class TestEdgeCases:
     """Edge case tests."""
 
     def test_rate_limit_error_on_custom_report(self, mock_client):
-        """Test that rate limit errors are handled gracefully."""
+        """Test that rate limit errors fail closed."""
         with patch.object(
             mock_client, "_request",
             side_effect=Exception("API error 429: Too Many Requests"),
         ):
-            result = mock_client.create_custom_report(
-                name="Test", start_time="2024-01-01", end_time="2024-01-30"
-            )
-
-        assert result is None
+            with pytest.raises(SearchAdsAPIError, match="429"):
+                mock_client.create_custom_report(
+                    name="Test", start_time="2024-01-01", end_time="2024-01-30"
+                )
 
     def test_empty_results_in_all_report_types(self, mock_client):
         """Test that all report types handle empty results gracefully."""

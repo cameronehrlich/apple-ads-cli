@@ -5,6 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![Apple Ads API v5](https://img.shields.io/badge/Apple%20Ads%20API-v5-black.svg)](https://developer.apple.com/documentation/apple_ads)
+[![CI](https://github.com/cameronehrlich/apple-search-ads-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/cameronehrlich/apple-search-ads-cli/actions/workflows/ci.yml)
 
 ```bash
 # Add keywords with automatic routing
@@ -129,15 +130,22 @@ asa keywords update-bids-bulk --bid 2.50       # Update all bids at once
 # Performance summary
 asa reports summary --days 7
 
+# Stable JSON over an exact inclusive, completed-date window
+asa reports summary --start 2026-08-01 --end 2026-08-07 --json
+
 # Keyword performance (sortable)
 asa reports keywords --sort cpa
+
+# Complete configured keyword inventory for integrations
+asa -A myapp reports keywords --all --include-zero \
+  --start 2026-08-01 --end 2026-08-07 --json
 
 # Search term analysis
 asa reports search-terms --winners    # Terms worth promoting
 asa reports search-terms --negatives  # Terms to block
 
-# Impression share / Share of Voice
-asa reports impression-share --all
+# Apple's true async impression-share data (app/search term/country deciles)
+asa reports impression-share --adam-id <APP_ID> --countries US --days 14
 
 # Ad-level performance
 asa reports ads
@@ -145,8 +153,8 @@ asa reports ads
 # Bid recommendations (from Apple's keyword insights)
 asa reports bid-recommendations
 
-# Async custom reports (large date ranges)
-asa reports custom --days 90 --granularity WEEKLY
+# Async custom reports (Apple limits custom date windows to 30 days)
+asa reports custom --days 30
 asa reports custom-list                        # List pending/completed reports
 asa reports custom-get <ID>                    # Download specific report
 ```
@@ -186,9 +194,13 @@ asa geo set --campaign <ID> --countries US,CA,GB
 # List ad variations
 asa ads list --campaign <ID>
 
-# Create/delete ad variations
-asa ads create --campaign <ID> --ad-group <ID>
-asa ads delete <AD_ID> --campaign <ID> --ad-group <ID>
+# Create/delete ad variations; creation requires immediate readback
+asa ads create "Focused CPP" --campaign <ID> --adgroup <ID> --creative <ID> --dry-run
+asa ads delete <AD_ID> --campaign <ID> --adgroup <ID>
+
+# Validate a CPP manifest without mutating, then explicitly attach it
+asa ads experiment experiment.json
+asa ads experiment experiment.json --apply
 
 # View creative sets and product pages
 asa ads creatives --campaign <ID> --ad-group <ID>
@@ -335,6 +347,7 @@ Claude: [Runs asa keywords add "photo editor,image filter,picture effects" --typ
 - [Apple Ads API Documentation](https://developer.apple.com/documentation/apple_ads)
 - [SKILL.md](SKILL.md) — Full command reference for Claude Code
 - [API Completion Plan](docs/API-COMPLETION-PLAN.md) — Implementation roadmap
+- [Reporting and CPP experiments](docs/REPORTING-AND-CPP.md) — Complete windows, JSON schema, and safe attachment
 
 ## 🤝 Contributing
 

@@ -133,7 +133,7 @@ def set_geo_targeting(
         result = client.update_campaign_countries(campaign_id, country_list)
 
     if result:
-        console.print(f"\n[green]Geo targeting updated successfully![/green]")
+        console.print("\n[green]Geo targeting updated successfully![/green]")
     else:
         console.print("[red]Failed to update geo targeting.[/red]")
         raise typer.Exit(1)

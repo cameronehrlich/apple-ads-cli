@@ -178,6 +178,7 @@ class TestRequestFailures:
         [
             ("get_campaign_report", (123,)),
             ("get_keyword_report", (123,)),
+            ("get_ad_group_report", (123,)),
             ("get_search_terms_report", (123,)),
             ("get_keyword_adgroup_report", (123, 456)),
         ],

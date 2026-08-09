@@ -234,7 +234,7 @@ def create_budget_order(
         )
 
     if bo:
-        console.print(f"\n[green]Budget order created successfully![/green]")
+        console.print("\n[green]Budget order created successfully![/green]")
         console.print(f"  ID: [cyan]{bo.get('id')}[/cyan]")
         console.print(f"  Name: [cyan]{bo.get('name')}[/cyan]")
     else:

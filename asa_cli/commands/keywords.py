@@ -10,14 +10,12 @@ from rich.table import Table
 
 from ..api import SearchAdsClient
 from ..config import (
-    CAMPAIGN_STRUCTURE,
     CampaignType,
     MatchType,
     detect_campaign_type,
     get_current_app_config,
     is_multi_app,
     load_credentials,
-    parse_campaign_name,
 )
 
 app = typer.Typer(help="Keyword management commands")
@@ -528,7 +526,7 @@ def promote_keywords(
 
     console.print(Panel(f"[bold]Promoting {len(keyword_list)} Keywords[/bold]", expand=False))
     console.print(f"\nKeywords: [cyan]{', '.join(keyword_list)}[/cyan]")
-    console.print(f"From: Discovery")
+    console.print("From: Discovery")
     console.print(f"To: [cyan]{target_type.value.upper()}[/cyan]")
 
     console.print("\n[bold]Actions:[/bold]")
