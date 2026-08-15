@@ -5,6 +5,7 @@ from __future__ import annotations
 import json
 import os
 from collections.abc import Callable, Mapping
+from copy import copy, deepcopy
 from types import MethodType
 from typing import Any
 
@@ -17,17 +18,37 @@ class PlatformConfigurationError(RuntimeError):
     """Raised when Platform API credentials or account context are incomplete."""
 
 
-_REPORTING_KEYWORD_RESPONSE_TYPES = frozenset(
-    {"AppsKeywordReportResponse", "AppsSearchTermReportResponse"}
-)
 _IMPRESSION_SHARE_RESPONSE_TYPE = "ImpressionShareQueryResponse"
 
 
-def _has_live_reporting_keyword_status(error: ValidationError) -> bool:
-    """Match Apple's live ENABLED value that SDK 1.109.0 rejects in report metadata."""
+def _matches_row_validation_error(
+    item: Mapping[str, Any],
+    *,
+    error_type: str,
+    field_name: str,
+    input_matches: Callable[[Any], bool],
+) -> bool:
+    """Match one SDK validation failure after nested from_dict location loss."""
+    location = tuple(item.get("loc", ()))
+    return (
+        item.get("type") == error_type
+        and location[-1:] == (field_name,)
+        and input_matches(item.get("input"))
+    )
+
+
+def _has_live_reporting_keyword_status(
+    error: ValidationError,
+) -> bool:
+    """Match Apple's live ENABLED keyword status rejected by SDK 1.109.0."""
     errors = error.errors()
     return bool(errors) and all(
-        item.get("input") == "ENABLED" and tuple(item.get("loc", ()))[-1:] == ("status",)
+        _matches_row_validation_error(
+            item,
+            error_type="value_error",
+            field_name="status",
+            input_matches=lambda value: value == "ENABLED",
+        )
         for item in errors
     )
 
@@ -36,8 +57,12 @@ def _has_live_impression_share_id(error: ValidationError) -> bool:
     """Match Apple's live integer Adam ID that SDK 1.109.0 declares as a string."""
     errors = error.errors()
     return bool(errors) and all(
-        isinstance(item.get("input"), int)
-        and tuple(item.get("loc", ()))[-1:] == ("promotedObjectId",)
+        _matches_row_validation_error(
+            item,
+            error_type="string_type",
+            field_name="promotedObjectId",
+            input_matches=lambda value: type(value) is int,
+        )
         for item in errors
     )
 
@@ -46,11 +71,46 @@ def _is_confirmed_live_response_mismatch(
     response_type: Any,
     error: ValidationError,
 ) -> bool:
-    if response_type in _REPORTING_KEYWORD_RESPONSE_TYPES:
+    if response_type == "AppsKeywordReportResponse":
+        return _has_live_reporting_keyword_status(error)
+    if response_type == "AppsSearchTermReportResponse":
         return _has_live_reporting_keyword_status(error)
     if response_type == _IMPRESSION_SHARE_RESPONSE_TYPE:
         return _has_live_impression_share_id(error)
     return False
+
+
+def _patched_validation_payload(response_type: Any, payload: Any) -> Any | None:
+    """Patch only confirmed wire mismatches in a copy used for SDK validation."""
+    if not isinstance(payload, Mapping):
+        return None
+    result = payload.get("result")
+    if not isinstance(result, Mapping) or not isinstance(result.get("rows"), list):
+        return None
+
+    patched = deepcopy(payload)
+    rows = patched["result"]["rows"]
+    replacements = 0
+    for row in rows:
+        if not isinstance(row, dict):
+            continue
+        if response_type == "AppsKeywordReportResponse":
+            metadata = row.get("metadata")
+            if isinstance(metadata, dict) and metadata.get("status") == "ENABLED":
+                metadata["status"] = "ACTIVE"
+                replacements += 1
+        elif response_type == "AppsSearchTermReportResponse":
+            metadata = row.get("metadata")
+            keyword = metadata.get("keyword") if isinstance(metadata, dict) else None
+            if isinstance(keyword, dict) and keyword.get("status") == "ENABLED":
+                keyword["status"] = "ACTIVE"
+                replacements += 1
+        elif response_type == _IMPRESSION_SHARE_RESPONSE_TYPE:
+            promoted_object_id = row.get("promotedObjectId")
+            if type(promoted_object_id) is int:
+                row["promotedObjectId"] = str(promoted_object_id)
+                replacements += 1
+    return patched if replacements else None
 
 
 def _deserialize_with_live_response_compatibility(
@@ -73,6 +133,18 @@ def _deserialize_with_live_response_compatibility(
         from apple_ads_platform.api_response import ApiResponse
 
         payload = json.loads(response_data.data.decode("utf-8"))
+        validation_payload = _patched_validation_payload(response_type, payload)
+        if validation_payload is None:
+            raise
+        validation_response = copy(response_data)
+        validation_response.data = json.dumps(validation_payload).encode("utf-8")
+        # A known mismatch may be the first error raised by generated nested
+        # from_dict calls. Validate a patched copy fully so later unrelated
+        # errors cannot be hidden by the raw-response fallback.
+        original(
+            response_data=validation_response,
+            response_types_map=response_types_map,
+        )
         return ApiResponse(
             status_code=response_data.status,
             data=payload,

@@ -21,6 +21,8 @@ from asa_cli.platform.manifest_discovery import (
     SDK_GIT_COMMIT,
     SDK_VERSION,
     _container,
+    _model_closure,
+    _model_types,
     canonical_sdk_methods,
     discover_manifest,
 )
@@ -107,7 +109,38 @@ def test_committed_operation_signatures_and_schemas_have_not_drifted():
 
     assert committed["operations"] == discovered["operations"]
     assert committed["request_models"] == discovered["request_models"]
+    assert committed["response_models"] == discovered["response_models"]
     assert len(committed["request_models"]) == 35
+    assert len(committed["response_models"]) == 220
+
+
+def test_all_operations_have_one_audited_response_model():
+    manifest = _load(MANIFEST_PATH)
+    operations = manifest["operations"]
+    response_models = manifest["response_models"]
+
+    assert len({operation["response_model"] for operation in operations}) == 71
+    assert all(operation["response_model"] in response_models for operation in operations)
+
+    roots = []
+    for method in canonical_sdk_methods().values():
+        models = _model_types(inspect.signature(method).return_annotation)
+        assert len(models) == 1
+        roots.extend(models)
+    closure = _model_closure(roots)
+
+    assert len(set(roots)) == 71
+    assert len(closure) == 220
+    assert {
+        f"{model.__module__}.{model.__qualname__}" for model in closure
+    } == set(response_models)
+
+    audits = [record["field_audit"] for record in response_models.values()]
+    assert sum(audit["field_count"] for audit in audits) == 1391
+    assert sum(len(audit["strict_fields"]) for audit in audits) == 516
+    assert sum(len(audit["identifier_fields"]) for audit in audits) == 135
+    assert sum(len(audit["enum_fields"]) for audit in audits) == 101
+    assert sum(len(audit["custom_validator_fields"]) for audit in audits) == 15
 
 
 def test_sdk_and_model_source_provenance_matches_the_pinned_release():
@@ -125,7 +158,11 @@ def test_sdk_and_model_source_provenance_matches_the_pinned_release():
     assert api_source is not None
     assert sdk["api_source_sha256"] == _sha256(Path(api_source))
 
-    for qualified_name, provenance in manifest["request_models"].items():
+    model_manifests = {
+        **manifest["request_models"],
+        **manifest["response_models"],
+    }
+    for qualified_name, provenance in model_manifests.items():
         model = _import_qualified(qualified_name)
         model_source = inspect.getsourcefile(model)
         assert model_source is not None

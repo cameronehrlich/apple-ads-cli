@@ -28,7 +28,10 @@ apple-ads-platform dependency
   -> asa_cli/platform/cli.py
 ```
 
-Each canonical official-SDK method belongs to exactly one resource module. Signatures, parameter locations, request models, mutation classification, and context requirements come from the generated manifest rather than handwritten copies.
+Each canonical official-SDK method belongs to exactly one resource module.
+Signatures, parameter locations, request models, response-model closure,
+mutation classification, and context requirements come from the generated
+manifest rather than handwritten copies.
 
 The previous implementation is a compatibility boundary under `asa_cli/v5`; avoid changing its public behavior while fixing Platform API code.
 
@@ -52,6 +55,13 @@ Common test locations:
 
 Generated SDK models may contain `additional_properties`. Preserve the official model’s `to_dict()` semantics and test nested unknown fields when changing serialization.
 
+For response deserialization defects, reproduce the official SDK failure before
+adding compatibility behavior. A compatibility case must name the exact root
+response type, field, rejected wire type/value, and Pydantic error type. Validate
+a patched copy through the SDK so a known early error cannot conceal a later
+unrelated failure. Add near-miss tests for adjacent fields, types, and values;
+never turn an unrecognized response into empty data.
+
 ## SDK upgrades
 
 Pin one official SDK release at a time. After changing the dependency:
@@ -62,7 +72,10 @@ uv run python -m asa_cli.platform.generate_manifest
 uv run python scripts/generate_skill_references.py
 ```
 
-Review the manifest and reference diffs. Every added, removed, or changed official method must be classified deliberately and covered by the public command tree.
+Review the manifest and reference diffs. Every added, removed, or changed
+official method must be classified deliberately and covered by the public
+command tree. Review all response-model source/schema hash and risk-inventory
+changes even when the operation count is unchanged.
 
 ## Quality gate
 

@@ -21,6 +21,7 @@
       "query_parameters": [],
       "resource_family": "ad-accounts",
       "resource_path": "/ad-accounts/{id}",
+      "response_model": "apple_ads_platform.models.ad_account_response.AdAccountResponse",
       "return_annotation": "AdAccountResponse",
       "sdk_method": "ad_accounts_id_get",
       "signature": [
@@ -69,6 +70,7 @@
       "query_parameters": [],
       "resource_family": "ad-accounts",
       "resource_path": "/ad-accounts/{id}",
+      "response_model": "apple_ads_platform.models.ad_account_response.AdAccountResponse",
       "return_annotation": "AdAccountResponse",
       "sdk_method": "ad_accounts_id_put",
       "signature": [
@@ -115,6 +117,7 @@
       "query_parameters": [],
       "resource_family": "ad-accounts",
       "resource_path": "/ad-accounts",
+      "response_model": "apple_ads_platform.models.ad_account_response.AdAccountResponse",
       "return_annotation": "AdAccountResponse",
       "sdk_method": "ad_accounts_post",
       "signature": [
@@ -147,6 +150,7 @@
       "query_parameters": [],
       "resource_family": "ad-groups",
       "resource_path": "/adgroups/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "adgroups_id_delete",
       "signature": [
@@ -185,6 +189,7 @@
       "query_parameters": [],
       "resource_family": "ad-groups",
       "resource_path": "/adgroups/{id}",
+      "response_model": "apple_ads_platform.models.ad_group_response.AdGroupResponse",
       "return_annotation": "AdGroupResponse",
       "sdk_method": "adgroups_id_get",
       "signature": [
@@ -233,6 +238,7 @@
       "query_parameters": [],
       "resource_family": "ad-groups",
       "resource_path": "/adgroups/{id}",
+      "response_model": "apple_ads_platform.models.ad_group_response.AdGroupResponse",
       "return_annotation": "AdGroupResponse",
       "sdk_method": "adgroups_id_put",
       "signature": [
@@ -279,6 +285,7 @@
       "query_parameters": [],
       "resource_family": "ad-groups",
       "resource_path": "/adgroups",
+      "response_model": "apple_ads_platform.models.ad_group_response.AdGroupResponse",
       "return_annotation": "AdGroupResponse",
       "sdk_method": "adgroups_post",
       "signature": [
@@ -319,6 +326,7 @@
       "query_parameters": [],
       "resource_family": "ad-groups",
       "resource_path": "/adgroups/query",
+      "response_model": "apple_ads_platform.models.ad_group_query_response.AdGroupQueryResponse",
       "return_annotation": "AdGroupQueryResponse",
       "sdk_method": "adgroups_query_post",
       "signature": [
@@ -357,6 +365,7 @@
       "query_parameters": [],
       "resource_family": "ads",
       "resource_path": "/ads/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "ads_id_delete",
       "signature": [
@@ -395,6 +404,7 @@
       "query_parameters": [],
       "resource_family": "ads",
       "resource_path": "/ads/{id}",
+      "response_model": "apple_ads_platform.models.ad_response.AdResponse",
       "return_annotation": "AdResponse",
       "sdk_method": "ads_id_get",
       "signature": [
@@ -443,6 +453,7 @@
       "query_parameters": [],
       "resource_family": "ads",
       "resource_path": "/ads/{id}",
+      "response_model": "apple_ads_platform.models.ad_response.AdResponse",
       "return_annotation": "AdResponse",
       "sdk_method": "ads_id_put",
       "signature": [
@@ -489,6 +500,7 @@
       "query_parameters": [],
       "resource_family": "ads",
       "resource_path": "/ads",
+      "response_model": "apple_ads_platform.models.ad_response.AdResponse",
       "return_annotation": "AdResponse",
       "sdk_method": "ads_post",
       "signature": [
@@ -529,6 +541,7 @@
       "query_parameters": [],
       "resource_family": "ads",
       "resource_path": "/ads/query",
+      "response_model": "apple_ads_platform.models.ad_query_response.AdQueryResponse",
       "return_annotation": "AdQueryResponse",
       "sdk_method": "ads_query_post",
       "signature": [
@@ -569,6 +582,7 @@
       "query_parameters": [],
       "resource_family": "recommendations",
       "resource_path": "/recommendations/daily-budgets/apply",
+      "response_model": "apple_ads_platform.models.recommendation_apply_daily_budget_response.RecommendationApplyDailyBudgetResponse",
       "return_annotation": "RecommendationApplyDailyBudgetResponse",
       "sdk_method": "apply_daily_budget_recommendations",
       "signature": [
@@ -611,6 +625,7 @@
       "query_parameters": [],
       "resource_family": "recommendations",
       "resource_path": "/recommendations/target-cpas/apply",
+      "response_model": "apple_ads_platform.models.recommendation_apply_target_cpa_response.RecommendationApplyTargetCpaResponse",
       "return_annotation": "RecommendationApplyTargetCpaResponse",
       "sdk_method": "apply_target_cpa_recommendations",
       "signature": [
@@ -653,6 +668,7 @@
       "query_parameters": [],
       "resource_family": "reports-apps",
       "resource_path": "/reports/apps/adgroups/query",
+      "response_model": "apple_ads_platform.models.apps_ad_group_report_response.AppsAdGroupReportResponse",
       "return_annotation": "AppsAdGroupReportResponse",
       "sdk_method": "apps_ad_group_reports",
       "signature": [
@@ -693,6 +709,7 @@
       "query_parameters": [],
       "resource_family": "reports-apps",
       "resource_path": "/reports/apps/ads/query",
+      "response_model": "apple_ads_platform.models.apps_ad_report_response.AppsAdReportResponse",
       "return_annotation": "AppsAdReportResponse",
       "sdk_method": "apps_ad_reports",
       "signature": [
@@ -733,6 +750,7 @@
       "query_parameters": [],
       "resource_family": "reports-apps",
       "resource_path": "/reports/apps/campaigns/query",
+      "response_model": "apple_ads_platform.models.apps_campaign_report_response.AppsCampaignReportResponse",
       "return_annotation": "AppsCampaignReportResponse",
       "sdk_method": "apps_campaign_reports",
       "signature": [
@@ -773,6 +791,7 @@
       "query_parameters": [],
       "resource_family": "reports-apps",
       "resource_path": "/reports/apps/keywords/query",
+      "response_model": "apple_ads_platform.models.apps_keyword_report_response.AppsKeywordReportResponse",
       "return_annotation": "AppsKeywordReportResponse",
       "sdk_method": "apps_keyword_reports",
       "signature": [
@@ -813,6 +832,7 @@
       "query_parameters": [],
       "resource_family": "reports-apps",
       "resource_path": "/reports/apps/searchterms/query",
+      "response_model": "apple_ads_platform.models.apps_search_term_report_response.AppsSearchTermReportResponse",
       "return_annotation": "AppsSearchTermReportResponse",
       "sdk_method": "apps_search_term_reports",
       "signature": [
@@ -853,6 +873,7 @@
       "query_parameters": [],
       "resource_family": "reports-business-brands",
       "resource_path": "/reports/business-brands/adgroups/query",
+      "response_model": "apple_ads_platform.models.brands_ad_group_report_response.BrandsAdGroupReportResponse",
       "return_annotation": "BrandsAdGroupReportResponse",
       "sdk_method": "brands_ad_group_reports",
       "signature": [
@@ -893,6 +914,7 @@
       "query_parameters": [],
       "resource_family": "reports-business-brands",
       "resource_path": "/reports/business-brands/ads/query",
+      "response_model": "apple_ads_platform.models.brands_ad_report_response.BrandsAdReportResponse",
       "return_annotation": "BrandsAdReportResponse",
       "sdk_method": "brands_ad_reports",
       "signature": [
@@ -933,6 +955,7 @@
       "query_parameters": [],
       "resource_family": "reports-business-brands",
       "resource_path": "/reports/business-brands/campaigns/query",
+      "response_model": "apple_ads_platform.models.brands_campaign_report_response.BrandsCampaignReportResponse",
       "return_annotation": "BrandsCampaignReportResponse",
       "sdk_method": "brands_campaign_reports",
       "signature": [
@@ -973,6 +996,7 @@
       "query_parameters": [],
       "resource_family": "reports-business-brands",
       "resource_path": "/reports/business-brands/keywords/query",
+      "response_model": "apple_ads_platform.models.brands_keyword_report_response.BrandsKeywordReportResponse",
       "return_annotation": "BrandsKeywordReportResponse",
       "sdk_method": "brands_keyword_reports",
       "signature": [
@@ -1013,6 +1037,7 @@
       "query_parameters": [],
       "resource_family": "reports-business-brands",
       "resource_path": "/reports/business-brands/searchterms/query",
+      "response_model": "apple_ads_platform.models.brands_search_term_report_response.BrandsSearchTermReportResponse",
       "return_annotation": "BrandsSearchTermReportResponse",
       "sdk_method": "brands_search_term_reports",
       "signature": [
@@ -1051,6 +1076,7 @@
       "query_parameters": [],
       "resource_family": "campaigns",
       "resource_path": "/campaigns/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "campaigns_id_delete",
       "signature": [
@@ -1089,6 +1115,7 @@
       "query_parameters": [],
       "resource_family": "campaigns",
       "resource_path": "/campaigns/{id}",
+      "response_model": "apple_ads_platform.models.campaign_response.CampaignResponse",
       "return_annotation": "CampaignResponse",
       "sdk_method": "campaigns_id_get",
       "signature": [
@@ -1127,6 +1154,7 @@
       "query_parameters": [],
       "resource_family": "campaigns",
       "resource_path": "/campaigns/{id}/legacy-app-limited-status-reason-details",
+      "response_model": "apple_ads_platform.models.legacy_app_limited_status_reason_details_response.LegacyAppLimitedStatusReasonDetailsResponse",
       "return_annotation": "LegacyAppLimitedStatusReasonDetailsResponse",
       "sdk_method": "campaigns_id_legacy_app_limited_status_reason_details_get",
       "signature": [
@@ -1175,6 +1203,7 @@
       "query_parameters": [],
       "resource_family": "campaigns",
       "resource_path": "/campaigns/{id}",
+      "response_model": "apple_ads_platform.models.campaign_response.CampaignResponse",
       "return_annotation": "CampaignResponse",
       "sdk_method": "campaigns_id_put",
       "signature": [
@@ -1221,6 +1250,7 @@
       "query_parameters": [],
       "resource_family": "campaigns",
       "resource_path": "/campaigns",
+      "response_model": "apple_ads_platform.models.campaign_response.CampaignResponse",
       "return_annotation": "CampaignResponse",
       "sdk_method": "campaigns_post",
       "signature": [
@@ -1261,6 +1291,7 @@
       "query_parameters": [],
       "resource_family": "campaigns",
       "resource_path": "/campaigns/query",
+      "response_model": "apple_ads_platform.models.campaign_query_response.CampaignQueryResponse",
       "return_annotation": "CampaignQueryResponse",
       "sdk_method": "campaigns_query_post",
       "signature": [
@@ -1301,6 +1332,7 @@
       "query_parameters": [],
       "resource_family": "location-groups",
       "resource_path": "/location-groups",
+      "response_model": "apple_ads_platform.models.location_group_response.LocationGroupResponse",
       "return_annotation": "LocationGroupResponse",
       "sdk_method": "create_location_group",
       "signature": [
@@ -1339,6 +1371,7 @@
       "query_parameters": [],
       "resource_family": "creatives",
       "resource_path": "/creatives/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "creatives_id_delete",
       "signature": [
@@ -1377,6 +1410,7 @@
       "query_parameters": [],
       "resource_family": "creatives",
       "resource_path": "/creatives/{id}",
+      "response_model": "apple_ads_platform.models.creative_response.CreativeResponse",
       "return_annotation": "CreativeResponse",
       "sdk_method": "creatives_id_get",
       "signature": [
@@ -1425,6 +1459,7 @@
       "query_parameters": [],
       "resource_family": "creatives",
       "resource_path": "/creatives/{id}",
+      "response_model": "apple_ads_platform.models.creative_response.CreativeResponse",
       "return_annotation": "CreativeResponse",
       "sdk_method": "creatives_id_put",
       "signature": [
@@ -1471,6 +1506,7 @@
       "query_parameters": [],
       "resource_family": "creatives",
       "resource_path": "/creatives",
+      "response_model": "apple_ads_platform.models.creative_response.CreativeResponse",
       "return_annotation": "CreativeResponse",
       "sdk_method": "creatives_post",
       "signature": [
@@ -1511,6 +1547,7 @@
       "query_parameters": [],
       "resource_family": "creatives",
       "resource_path": "/creatives/query",
+      "response_model": "apple_ads_platform.models.creative_query_response.CreativeQueryResponse",
       "return_annotation": "CreativeQueryResponse",
       "sdk_method": "creatives_query_post",
       "signature": [
@@ -1549,6 +1586,7 @@
       "query_parameters": [],
       "resource_family": "assets",
       "resource_path": "/assets/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "delete_asset",
       "signature": [
@@ -1587,6 +1625,7 @@
       "query_parameters": [],
       "resource_family": "location-groups",
       "resource_path": "/location-groups/{id}",
+      "response_model": "apple_ads_platform.models.location_group_response.LocationGroupResponse",
       "return_annotation": "LocationGroupResponse",
       "sdk_method": "delete_location_group",
       "signature": [
@@ -1627,6 +1666,7 @@
       "query_parameters": [],
       "resource_family": "recommendations",
       "resource_path": "/recommendations/daily-budgets/dismiss",
+      "response_model": "apple_ads_platform.models.recommendation_dismiss_daily_budget_response.RecommendationDismissDailyBudgetResponse",
       "return_annotation": "RecommendationDismissDailyBudgetResponse",
       "sdk_method": "dismiss_daily_budget_recommendations",
       "signature": [
@@ -1669,6 +1709,7 @@
       "query_parameters": [],
       "resource_family": "recommendations",
       "resource_path": "/recommendations/target-cpas/dismiss",
+      "response_model": "apple_ads_platform.models.recommendation_dismiss_target_cpa_response.RecommendationDismissTargetCpaResponse",
       "return_annotation": "RecommendationDismissTargetCpaResponse",
       "sdk_method": "dismiss_target_cpa_recommendations",
       "signature": [
@@ -1711,6 +1752,7 @@
       "query_parameters": [],
       "resource_family": "apps",
       "resource_path": "/eligibilities/apps/query",
+      "response_model": "apple_ads_platform.models.eligibility_query_response.EligibilityQueryResponse",
       "return_annotation": "EligibilityQueryResponse",
       "sdk_method": "eligibilities_apps_query_post",
       "signature": [
@@ -1749,6 +1791,7 @@
       ],
       "resource_family": "access",
       "resource_path": "/advertiser-resources",
+      "response_model": "apple_ads_platform.models.advertiser_resource_list_response.AdvertiserResourceListResponse",
       "return_annotation": "AdvertiserResourceListResponse",
       "sdk_method": "get_advertiser_resources",
       "signature": [
@@ -1781,6 +1824,7 @@
       "query_parameters": [],
       "resource_family": "apps",
       "resource_path": "/apps/{adamId}",
+      "response_model": "apple_ads_platform.models.app_details_response.AppDetailsResponse",
       "return_annotation": "AppDetailsResponse",
       "sdk_method": "get_app_details_by_adam_id",
       "signature": [
@@ -1819,6 +1863,7 @@
       "query_parameters": [],
       "resource_family": "assets",
       "resource_path": "/assets/{id}",
+      "response_model": "apple_ads_platform.models.asset_response.AssetResponse",
       "return_annotation": "AssetResponse",
       "sdk_method": "get_asset",
       "signature": [
@@ -1859,6 +1904,7 @@
       "query_parameters": [],
       "resource_family": "business-brands",
       "resource_path": "/business-brands/{id}",
+      "response_model": "apple_ads_platform.models.brand_response.BrandResponse",
       "return_annotation": "BrandResponse",
       "sdk_method": "get_brand",
       "signature": [
@@ -1897,6 +1943,7 @@
       "query_parameters": [],
       "resource_family": "business-categories",
       "resource_path": "/business-categories/{id}",
+      "response_model": "apple_ads_platform.models.business_category_response.BusinessCategoryResponse",
       "return_annotation": "BusinessCategoryResponse",
       "sdk_method": "get_category",
       "signature": [
@@ -1950,6 +1997,7 @@
       ],
       "resource_family": "change-history",
       "resource_path": "/change-history/{detailId}",
+      "response_model": "apple_ads_platform.models.change_details_response.ChangeDetailsResponse",
       "return_annotation": "ChangeDetailsResponse",
       "sdk_method": "get_change_details",
       "signature": [
@@ -2002,6 +2050,7 @@
       "query_parameters": [],
       "resource_family": "geos",
       "resource_path": "/search/geo",
+      "response_model": "apple_ads_platform.models.geo_search_response.GeoSearchResponse",
       "return_annotation": "GeoSearchResponse",
       "sdk_method": "get_geos_by_ids",
       "signature": [
@@ -2040,6 +2089,7 @@
       "query_parameters": [],
       "resource_family": "locations",
       "resource_path": "/locations/{id}",
+      "response_model": "apple_ads_platform.models.location_response.LocationResponse",
       "return_annotation": "LocationResponse",
       "sdk_method": "get_location",
       "signature": [
@@ -2078,6 +2128,7 @@
       "query_parameters": [],
       "resource_family": "location-groups",
       "resource_path": "/location-groups/{id}",
+      "response_model": "apple_ads_platform.models.location_group_response.LocationGroupResponse",
       "return_annotation": "LocationGroupResponse",
       "sdk_method": "get_location_group",
       "signature": [
@@ -2108,6 +2159,7 @@
       "query_parameters": [],
       "resource_family": "access",
       "resource_path": "/me",
+      "response_model": "apple_ads_platform.models.me_response.MeResponse",
       "return_annotation": "MeResponse",
       "sdk_method": "get_me",
       "signature": [],
@@ -2133,6 +2185,7 @@
       "query_parameters": [],
       "resource_family": "product-pages",
       "resource_path": "/product-pages/{productPageId}",
+      "response_model": "apple_ads_platform.models.product_page_details_response.ProductPageDetailsResponse",
       "return_annotation": "ProductPageDetailsResponse",
       "sdk_method": "get_product_page_by_id",
       "signature": [
@@ -2163,6 +2216,7 @@
       "query_parameters": [],
       "resource_family": "access",
       "resource_path": "/acls",
+      "response_model": "apple_ads_platform.models.user_acl_list_response.UserAclListResponse",
       "return_annotation": "UserAclListResponse",
       "sdk_method": "get_user_acls",
       "signature": [],
@@ -2190,6 +2244,7 @@
       "query_parameters": [],
       "resource_family": "insights",
       "resource_path": "/insights/apps/impression-share/query",
+      "response_model": "apple_ads_platform.models.impression_share_query_response.ImpressionShareQueryResponse",
       "return_annotation": "ImpressionShareQueryResponse",
       "sdk_method": "impression_share_query",
       "signature": [
@@ -2230,6 +2285,7 @@
       "query_parameters": [],
       "resource_family": "keywords",
       "resource_path": "/keywords/bulk-create",
+      "response_model": "apple_ads_platform.models.keyword_create_bulk_response.KeywordCreateBulkResponse",
       "return_annotation": "KeywordCreateBulkResponse",
       "sdk_method": "keywords_bulk_create_post",
       "signature": [
@@ -2270,6 +2326,7 @@
       "query_parameters": [],
       "resource_family": "keywords",
       "resource_path": "/keywords/bulk-update",
+      "response_model": "apple_ads_platform.models.keyword_update_bulk_response.KeywordUpdateBulkResponse",
       "return_annotation": "KeywordUpdateBulkResponse",
       "sdk_method": "keywords_bulk_update_post",
       "signature": [
@@ -2308,6 +2365,7 @@
       "query_parameters": [],
       "resource_family": "keywords",
       "resource_path": "/keywords/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "keywords_id_delete",
       "signature": [
@@ -2346,6 +2404,7 @@
       "query_parameters": [],
       "resource_family": "keywords",
       "resource_path": "/keywords/{id}",
+      "response_model": "apple_ads_platform.models.keyword_response.KeywordResponse",
       "return_annotation": "KeywordResponse",
       "sdk_method": "keywords_id_get",
       "signature": [
@@ -2394,6 +2453,7 @@
       "query_parameters": [],
       "resource_family": "keywords",
       "resource_path": "/keywords/{id}",
+      "response_model": "apple_ads_platform.models.keyword_response.KeywordResponse",
       "return_annotation": "KeywordResponse",
       "sdk_method": "keywords_id_put",
       "signature": [
@@ -2440,6 +2500,7 @@
       "query_parameters": [],
       "resource_family": "keywords",
       "resource_path": "/keywords",
+      "response_model": "apple_ads_platform.models.keyword_response.KeywordResponse",
       "return_annotation": "KeywordResponse",
       "sdk_method": "keywords_post",
       "signature": [
@@ -2480,6 +2541,7 @@
       "query_parameters": [],
       "resource_family": "keywords",
       "resource_path": "/keywords/query",
+      "response_model": "apple_ads_platform.models.keyword_query_response.KeywordQueryResponse",
       "return_annotation": "KeywordQueryResponse",
       "sdk_method": "keywords_query_post",
       "signature": [
@@ -2520,6 +2582,7 @@
       "query_parameters": [],
       "resource_family": "negative-keywords",
       "resource_path": "/negative-keywords/bulk-create",
+      "response_model": "apple_ads_platform.models.negative_keyword_create_bulk_response.NegativeKeywordCreateBulkResponse",
       "return_annotation": "NegativeKeywordCreateBulkResponse",
       "sdk_method": "negative_keywords_bulk_create_post",
       "signature": [
@@ -2560,6 +2623,7 @@
       "query_parameters": [],
       "resource_family": "negative-keywords",
       "resource_path": "/negative-keywords/bulk-update",
+      "response_model": "apple_ads_platform.models.negative_keyword_update_bulk_response.NegativeKeywordUpdateBulkResponse",
       "return_annotation": "NegativeKeywordUpdateBulkResponse",
       "sdk_method": "negative_keywords_bulk_update_post",
       "signature": [
@@ -2598,6 +2662,7 @@
       "query_parameters": [],
       "resource_family": "negative-keywords",
       "resource_path": "/negative-keywords/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "negative_keywords_id_delete",
       "signature": [
@@ -2636,6 +2701,7 @@
       "query_parameters": [],
       "resource_family": "negative-keywords",
       "resource_path": "/negative-keywords/{id}",
+      "response_model": "apple_ads_platform.models.negative_keyword_response.NegativeKeywordResponse",
       "return_annotation": "NegativeKeywordResponse",
       "sdk_method": "negative_keywords_id_get",
       "signature": [
@@ -2684,6 +2750,7 @@
       "query_parameters": [],
       "resource_family": "negative-keywords",
       "resource_path": "/negative-keywords/{id}",
+      "response_model": "apple_ads_platform.models.negative_keyword_response.NegativeKeywordResponse",
       "return_annotation": "NegativeKeywordResponse",
       "sdk_method": "negative_keywords_id_put",
       "signature": [
@@ -2730,6 +2797,7 @@
       "query_parameters": [],
       "resource_family": "negative-keywords",
       "resource_path": "/negative-keywords",
+      "response_model": "apple_ads_platform.models.negative_keyword_response.NegativeKeywordResponse",
       "return_annotation": "NegativeKeywordResponse",
       "sdk_method": "negative_keywords_post",
       "signature": [
@@ -2770,6 +2838,7 @@
       "query_parameters": [],
       "resource_family": "negative-keywords",
       "resource_path": "/negative-keywords/query",
+      "response_model": "apple_ads_platform.models.negative_keyword_query_response.NegativeKeywordQueryResponse",
       "return_annotation": "NegativeKeywordQueryResponse",
       "sdk_method": "negative_keywords_query_post",
       "signature": [
@@ -2808,6 +2877,7 @@
       "query_parameters": [],
       "resource_family": "access",
       "resource_path": "/orgs/{id}",
+      "response_model": "apple_ads_platform.models.org_response.OrgResponse",
       "return_annotation": "OrgResponse",
       "sdk_method": "orgs_id_get",
       "signature": [
@@ -2850,6 +2920,7 @@
       "query_parameters": [],
       "resource_family": "apps",
       "resource_path": "/apps/{adamId}/locale-details/query",
+      "response_model": "apple_ads_platform.models.app_locale_details_query_response.AppLocaleDetailsQueryResponse",
       "return_annotation": "AppLocaleDetailsQueryResponse",
       "sdk_method": "query_app_locale_details",
       "signature": [
@@ -2896,6 +2967,7 @@
       "query_parameters": [],
       "resource_family": "assets",
       "resource_path": "/assets/query",
+      "response_model": "apple_ads_platform.models.asset_query_response.AssetQueryResponse",
       "return_annotation": "AssetQueryResponse",
       "sdk_method": "query_assets",
       "signature": [
@@ -2936,6 +3008,7 @@
       "query_parameters": [],
       "resource_family": "change-history",
       "resource_path": "/change-history/query",
+      "response_model": "apple_ads_platform.models.audit_summary_response.AuditSummaryResponse",
       "return_annotation": "AuditSummaryResponse",
       "sdk_method": "query_audit_summary",
       "signature": [
@@ -2976,6 +3049,7 @@
       "query_parameters": [],
       "resource_family": "business-brands",
       "resource_path": "/business-brands/query",
+      "response_model": "apple_ads_platform.models.brand_query_response.BrandQueryResponse",
       "return_annotation": "BrandQueryResponse",
       "sdk_method": "query_brands",
       "signature": [
@@ -3016,6 +3090,7 @@
       "query_parameters": [],
       "resource_family": "business-categories",
       "resource_path": "/business-categories/query",
+      "response_model": "apple_ads_platform.models.business_category_query_response.BusinessCategoryQueryResponse",
       "return_annotation": "BusinessCategoryQueryResponse",
       "sdk_method": "query_categories",
       "signature": [
@@ -3056,6 +3131,7 @@
       "query_parameters": [],
       "resource_family": "suggestions",
       "resource_path": "/suggestions/categories/query",
+      "response_model": "apple_ads_platform.models.recommendation_query_category_suggestion_response.RecommendationQueryCategorySuggestionResponse",
       "return_annotation": "RecommendationQueryCategorySuggestionResponse",
       "sdk_method": "query_category_suggestions",
       "signature": [
@@ -3096,6 +3172,7 @@
       "query_parameters": [],
       "resource_family": "recommendations",
       "resource_path": "/recommendations/daily-budgets/query",
+      "response_model": "apple_ads_platform.models.recommendation_query_daily_budget_response.RecommendationQueryDailyBudgetResponse",
       "return_annotation": "RecommendationQueryDailyBudgetResponse",
       "sdk_method": "query_daily_budget_recommendations",
       "signature": [
@@ -3136,6 +3213,7 @@
       "query_parameters": [],
       "resource_family": "suggestions",
       "resource_path": "/suggestions/keywords/query",
+      "response_model": "apple_ads_platform.models.recommendation_query_keyword_suggestion_response.RecommendationQueryKeywordSuggestionResponse",
       "return_annotation": "RecommendationQueryKeywordSuggestionResponse",
       "sdk_method": "query_keyword_suggestions",
       "signature": [
@@ -3176,6 +3254,7 @@
       "query_parameters": [],
       "resource_family": "location-groups",
       "resource_path": "/location-groups/query",
+      "response_model": "apple_ads_platform.models.location_group_query_response.LocationGroupQueryResponse",
       "return_annotation": "LocationGroupQueryResponse",
       "sdk_method": "query_location_groups",
       "signature": [
@@ -3216,6 +3295,7 @@
       "query_parameters": [],
       "resource_family": "locations",
       "resource_path": "/locations/query",
+      "response_model": "apple_ads_platform.models.location_query_response.LocationQueryResponse",
       "return_annotation": "LocationQueryResponse",
       "sdk_method": "query_locations",
       "signature": [
@@ -3256,6 +3336,7 @@
       "query_parameters": [],
       "resource_family": "suggestions",
       "resource_path": "/suggestions/phrases/query",
+      "response_model": "apple_ads_platform.models.recommendation_query_phrase_suggestion_response.RecommendationQueryPhraseSuggestionResponse",
       "return_annotation": "RecommendationQueryPhraseSuggestionResponse",
       "sdk_method": "query_phrase_suggestions",
       "signature": [
@@ -3296,6 +3377,7 @@
       "query_parameters": [],
       "resource_family": "product-pages",
       "resource_path": "/product-pages/locale-details/query",
+      "response_model": "apple_ads_platform.models.product_page_locale_details_query_response.ProductPageLocaleDetailsQueryResponse",
       "return_annotation": "ProductPageLocaleDetailsQueryResponse",
       "sdk_method": "query_product_page_locale_details",
       "signature": [
@@ -3336,6 +3418,7 @@
       "query_parameters": [],
       "resource_family": "product-pages",
       "resource_path": "/product-pages/query",
+      "response_model": "apple_ads_platform.models.product_page_details_query_response.ProductPageDetailsQueryResponse",
       "return_annotation": "ProductPageDetailsQueryResponse",
       "sdk_method": "query_product_pages",
       "signature": [
@@ -3376,6 +3459,7 @@
       "query_parameters": [],
       "resource_family": "rejection-reasons",
       "resource_path": "/rejection-reasons/business-brands/query",
+      "response_model": "apple_ads_platform.models.policy_assignment_query_response.PolicyAssignmentQueryResponse",
       "return_annotation": "PolicyAssignmentQueryResponse",
       "sdk_method": "query_rejection_reasons_by_business_brand",
       "signature": [
@@ -3416,6 +3500,7 @@
       "query_parameters": [],
       "resource_family": "apps",
       "resource_path": "/metadata/apps/supported-languages/query",
+      "response_model": "apple_ads_platform.models.app_supported_languages_query_response.AppSupportedLanguagesQueryResponse",
       "return_annotation": "AppSupportedLanguagesQueryResponse",
       "sdk_method": "query_supported_app_languages",
       "signature": [
@@ -3456,6 +3541,7 @@
       "query_parameters": [],
       "resource_family": "recommendations",
       "resource_path": "/recommendations/target-cpas/query",
+      "response_model": "apple_ads_platform.models.recommendation_query_target_cpa_response.RecommendationQueryTargetCpaResponse",
       "return_annotation": "RecommendationQueryTargetCpaResponse",
       "sdk_method": "query_target_cpa_recommendations",
       "signature": [
@@ -3496,6 +3582,7 @@
       "query_parameters": [],
       "resource_family": "suggestions",
       "resource_path": "/suggestions/target-cpas/query",
+      "response_model": "apple_ads_platform.models.recommendation_query_target_cpa_suggestion_response.RecommendationQueryTargetCpaSuggestionResponse",
       "return_annotation": "RecommendationQueryTargetCpaSuggestionResponse",
       "sdk_method": "query_target_cpa_suggestion",
       "signature": [
@@ -3536,6 +3623,7 @@
       "query_parameters": [],
       "resource_family": "rejection-reasons",
       "resource_path": "/rejection-reasons/apps/query",
+      "response_model": "apple_ads_platform.models.creative_rejection_reason_query_response.CreativeRejectionReasonQueryResponse",
       "return_annotation": "CreativeRejectionReasonQueryResponse",
       "sdk_method": "rejection_reasons_apps_query_post",
       "signature": [
@@ -3574,6 +3662,7 @@
       "query_parameters": [],
       "resource_family": "rejection-reasons",
       "resource_path": "/rejection-reasons/apps/{rejectionReasonId}",
+      "response_model": "apple_ads_platform.models.rejection_reason_response.RejectionReasonResponse",
       "return_annotation": "RejectionReasonResponse",
       "sdk_method": "rejection_reasons_apps_rejection_reason_id_get",
       "signature": [
@@ -3647,6 +3736,7 @@
       ],
       "resource_family": "apps",
       "resource_path": "/search/apps",
+      "response_model": "apple_ads_platform.models.apps_search_response.AppsSearchResponse",
       "return_annotation": "AppsSearchResponse",
       "sdk_method": "search_apps",
       "signature": [
@@ -3757,6 +3847,7 @@
       ],
       "resource_family": "geos",
       "resource_path": "/search/geo",
+      "response_model": "apple_ads_platform.models.geo_search_response.GeoSearchResponse",
       "return_annotation": "GeoSearchResponse",
       "sdk_method": "search_geos",
       "signature": [
@@ -3833,6 +3924,7 @@
       "query_parameters": [],
       "resource_family": "insights",
       "resource_path": "/insights/apps/search-term-popularity/query",
+      "response_model": "apple_ads_platform.models.search_term_popularity_query_response.SearchTermPopularityQueryResponse",
       "return_annotation": "SearchTermPopularityQueryResponse",
       "sdk_method": "search_term_popularity_query",
       "signature": [
@@ -3871,6 +3963,7 @@
       "query_parameters": [],
       "resource_family": "shared-budgets",
       "resource_path": "/shared-budgets/{id}",
+      "response_model": "apple_ads_platform.models.response.Response",
       "return_annotation": "Response",
       "sdk_method": "shared_budgets_id_delete",
       "signature": [
@@ -3903,6 +3996,7 @@
       "query_parameters": [],
       "resource_family": "shared-budgets",
       "resource_path": "/shared-budgets/{id}",
+      "response_model": "apple_ads_platform.models.shared_budget_response.SharedBudgetResponse",
       "return_annotation": "SharedBudgetResponse",
       "sdk_method": "shared_budgets_id_get",
       "signature": [
@@ -3951,6 +4045,7 @@
       "query_parameters": [],
       "resource_family": "shared-budgets",
       "resource_path": "/shared-budgets/{id}",
+      "response_model": "apple_ads_platform.models.shared_budget_response.SharedBudgetResponse",
       "return_annotation": "SharedBudgetResponse",
       "sdk_method": "shared_budgets_id_put",
       "signature": [
@@ -3991,6 +4086,7 @@
       "query_parameters": [],
       "resource_family": "shared-budgets",
       "resource_path": "/shared-budgets",
+      "response_model": "apple_ads_platform.models.shared_budget_response.SharedBudgetResponse",
       "return_annotation": "SharedBudgetResponse",
       "sdk_method": "shared_budgets_post",
       "signature": [
@@ -4025,6 +4121,7 @@
       "query_parameters": [],
       "resource_family": "shared-budgets",
       "resource_path": "/shared-budgets/query",
+      "response_model": "apple_ads_platform.models.shared_budget_query_response.SharedBudgetQueryResponse",
       "return_annotation": "SharedBudgetQueryResponse",
       "sdk_method": "shared_budgets_query_post",
       "signature": [
@@ -4073,6 +4170,7 @@
       "query_parameters": [],
       "resource_family": "location-groups",
       "resource_path": "/location-groups/{id}",
+      "response_model": "apple_ads_platform.models.location_group_response.LocationGroupResponse",
       "return_annotation": "LocationGroupResponse",
       "sdk_method": "update_location_group",
       "signature": [
@@ -4131,6 +4229,7 @@
       "query_parameters": [],
       "resource_family": "assets",
       "resource_path": "/assets/upload",
+      "response_model": "apple_ads_platform.models.asset_response.AssetResponse",
       "return_annotation": "AssetResponse",
       "sdk_method": "upload_asset",
       "signature": [
@@ -11258,7 +11357,3396 @@
       "source_sha256": "80ad77cf60518a659e3d09ca9388081bf796be278b790bafddca96e90d07529c"
     }
   },
-  "schema_version": 1,
+  "response_models": {
+    "apple_ads_platform.models.acl_ad_account.AclAdAccount": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [
+          "id",
+          "orgId"
+        ],
+        "strict_fields": [
+          "id",
+          "name",
+          "orgId"
+        ]
+      },
+      "schema_sha256": "7a8e77d09e31dce9757fd469d956fed55ef1fd86a62faf6f41bb7c80a617609e",
+      "source_sha256": "bf588da8aa879db8473a6fd75b572f2773167aac1dea897da281818612404cee"
+    },
+    "apple_ads_platform.models.action_metrics.ActionMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": [
+          "tap"
+        ]
+      },
+      "schema_sha256": "e298877531c97fd0618f7e2bba1369d8c48b64b76effb1d7005260e838bd641b",
+      "source_sha256": "222ceaa4e5d806cd7069391e7c6a5fc6ebf8fc130d8cdb6e8d1bbf5942e66f4e"
+    },
+    "apple_ads_platform.models.activity_detail.ActivityDetail": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [
+          "transactionId"
+        ],
+        "strict_fields": [
+          "transactionId"
+        ]
+      },
+      "schema_sha256": "3629dccbebd3915599b6912166c135b83ef276587f302b7a54ca25dd228ce652",
+      "source_sha256": "cae28cf490f2166b7c12b157414abfb2fba692b74044259f6ad8c78c1ebd8a4f"
+    },
+    "apple_ads_platform.models.activity_detail_changes_inner.ActivityDetailChangesInner": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "field",
+          "newValues",
+          "oldValues"
+        ]
+      },
+      "schema_sha256": "88d57d41ea58459c334c6f3eaed2280e1b7f8a67089a389ba8a7eb66d3b35c5b",
+      "source_sha256": "f59f6faca4470a83e265cdb06d27e728fa79254853d2c6d797d94dd48d7ebd2e"
+    },
+    "apple_ads_platform.models.ad.Ad": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "displayStatus",
+          "status",
+          "systemStatus",
+          "systemStatusLimitingReasons",
+          "systemStatusReasons"
+        ],
+        "field_count": 15,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "creativeId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "creativeId",
+          "deleted",
+          "id",
+          "name"
+        ]
+      },
+      "schema_sha256": "0b554c01f17926a65f8b8c72cbdb6ae1ead29b3560e813cfcffc39c6524b476b",
+      "source_sha256": "49ef63ce832e9e03dac3ee19e0c47ac43e158f4119795ef73b5ca985e5f8a994"
+    },
+    "apple_ads_platform.models.ad_account.AdAccount": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "currency",
+          "paymentModel",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 13,
+        "identifier_fields": [
+          "id",
+          "orgId"
+        ],
+        "strict_fields": [
+          "id",
+          "name",
+          "orgId",
+          "productFeatures",
+          "timezone"
+        ]
+      },
+      "schema_sha256": "4e50f277627bcc104fd343c35ee7b3568adb9d0ab97f4f18c3ea492ecfbb046d",
+      "source_sha256": "37b3784c26d437000cf65005e2e6fa300decc2e904f175be37a11747d50ae62f"
+    },
+    "apple_ads_platform.models.ad_account_response.AdAccountResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "6399f625c9780790fcb615121f1da7b63e34ea24b0dd9381ee56acad71851107",
+      "source_sha256": "b24437912dae6a9f0e4fd6f503d53bf6d288d9d687cf8b00071584a3b0ddb464"
+    },
+    "apple_ads_platform.models.ad_group.AdGroup": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "displayStatus",
+          "pricingModel",
+          "status",
+          "systemStatus",
+          "systemStatusLimitingReasons",
+          "systemStatusReasons"
+        ],
+        "field_count": 21,
+        "identifier_fields": [
+          "adAccountId",
+          "campaignId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "automatedKeywordsOptIn",
+          "automatedKeywordsRequired",
+          "campaignId",
+          "deleted",
+          "id",
+          "name"
+        ]
+      },
+      "schema_sha256": "cb1cabd0a9ed56525561e89edd993252a8ae820e8bbe8dee91613c462f881011",
+      "source_sha256": "94e0fe782d06cc41389b9da75220ec932668a601c7c5daf50f1f1ff8bdb5b45d"
+    },
+    "apple_ads_platform.models.ad_group_query_response.AdGroupQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "5e98aae2958a454f5296d82202abdfc25bb02436f3e2d111b5a49410dd116b49",
+      "source_sha256": "d70ebaa931ea85347e06ec101ffee214bea6f6f356b905cbcfb43ca31ff6c5ea"
+    },
+    "apple_ads_platform.models.ad_group_response.AdGroupResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "306dd4da01639f9c53edae0251160c931780c87452ef4673525b354afd2601b9",
+      "source_sha256": "987fc9577c058f754efa26374feada5ed217955a5751223bb757ad55607e57d4"
+    },
+    "apple_ads_platform.models.ad_group_targeting.AdGroupTargeting": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 15,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "e4c481e10b586e5ef0dc6cd1fb53964c25e0be2a1b874624e1a7999adb8b8e45",
+      "source_sha256": "9566c11fa056510b79b880b189086ef13788fd05bac161bbd169acaca21644bd"
+    },
+    "apple_ads_platform.models.ad_query_response.AdQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "92557795e4fad9779eb99a1d4a576f7d481421ff8ad16229b7dee3e4d35e5042",
+      "source_sha256": "f26e56c54ec4f6062646d2b292431b1c5191f8bdf93e779e93090e6e96411f4c"
+    },
+    "apple_ads_platform.models.ad_response.AdResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "fd908543b07c4e8d39b4ebbc400f3782c7ee38f917ef9241e421676ece50fa37",
+      "source_sha256": "59d24eb5a7b488186fee6fa2195bb42494fdaf619d270d841561ec67cd017357"
+    },
+    "apple_ads_platform.models.advertiser_resource_list_response.AdvertiserResourceListResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "c2fc7b6e2d852727bddc8bcd251673a98c2561d4413a895812117b162486fd57",
+      "source_sha256": "b43fe805427778e0aefc5e2c4488b3ea2aaf62815b2ba155206a8e0c9d439ffa"
+    },
+    "apple_ads_platform.models.app_details.AppDetails": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "deviceClasses"
+        ],
+        "enum_fields": [],
+        "field_count": 11,
+        "identifier_fields": [
+          "id"
+        ],
+        "strict_fields": [
+          "appName",
+          "artistName",
+          "availableStorefronts",
+          "deviceClasses",
+          "iconPictureUrl",
+          "id",
+          "isPreorder",
+          "primaryGenre",
+          "primaryLanguage",
+          "secondaryGenre"
+        ]
+      },
+      "schema_sha256": "18142abbad1d4f1449b180156595cda842f9c563a297fca9f0f5545b44a84dab",
+      "source_sha256": "04fe9a31e848557ab1bb1ccd9e449d2112c4f001d8d355f085493f43bbb33912"
+    },
+    "apple_ads_platform.models.app_details_response.AppDetailsResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "80935a060df89d8f2f04d0d6ff6219306042a42e125559503c91de10aef2f41c",
+      "source_sha256": "597f648159a6bb223bf223f9e6573638d73a7fc6ce08d3ad6176d13d64cb7c02"
+    },
+    "apple_ads_platform.models.app_info.AppInfo": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 5,
+        "identifier_fields": [
+          "adamId"
+        ],
+        "strict_fields": [
+          "adamId",
+          "appName",
+          "countryOrRegionCodes",
+          "developerName"
+        ]
+      },
+      "schema_sha256": "1ef36b7a0377455288323ab9153f5d9e5a27aef5dc57f7c8eee9f18d59c5459c",
+      "source_sha256": "974386e59c0a4ba8ffed238e09e5811892ea67de4c8347a67ee685af99c7132a"
+    },
+    "apple_ads_platform.models.app_locale_details.AppLocaleDetails": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "deviceClasses"
+        ],
+        "enum_fields": [],
+        "field_count": 11,
+        "identifier_fields": [
+          "adamId"
+        ],
+        "strict_fields": [
+          "adamId",
+          "appName",
+          "deviceClasses",
+          "isPrimaryLocale",
+          "language",
+          "languageCode",
+          "promotionalText",
+          "shortDescription",
+          "subTitle"
+        ]
+      },
+      "schema_sha256": "fc8fda20d561e6da9f76eacc0b421102c8cf3eba4b071a62500288af49b028b0",
+      "source_sha256": "978882f94694af9d9e826a639b16086db371eee77969104c1b111c17780d5068"
+    },
+    "apple_ads_platform.models.app_locale_details_query_response.AppLocaleDetailsQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "cab48faabdb4531b64890966b45f1f01bcf54ad5b3544b8e26f0c544bdd739be",
+      "source_sha256": "b50578fda0b66175ed2d3ba0a99a6e60b72aa90d7eef2de4a5a567616b9dc8a5"
+    },
+    "apple_ads_platform.models.app_supported_languages.AppSupportedLanguages": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 5,
+        "identifier_fields": [],
+        "strict_fields": [
+          "countryCode",
+          "name"
+        ]
+      },
+      "schema_sha256": "b6da1a9c4e2521f3a03ea267c35b76a9cc795e422d72bb48ecd83fc380f2b39b",
+      "source_sha256": "3919bece889bda6156fd0fa3f669bce062370208c2242b58c91e8d4d5b3c9e09"
+    },
+    "apple_ads_platform.models.app_supported_languages_query_response.AppSupportedLanguagesQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "082683e01804421c9504834facdaeb8887dbd47e118e1e5ecdb2223f0d949497",
+      "source_sha256": "454db29bbe80a126871145759ebbb55255c53268d6d9f0cec6ac4487f7e78e7e"
+    },
+    "apple_ads_platform.models.apps_ad_group_metrics.AppsAdGroupMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 24,
+        "identifier_fields": [],
+        "strict_fields": [
+          "impressions",
+          "tapInstallRate",
+          "tapInstalls",
+          "tapNewDownloads",
+          "tapPreOrdersPlaced",
+          "tapRedownloads",
+          "taps",
+          "totalInstallRate",
+          "totalInstalls",
+          "totalNewDownloads",
+          "totalPreOrdersPlaced",
+          "totalRedownloads",
+          "ttr",
+          "viewInstalls",
+          "viewNewDownloads",
+          "viewPreOrdersPlaced",
+          "viewRedownloads"
+        ]
+      },
+      "schema_sha256": "9e5ac8a6758919b2e4693728c0154ce7c9df060707154d28b85107add036d4de",
+      "source_sha256": "97ede4df2b9460548a2bf539a4524023002107b69567fdbd0ae446eff9490889"
+    },
+    "apple_ads_platform.models.apps_ad_group_report_response.AppsAdGroupReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "bca21198b43cd18c5d2af2667d3e2eab0fa755f853b932cdaf35e06e294a90d2",
+      "source_sha256": "0c6d9b477751722a7ed3855d1c3fce7b56833a5285d3751aa31ea92b01ec5cfb"
+    },
+    "apple_ads_platform.models.apps_ad_group_report_row.AppsAdGroupReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "3320f10d3c6a9eb5e3f584e2fd31e596078ce9d9ed87042d636b879d1222b434",
+      "source_sha256": "ce43e9d77bce4e984623f2535b2a4a048c41388e900e66f4c28fe984d9554c43"
+    },
+    "apple_ads_platform.models.apps_ad_group_report_summary.AppsAdGroupReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "9d4ab4e29d54bec5dd99bd595054d939469fa950b03e43fb040aa494a44f575b",
+      "source_sha256": "0d4f4a38a24abc17f8effbc5b445bd7c4af23928f54f0bb810566849c47cc374"
+    },
+    "apple_ads_platform.models.apps_ad_group_result_container.AppsAdGroupResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "f7c3ede58d43c3ca6a694529cc7e899258f4d84f2c39f3af5f94e4bfafcee237",
+      "source_sha256": "937c07367f2b55dbf7d86a91b7b1f2c737a5849b246c8ef54940804f5b7b8b40"
+    },
+    "apple_ads_platform.models.apps_ad_report_response.AppsAdReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "4caa124758ef8201afb0982ccbd5cd4c693f9e763e624047a54ce003219eb979",
+      "source_sha256": "47b1d9ddcc04110a3f8b665165d592037246a6aaba7774718ab28700465ed85e"
+    },
+    "apple_ads_platform.models.apps_ad_report_row.AppsAdReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "2600a83fffac318dc30c2be9c92c4f8880c74b7c8c9a9e6c84c1ca44cda89578",
+      "source_sha256": "2390ec67f54c96559b7af3b9bec170177eb6395c7fda934b69ecd8d91025c75b"
+    },
+    "apple_ads_platform.models.apps_ad_report_summary.AppsAdReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "9c902e1eab588c8d33e3bd74114381c2b6a2b1501475bef5166d1b2bba917a3b",
+      "source_sha256": "97d700c0ca63b3cb988a8b10075ce6eee5e7281a3e1399e4b72030ba4cccba34"
+    },
+    "apple_ads_platform.models.apps_ad_result_container.AppsAdResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "064199b1a3f2c7ec09e2960914d17ed330168e883e2f71020552cccbf04f5373",
+      "source_sha256": "0a85fa8974f8a161e9e33a5a6cc0151a26653caf9bb5154562460baff684b094"
+    },
+    "apple_ads_platform.models.apps_campaign_metrics.AppsCampaignMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 24,
+        "identifier_fields": [],
+        "strict_fields": [
+          "impressions",
+          "tapInstallRate",
+          "tapInstalls",
+          "tapNewDownloads",
+          "tapPreOrdersPlaced",
+          "tapRedownloads",
+          "taps",
+          "totalInstallRate",
+          "totalInstalls",
+          "totalNewDownloads",
+          "totalPreOrdersPlaced",
+          "totalRedownloads",
+          "ttr",
+          "viewInstalls",
+          "viewNewDownloads",
+          "viewPreOrdersPlaced",
+          "viewRedownloads"
+        ]
+      },
+      "schema_sha256": "eb803cb07faeb246a3f984f50b36c489f3e524363ea5d3f1b3948ba0e438f7fb",
+      "source_sha256": "1450b7bf3393d0a72a60e2abd87c30877b75a990f9e9f05458937160a23fd31a"
+    },
+    "apple_ads_platform.models.apps_campaign_report_response.AppsCampaignReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "ae0394c36091021d11147a617a2e951d8ba5a4c23cf9e8a2ddb84e87943cbb75",
+      "source_sha256": "c90396f34266bcbc40f8aa7dc3d98a56046bfa90e2f3f95e3bea01368bd52b85"
+    },
+    "apple_ads_platform.models.apps_campaign_report_row.AppsCampaignReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "1e39d335dc18f318dd54a176a6c5e6234d34527de24cdd95be180cd86cf14a73",
+      "source_sha256": "4f737c638094439ecf54b4b075dde26e2208c1bc19ff94177e7be4e38f63ad18"
+    },
+    "apple_ads_platform.models.apps_campaign_report_summary.AppsCampaignReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "699f36180d9b548b38d2a5af24f2e0999e9fb6e1deb9915341c6ffa1e287e1e7",
+      "source_sha256": "6b06796cb7c5f1ca57550e986175fffc9243fca8e09fe349d01cae4e3742ab0a"
+    },
+    "apple_ads_platform.models.apps_campaign_result_container.AppsCampaignResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "27546912de36915e6b8abe1511eb2ea861ec903a6b3e6c713b468660f7ff6ee1",
+      "source_sha256": "497e370ef0347c2d86e31dd8446a0ffd5d4996aba1e8fced3a150ab735d5542b"
+    },
+    "apple_ads_platform.models.apps_keyword_report_response.AppsKeywordReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "c28c6ea3dd4aac31ec5db1e812d65393b8cbec7a49f24175d895826bf63632a5",
+      "source_sha256": "f09464604d5e47e9e360c983e16e653360ab1fc77ec8c21c302259ecee9f8940"
+    },
+    "apple_ads_platform.models.apps_keyword_report_row.AppsKeywordReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 5,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "0a1bf985e50e440e8363e771c2cdcb1ffb5477709be2e08a8b78175a1acc8dee",
+      "source_sha256": "78c6ffbe7a6c8d30e487867262d883c153cfd28041b6771778be0b9ed2580286"
+    },
+    "apple_ads_platform.models.apps_keyword_report_summary.AppsKeywordReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "646bca1aa7da29456f796bde530f36b457891ddfe2f903d3e87bd9570d4b8973",
+      "source_sha256": "dd75b2c2f24b112e02de095bed0037af9819d6b2ee5e7d3045921108d8b297ff"
+    },
+    "apple_ads_platform.models.apps_keyword_result_container.AppsKeywordResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "5d4dff72b006f78b1980ac71d9754c786338ef7afd8d8b6e98504a3cd0650810",
+      "source_sha256": "47ce769104d841aae77afa1a8331cd8387122f81b74fce4673c1d42b073a47cf"
+    },
+    "apple_ads_platform.models.apps_metrics.AppsMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 24,
+        "identifier_fields": [],
+        "strict_fields": [
+          "impressions",
+          "tapInstallRate",
+          "tapInstalls",
+          "tapNewDownloads",
+          "tapPreOrdersPlaced",
+          "tapRedownloads",
+          "taps",
+          "totalInstallRate",
+          "totalInstalls",
+          "totalNewDownloads",
+          "totalPreOrdersPlaced",
+          "totalRedownloads",
+          "ttr",
+          "viewInstalls",
+          "viewNewDownloads",
+          "viewPreOrdersPlaced",
+          "viewRedownloads"
+        ]
+      },
+      "schema_sha256": "1697d23e53ab6c633b8ad655f072b033bcdfcabc96d5e8f6d396c2c6e90e82b8",
+      "source_sha256": "72e681771495bc93c45e0c5de05c88953e1c76c65e3e35fa71a684ddbaf912dc"
+    },
+    "apple_ads_platform.models.apps_reporting_ad.AppsReportingAd": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "status",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 17,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "countryOrRegion",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "id",
+          "name",
+          "systemStatusLimitingReasons"
+        ]
+      },
+      "schema_sha256": "6e68a0bac0c481b2dfebec31b154d8f43a513fc07a155792b70b8581d2b2f1ad",
+      "source_sha256": "d8c55998e46168aa8bbe4a6cf3030b96da253ed165975f6d397be438842591cb"
+    },
+    "apple_ads_platform.models.apps_reporting_ad_group.AppsReportingAdGroup": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "pricingModel",
+          "status",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 28,
+        "identifier_fields": [
+          "adAccountId",
+          "campaignId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adminArea",
+          "ageRange",
+          "automatedKeywordsOptIn",
+          "automatedKeywordsRequired",
+          "campaignId",
+          "countryCode",
+          "countryOrRegion",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "gender",
+          "id",
+          "locality",
+          "name",
+          "systemStatusLimitingReasons"
+        ]
+      },
+      "schema_sha256": "ae4372b58ed056eb57e6bc42d34945defb0d083830450e0815554f73745e5411",
+      "source_sha256": "b320e453799d60c001b75629ad186772f6e64a51b4afb3efba8a7e6bddf9a9c3"
+    },
+    "apple_ads_platform.models.apps_reporting_campaign.AppsReportingCampaign": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "adChannelType",
+          "billingEvent",
+          "status",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 30,
+        "identifier_fields": [
+          "adAccountId",
+          "id",
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adminArea",
+          "ageRange",
+          "countryCode",
+          "countryOrRegion",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "gender",
+          "id",
+          "locality",
+          "name",
+          "promotedObjectId",
+          "promotedObjectType",
+          "systemStatusLimitingReasons"
+        ]
+      },
+      "schema_sha256": "715a5b8a39e2449ced266b2f6c3e4d06104a941e9b1f0e1a1f2d0539150602a0",
+      "source_sha256": "bad9ba928f7a420913a98837d9478ad2cc0706d709ae9c673b7ceca4add708cb"
+    },
+    "apple_ads_platform.models.apps_reporting_creative.AppsReportingCreative": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "creativeType",
+          "systemStatus"
+        ],
+        "field_count": 6,
+        "identifier_fields": [
+          "id"
+        ],
+        "strict_fields": [
+          "id"
+        ]
+      },
+      "schema_sha256": "c72c78055cc50f9b032a544e153b53c5a578170887bf2392466b641c21a25eb1",
+      "source_sha256": "8f76d0539e78f64503068215da49cc2c8936c3851712399362f784f45e49af02"
+    },
+    "apple_ads_platform.models.apps_search_response.AppsSearchResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "bac36a220f8d324eb34be711a0bb80a5113231ed1fac31b9f996b8cb67c5ae8b",
+      "source_sha256": "558d47caea1e347c0cdcf133bc1fa1d87810a1dc28bf7f33277374b5e9652ea7"
+    },
+    "apple_ads_platform.models.apps_search_term_report_response.AppsSearchTermReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "3397e6ef1203c9098e968d910160bc0b8de13c3bdeb0f05e6da11b04bb14e6b8",
+      "source_sha256": "1100d912eb3579b92dcf443cd48efc57b4311941779cf104adcb6ebf5b158f1c"
+    },
+    "apple_ads_platform.models.apps_search_term_report_row.AppsSearchTermReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "f2fc4f149aad649f1ed4c2a23c8e8e02e8193a89f23bc57645cb4b256467393e",
+      "source_sha256": "b7a2346cc2eeb1a7860e9209950c29aa1f1e968510ea9fe96d2547b9ded03439"
+    },
+    "apple_ads_platform.models.apps_search_term_report_summary.AppsSearchTermReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "e2f4b7e3a785b12312cfb653ec34b133e0f5d6a90f9ddc8b30013e80134e35ae",
+      "source_sha256": "459fa05c5a572631b3b7dd9d6954405739e47f2871b152aff6e5ee4867f946aa"
+    },
+    "apple_ads_platform.models.apps_search_term_result_container.AppsSearchTermResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "b55c17478db5497a2b4b8ba44ea9756ddd91e9dc768d3d1177ec5db9ec33f1e5",
+      "source_sha256": "e9fe4dc7bfdeb7f7b2ff9eac438bf291421cb88e0c9c3c779a7767f85e16aad8"
+    },
+    "apple_ads_platform.models.apps_targeting_projection.AppsTargetingProjection": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "53f25c909e7122a9dd4ffac275ee2420ca1fc1ff161e35ed2dfa9dd6218f40b9",
+      "source_sha256": "b12ab46653f663055cb52a46c409fec42e4141f697ddba5a7ee65da3bc518b80"
+    },
+    "apple_ads_platform.models.asset.Asset": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "assetType",
+          "promotedObjectType"
+        ],
+        "field_count": 15,
+        "identifier_fields": [
+          "id",
+          "parentAssetId",
+          "promotedObjectId",
+          "providerAssetId",
+          "variantIds"
+        ],
+        "strict_fields": [
+          "deleted",
+          "name",
+          "parentAssetId",
+          "promotedObjectId",
+          "providerAssetId",
+          "variantIds"
+        ]
+      },
+      "schema_sha256": "2357d4331bab074adde4b148afef2a1da9a9c00124b82b944b8f74c6503de37f",
+      "source_sha256": "3f7bb1185298b93bc630cc6583562fa1fcc0b84d35a26d48797302f30b9a2b63"
+    },
+    "apple_ads_platform.models.asset_constraint_group.AssetConstraintGroup": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "countryOrRegion",
+          "supplyPlacement"
+        ]
+      },
+      "schema_sha256": "983ed751005e8f993b490b8e115f79a046deb62221721141de23016a16fd11e0",
+      "source_sha256": "5d3222959fb2cb83ad694d1833479c6165a705e0aea7775c6cb225f7899317e3"
+    },
+    "apple_ads_platform.models.asset_eligibility.AssetEligibility": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "status"
+        ],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "5270e8a261f71844b6db0e97e8e17539f2779c2db8af1b7328db86095e657701",
+      "source_sha256": "af6ef5e6cb0434797e49521f946ff2e8b5e7090dcebafec10246195dea48c580"
+    },
+    "apple_ads_platform.models.asset_image.AssetImage": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "format",
+          "orientation"
+        ],
+        "field_count": 11,
+        "identifier_fields": [
+          "adAccountId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "checkSum",
+          "height",
+          "providerAssetUrl",
+          "providerToken",
+          "sizeBytes",
+          "sortPosition",
+          "width"
+        ]
+      },
+      "schema_sha256": "f1ea02e6c912f95e98ae6d7aaed4d457969227b055982a7b648ff8c25d5706db",
+      "source_sha256": "5850f7f2518197bdff93b439e89d5fb29bad5b5b707138bde5f60d46ac9febdf"
+    },
+    "apple_ads_platform.models.asset_query_response.AssetQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "05b09142ca5c0590568ce324d19bcccfa08c4d2a99d51b375268e06b763b765c",
+      "source_sha256": "3b472b11928e0cb5a4e911d6bec96734780334636fb98282ba74bb405e5c48fe"
+    },
+    "apple_ads_platform.models.asset_reference.AssetReference": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [
+          "assetId"
+        ],
+        "strict_fields": []
+      },
+      "schema_sha256": "08971cf2e8cfef6959b82dd3bb0a232ef997ac316bd317a5be780676daa7fba7",
+      "source_sha256": "6f3a46cc1fd992909c2b0e1c591c44e979a0599a8abe2f879e647ada5e970e68"
+    },
+    "apple_ads_platform.models.asset_response.AssetResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "9979a15824e4226d7f0408f2fbc6efd7646c2793f6e7d1011495b9a656f9c587",
+      "source_sha256": "6f70aa6874e96c2f8cfc4efd14daf41f42694b04209b81d2129899f4999991eb"
+    },
+    "apple_ads_platform.models.audit_summary.AuditSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "eventType",
+          "userType"
+        ],
+        "field_count": 9,
+        "identifier_fields": [
+          "transactionId"
+        ],
+        "strict_fields": [
+          "count",
+          "entityType",
+          "modifiedBy",
+          "transactionId"
+        ]
+      },
+      "schema_sha256": "9b7789961789b5166b4023eee7a8ca50372ff1e8e4a3cba9466d8f590651357c",
+      "source_sha256": "d0d190f883c5acbf0d32ec2f3f1776df5372cde0d01dc4c7a85735e43db348f0"
+    },
+    "apple_ads_platform.models.audit_summary_response.AuditSummaryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "ed3944730c6b1e74e3e671495eec9d5653fb4c2807277e38d84eaa0ef7a16a75",
+      "source_sha256": "ec3ae8ee54d1f51f9c73247c1ccc0004f1bddc880106c80b1e0c2d2314d475e7"
+    },
+    "apple_ads_platform.models.bid_strategy.BidStrategy": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "bidStrategyGoal",
+          "bidStrategyType"
+        ],
+        "field_count": 4,
+        "identifier_fields": [
+          "bid"
+        ],
+        "strict_fields": []
+      },
+      "schema_sha256": "1cf9ef48ea15ad03a4d4093a95c137514b14c283d40aa2bc79d9567933ae417a",
+      "source_sha256": "77c45dacb36ffcaaaa0b2eb7cef699359613ab902fbb88d9c5fa415b95194829"
+    },
+    "apple_ads_platform.models.brand.Brand": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 8,
+        "identifier_fields": [
+          "id"
+        ],
+        "strict_fields": [
+          "categories",
+          "countryOrRegion",
+          "id",
+          "name"
+        ]
+      },
+      "schema_sha256": "623b590e2f30a39fa17d29f9e779069fafff1c6dca2c5d3c75d7f85af13b5999",
+      "source_sha256": "87897a741d0b0bff67c61a35a4e934d1ce5a5a00b6da5ccd4c84c92037ab4cab"
+    },
+    "apple_ads_platform.models.brand_query_response.BrandQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "36fd062f91b62ca8b62851a5e3d47096cb58e0ed5721cd26d38478f0d45a86ae",
+      "source_sha256": "7dd7cfb3dbee4105a76875b5f62eb0597fc410149600e3b337dfb1a80c70e394"
+    },
+    "apple_ads_platform.models.brand_rejection_reason_response.BrandRejectionReasonResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 11,
+        "identifier_fields": [
+          "entityId",
+          "id",
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "body",
+          "code",
+          "component",
+          "componentType",
+          "entityId",
+          "entityType",
+          "id",
+          "promotedObjectId",
+          "promotedObjectType",
+          "title"
+        ]
+      },
+      "schema_sha256": "5565736945d759c0deba4d9b88080a9192c37d7528c4950825bb34b8580d0192",
+      "source_sha256": "177f96acb36f5213d7ce8c1017d5880701500720c102b9fe813674d39cc315af"
+    },
+    "apple_ads_platform.models.brand_response.BrandResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "263a0cf45a16a4e1014b820535f9bf0ac3779aecc533726566edd34cf27d8a5b",
+      "source_sha256": "da62ea281eccf2d20e08322671ec6464a156dde963947747274a039ae0e3d426"
+    },
+    "apple_ads_platform.models.brands_ad_group_metrics.BrandsAdGroupMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 22,
+        "identifier_fields": [],
+        "strict_fields": [
+          "impressions",
+          "taps",
+          "ttr"
+        ]
+      },
+      "schema_sha256": "cdb8c17ae572794dd766148a8d3c5d071006d2b4e564bc12071683ff5bcf8d7b",
+      "source_sha256": "04ffdd03f8ccd4651c5878a77dd4a9263c3ec969808b5d47a60414ebb0cce18c"
+    },
+    "apple_ads_platform.models.brands_ad_group_report_response.BrandsAdGroupReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "e60a3ad0555ce4733d166e76c661eb7c8f2844371247025543f4a7511287feb2",
+      "source_sha256": "17ef29a4eb7334ce8bfc2909ae52d0a298dbe873c93bb556804e24ee8fa05065"
+    },
+    "apple_ads_platform.models.brands_ad_group_report_row.BrandsAdGroupReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "6c2aaf383c43518353824f380f842626b9ab79b0601d2704e0e07af67e7606b3",
+      "source_sha256": "24951e4e2c3648389834a7cb74a15d9b6bfb082c9fff56b677e62ea7f263029c"
+    },
+    "apple_ads_platform.models.brands_ad_group_report_summary.BrandsAdGroupReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "484a076b8fb3e8015f98041328e1ec20afcd8e2ce22c5dab787ddf3007c06e58",
+      "source_sha256": "389603ad3a8d3fc0457bfc309d1e3d4f29a55bc6ffaf228af2e6ad4c50710f40"
+    },
+    "apple_ads_platform.models.brands_ad_group_result_container.BrandsAdGroupResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "8119d445da53a02cc1199417bc179fb5c428b93aa2302d797213a39588e9403a",
+      "source_sha256": "2b020b3431e71773ea39787a7d38585f18a2c7279eb39dd83de8bce5edd4872d"
+    },
+    "apple_ads_platform.models.brands_ad_report_response.BrandsAdReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "386da48e1dcb890064161b7d868b28c160820c21427664eb5cab680a4e3216ee",
+      "source_sha256": "94981540d88324f6b8179ef090acd96aa988e70e4b4f647f94301150897e7be9"
+    },
+    "apple_ads_platform.models.brands_ad_report_row.BrandsAdReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "bdd417f0b6fdfb1c5e22e29e9f939a216e45d254c268e0a5846581788c48a201",
+      "source_sha256": "1b9dba32f79fb630573805af5df4d7bf77eb773c0c1fb1731a1e8d39b47660dd"
+    },
+    "apple_ads_platform.models.brands_ad_report_summary.BrandsAdReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "5f5e40377d7f66271f71021c443bfdda6c4982284721cafabdd16e8ce4a2e110",
+      "source_sha256": "bb861f452735b739b973b2808b927c22489de06228ad8db936d61f5571553e3a"
+    },
+    "apple_ads_platform.models.brands_ad_result_container.BrandsAdResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "8bc377ca75b0aedf91ee79da70b8fbcc3d63ba235e94cda22beaaac75f0c4c77",
+      "source_sha256": "a27fda7d2606b75c1e4dfc9aed21cfd4c927e27f7af33bac26b09eb3963498cc"
+    },
+    "apple_ads_platform.models.brands_campaign_metrics.BrandsCampaignMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 22,
+        "identifier_fields": [],
+        "strict_fields": [
+          "impressions",
+          "taps",
+          "ttr"
+        ]
+      },
+      "schema_sha256": "2ac79f4ac97b2c51892576e4acdf7f315ef7c4882be8690ed1ea1f41c6c1e602",
+      "source_sha256": "48713be3010ab960d3578d374d84604605fca6be21fe57d80700f96d3656daa7"
+    },
+    "apple_ads_platform.models.brands_campaign_report_response.BrandsCampaignReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "df1dda059bab3ad78cd7f6045af7f24d46c0fadfb495ecdddf143bb1e6b80ac0",
+      "source_sha256": "422e97a808a261cab18db86dd1f172e3276c1320a28716f1cea193986d3c88b3"
+    },
+    "apple_ads_platform.models.brands_campaign_report_row.BrandsCampaignReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "3f6b98dde4b65d9eb6c1e02e2b5fde99a868887566d3fea1b16caea4c2ceb4a4",
+      "source_sha256": "2d4fe8d9cf7ff09dde22a752ca17fb69948b751303c435ca182f5eed186c985e"
+    },
+    "apple_ads_platform.models.brands_campaign_report_summary.BrandsCampaignReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "e7eb876ca9b88bbe28f2314aa30fd5a6a90168e312670dde53e5586d104d4c58",
+      "source_sha256": "92704b2a70c0804c0995167acc57767515bbc91cfda0748fafe2df966382ed6c"
+    },
+    "apple_ads_platform.models.brands_campaign_result_container.BrandsCampaignResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "bf53c54a6ba2ddcd0ad0e37585c03e68bf63a89adfd54ed50b113f7cd4f98e0a",
+      "source_sha256": "f4eb8cdc43c32f9314e30753003f52159d9e4ca21f788a1d766b5bcbdcf93bbe"
+    },
+    "apple_ads_platform.models.brands_keyword_report_response.BrandsKeywordReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "104e21582f0e900f919c71367eb3dfadf1628a7f0f7b30684efb7839bcc0fba3",
+      "source_sha256": "006e9ce9ba0e5a562f568b3926f5cf475799c4b0c23692ba74d344d10977e1b8"
+    },
+    "apple_ads_platform.models.brands_keyword_report_row.BrandsKeywordReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 5,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "e6f056a0ec41cf437afae3451bb02034e1c7ddb3ee9158ac3866c3c0383ebabc",
+      "source_sha256": "426100cde5a29ab0ead041b782451205dd0ff25d5a7a51d0858e936d6a9a5c55"
+    },
+    "apple_ads_platform.models.brands_keyword_report_summary.BrandsKeywordReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "6cb80e9b772d126b6ba6657f0a3a578e76ee36ad5d265514004e3c01c3bf9a7a",
+      "source_sha256": "7ee01c0015452d958db9c3455d03031a1626290e34e1e3bbe32a863313c009d8"
+    },
+    "apple_ads_platform.models.brands_keyword_result_container.BrandsKeywordResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "a52a5d2163d07c65e5e17d33fcdebd38eab7862e2b6256be3a84ee7591750c26",
+      "source_sha256": "61b7e4ae27d88cf56c5c65c28b6b57c7faeabdfdb0fdc213935dfd34bc74e571"
+    },
+    "apple_ads_platform.models.brands_metrics.BrandsMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 22,
+        "identifier_fields": [],
+        "strict_fields": [
+          "impressions",
+          "taps",
+          "ttr"
+        ]
+      },
+      "schema_sha256": "b311c4d04345828867711cba78dad7e5050ff7a39607f4ed11b3fa692f87fc2e",
+      "source_sha256": "8f5f387312f2d862b70777ea61e5a9d4135c1f989e8d2e34c09aaf8801b25d77"
+    },
+    "apple_ads_platform.models.brands_reporting_ad.BrandsReportingAd": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "status",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 18,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "id",
+          "locationId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "id",
+          "locationId",
+          "name",
+          "supplyPlacement",
+          "systemStatusLimitingReasons"
+        ]
+      },
+      "schema_sha256": "cdf38197643645711ed19b57ae659c134be30947ff276032f8aaf6fdf67833f8",
+      "source_sha256": "16171f262151413e9b0b3cd5fc04956c4df14bcbba947b5fce0c379bd076c66b"
+    },
+    "apple_ads_platform.models.brands_reporting_ad_group.BrandsReportingAdGroup": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "pricingModel",
+          "status",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 24,
+        "identifier_fields": [
+          "adAccountId",
+          "campaignId",
+          "id",
+          "locationId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "automatedKeywordsOptIn",
+          "automatedKeywordsRequired",
+          "campaignId",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "id",
+          "locationId",
+          "name",
+          "supplyPlacement",
+          "systemStatusLimitingReasons"
+        ]
+      },
+      "schema_sha256": "6fc2acefd14a96e9ed756d4cab5cd6877262ae8a0e834dc8991208c254869331",
+      "source_sha256": "385491f26989aaa2323d5f07a7c0921ca8cbbb40df010f2d586693c3fcf57c34"
+    },
+    "apple_ads_platform.models.brands_reporting_campaign.BrandsReportingCampaign": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "adChannelType",
+          "billingEvent",
+          "status",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 26,
+        "identifier_fields": [
+          "adAccountId",
+          "id",
+          "locationId",
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "id",
+          "locationId",
+          "name",
+          "promotedObjectId",
+          "promotedObjectType",
+          "supplyPlacement",
+          "systemStatusLimitingReasons"
+        ]
+      },
+      "schema_sha256": "19114d0fa4e3abad294da78937c784907b5170939f244d026cdd5f9b5473134b",
+      "source_sha256": "e7df11df14a4d544aed51b62fdf6c36e7801bd3775814efe27c8855e9252ac5d"
+    },
+    "apple_ads_platform.models.brands_reporting_creative.BrandsReportingCreative": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "creativeType",
+          "systemStatus"
+        ],
+        "field_count": 4,
+        "identifier_fields": [
+          "id"
+        ],
+        "strict_fields": [
+          "id"
+        ]
+      },
+      "schema_sha256": "abbd5df5d0661675c013438dc2494847b1f894256e749e183204697257876ee4",
+      "source_sha256": "667b55c422a045c78e8eb4d52b2c836370daea1430b2b86a460dc544eb88ba55"
+    },
+    "apple_ads_platform.models.brands_reporting_keyword.BrandsReportingKeyword": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "matchType",
+          "status"
+        ],
+        "enum_fields": [],
+        "field_count": 17,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "bid",
+          "campaignId",
+          "id",
+          "locationId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "countryOrRegion",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "id",
+          "locationId",
+          "matchType",
+          "status",
+          "text"
+        ]
+      },
+      "schema_sha256": "c2cf746dcad42be8ccaa9d833faf2508f7d02163fc24c76bf1c451e76707b09d",
+      "source_sha256": "71930ff817ba27b10db700a1e91702268a2a9fae8f8f29b81b60ebcc1436b646"
+    },
+    "apple_ads_platform.models.brands_reporting_search_term.BrandsReportingSearchTerm": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 11,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "locationId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "countryOrRegion",
+          "deviceClass",
+          "locationId",
+          "searchTermSource",
+          "searchTermText"
+        ]
+      },
+      "schema_sha256": "56d43cba1bf8ab8158ed862deae6f823c2cd9e893c6b70aa522568d8678e3693",
+      "source_sha256": "5d2e5068a35266c4e25faa0fcb159c34f32bcbb2586130af2e5e68dde8bece71"
+    },
+    "apple_ads_platform.models.brands_search_term_report_response.BrandsSearchTermReportResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "faeb9f9d5ea5804bb188bcdd6d2d61c47acf58a8ffc31c1609bd5e9ccaba89aa",
+      "source_sha256": "09444db6e72694f523cffa5d7fe67316492c2ca85a1e8a71bf1476b14a72e20b"
+    },
+    "apple_ads_platform.models.brands_search_term_report_row.BrandsSearchTermReportRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "f0cf2bb73e9de1804a5618f588bd889956b910b1d3d5d44fe01fe175ae5af718",
+      "source_sha256": "c96dcca2cf912d6583099fe153ba18eb1c28df889e484657ba1d7700fb0a40a3"
+    },
+    "apple_ads_platform.models.brands_search_term_report_summary.BrandsSearchTermReportSummary": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "185d11cae81c6379b96489d4cb90f5247b214a25728ff2cd4b07d207e0641692",
+      "source_sha256": "fd2ed7a352246facafbd8952d9dcfe9d8b9c39aa3d5aa0565b756ea0739f4652"
+    },
+    "apple_ads_platform.models.brands_search_term_result_container.BrandsSearchTermResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "aed7923e3e49c84fbef4acf5fdc09610ef322e869eb2219747f072a631ff5b8d",
+      "source_sha256": "67c57bb7e5300b2741f2320d0436bc33c3119cb84bac970991288a7aedb4f3d4"
+    },
+    "apple_ads_platform.models.brands_targeting_projection.BrandsTargetingProjection": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 6,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "f3ab42e0ff893920a2a171c0c73d4d4759ff2b59b8d9fbc4b8d37218ef0b79da",
+      "source_sha256": "45e850079630b9f62336614bb700fb5a8a88df0ce3ac85f5f47b672ac0beaf3c"
+    },
+    "apple_ads_platform.models.bulk_item_result_keyword.BulkItemResultKeyword": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 6,
+        "identifier_fields": [
+          "correlationId"
+        ],
+        "strict_fields": [
+          "correlationId",
+          "operation",
+          "success"
+        ]
+      },
+      "schema_sha256": "ec596cd176061e646347a07b8d07ce6f8aa5c43d3ec34a3207be0ecc2179c439",
+      "source_sha256": "99c0952e783ef3269889d8e14d7a2847791227103951df2667003151f1fa1846"
+    },
+    "apple_ads_platform.models.bulk_item_result_negative_keyword.BulkItemResultNegativeKeyword": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 6,
+        "identifier_fields": [
+          "correlationId"
+        ],
+        "strict_fields": [
+          "correlationId",
+          "operation",
+          "success"
+        ]
+      },
+      "schema_sha256": "2857be98f9f6f3e5091d6bb6c4d6b005d267d21201b86218ee246162054dda71",
+      "source_sha256": "58627978762a04466164ca414581fdd42682134c5284bb4b8c21d2978abb9c2e"
+    },
+    "apple_ads_platform.models.business_category.BusinessCategory": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 6,
+        "identifier_fields": [
+          "id",
+          "qualifiedId"
+        ],
+        "strict_fields": [
+          "description",
+          "id",
+          "name",
+          "qualifiedId"
+        ]
+      },
+      "schema_sha256": "e213f87ef9f779f077bc2087451d5c2117d0d9af8853169321827f9bbce6064c",
+      "source_sha256": "9e6e0d1d26bfb29a83d925ffc4e95f5538abf10f1a0ea778423cda88805902c9"
+    },
+    "apple_ads_platform.models.business_category_query_response.BusinessCategoryQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "18c347926497f52e4b35264c7140cfbbab3b3473514d2d06c327055ada0e1f70",
+      "source_sha256": "5918e7231b1240b45e169f0ba0e21b1c4d7d8366e0733185bcec84a3c6aee783"
+    },
+    "apple_ads_platform.models.business_category_response.BusinessCategoryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "bfc98e771de084244bbe605966631d63f17c3a4e5fd5fb5962b311bbea86fc3c",
+      "source_sha256": "9677ebf2f4c12ff7f968fdff822008540b9054414deda2d75bc6f7f6159cdd2c"
+    },
+    "apple_ads_platform.models.campaign.Campaign": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "billingEvent",
+          "displayStatus",
+          "paymentModel",
+          "promotedObjectType",
+          "status",
+          "systemStatus",
+          "systemStatusLimitingReasons",
+          "systemStatusReasons"
+        ],
+        "field_count": 24,
+        "identifier_fields": [
+          "adAccountId",
+          "id",
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "deleted",
+          "id",
+          "name",
+          "promotedObjectId"
+        ]
+      },
+      "schema_sha256": "bad8f286c5283e001d7ec8f6cd42d222d21abc1c75f48b75fd8893d2f3a0f7cb",
+      "source_sha256": "8ffb5aaf402305768a87b3e74e0b7bb9acabd51f16b8c86f121e991297f71e8e"
+    },
+    "apple_ads_platform.models.campaign_query_response.CampaignQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "5a1180992c0a87b50fe725b96b78be157dcf4f1688421973859c49c4691cdbaa",
+      "source_sha256": "62c560fd966fb54c4dfee992533a4463d80240873ec65bdfe9dea7656ffccf81"
+    },
+    "apple_ads_platform.models.campaign_response.CampaignResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "8aa5723df66e991b74af2a985fbca342c47a8259a59ba712944adc872c8db96c",
+      "source_sha256": "fd382e8e2236e7b28141f3cdad9be76b8d013180f1c441dbb183ba434423a732"
+    },
+    "apple_ads_platform.models.campaign_targeting.CampaignTargeting": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "fab0d7957d2b1156d18f042d395b07efd6bdc981068689d3bcdc4d105086b89f",
+      "source_sha256": "0bf76766b94f3d15ef663428fa8d527b1538633ce8dd468645c9f1133b2b5baa"
+    },
+    "apple_ads_platform.models.category_suggestion.CategorySuggestion": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "category",
+          "popularity"
+        ]
+      },
+      "schema_sha256": "b0dd5d6e811a199907b02147a1548882ac72b4fc7fd46bfdf2b011b54e15c310",
+      "source_sha256": "911bb330008c9271c5391511284c60d946daff77a52201d0c3e282430891fbcb"
+    },
+    "apple_ads_platform.models.change_details.ChangeDetails": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "eventType",
+          "userType"
+        ],
+        "field_count": 11,
+        "identifier_fields": [
+          "detailId",
+          "entityId",
+          "transactionId"
+        ],
+        "strict_fields": [
+          "detailId",
+          "entityId",
+          "entityMetaData",
+          "entityType",
+          "modifiedBy",
+          "transactionId"
+        ]
+      },
+      "schema_sha256": "73ad5e6ccf2f50f27b33ac7baa3282d8c7681215cc560ad770e8acead17e1747",
+      "source_sha256": "8f5f2f257c47d2e867566e31ae6e7d2d524ae571273327156c45e4cc7bba0f97"
+    },
+    "apple_ads_platform.models.change_details_response.ChangeDetailsResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "cc22e905768be3f5ce8a2f99b34a808ca0581b5d2a8bed6d6f9c9995019defa7",
+      "source_sha256": "8d90240dc297f4c62df487934bf91f686fc89a779eb71918833ff24e87702045"
+    },
+    "apple_ads_platform.models.constraint_group.ConstraintGroup": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "countryOrRegion",
+          "supplyPlacement"
+        ]
+      },
+      "schema_sha256": "4b6b2e5c3e34a07960753c62351f674cb459e46fc9fe30c98dd1943bc5e13f78",
+      "source_sha256": "3f861d20d8e914b2c1cc63432aabdf3e1ccbf42617578e410de9e58d96c5cf33"
+    },
+    "apple_ads_platform.models.cost_metrics.CostMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "b4fdef98d84d9d03118a95e14bb0775394c3f84883a9ddb2d1bb047da7434758",
+      "source_sha256": "b0c05ef395cf06c68da348b976b9de29bbe285f0da5a58a0fe07e7740b02c550"
+    },
+    "apple_ads_platform.models.cpa_goal.CPAGoal": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "bb0c724b5413565027b4ec2181093df322c92b79809aa3aad7b7b71ecf70e0ff",
+      "source_sha256": "8af5f3468984e08d9f084ea62b49aab4f8ea1df60552bb50c5675f0a661c60ac"
+    },
+    "apple_ads_platform.models.creative.Creative": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "creativeType",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 13,
+        "identifier_fields": [
+          "adAccountId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "deleted",
+          "id",
+          "name"
+        ]
+      },
+      "schema_sha256": "d6da45493d5591abeb0ec1dd4d5866a20bb7e25ce8d9901381d4477be26ca67e",
+      "source_sha256": "381fc7713cef7e341bee65ae50310143b8ee85f1bcfe9ac618f9022ea58ee81c"
+    },
+    "apple_ads_platform.models.creative_eligibility.CreativeEligibility": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "status"
+        ]
+      },
+      "schema_sha256": "fcee3c6008e24fcae761aad9c45fccd8773ce7a0b6399881aeee9b88c2b57ba2",
+      "source_sha256": "c7ec4ea6d9bcef37693ca5fc547954abf027fa4f10a5c1811c3189f5e500dfc3"
+    },
+    "apple_ads_platform.models.creative_query_response.CreativeQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "f2ba55a1388bdea3f315525f7496e4a7b2a8dda3fab568900f8c84a0f6679b98",
+      "source_sha256": "9755ceabdf0abe236eccb5ad76d0e9c3ca3c488cb5e366bef8f237ed618aa2ae"
+    },
+    "apple_ads_platform.models.creative_rejection_reason.CreativeRejectionReason": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "reasonLevel"
+        ],
+        "enum_fields": [],
+        "field_count": 13,
+        "identifier_fields": [
+          "adamId",
+          "assetId",
+          "id",
+          "productPageId"
+        ],
+        "strict_fields": [
+          "adamId",
+          "assetId",
+          "comment",
+          "countryOrRegion",
+          "id",
+          "languageCode",
+          "productPageId",
+          "reasonCode",
+          "reasonLevel",
+          "reasonType",
+          "supplyPlacement",
+          "supplySource"
+        ]
+      },
+      "schema_sha256": "932ec1482c993ef2871e292563e079eff83574a915b57067bcc659723dc2567b",
+      "source_sha256": "ecca8b3fcc5ec3cad134749dc525a9af6c238dae576000d0452e5e5f4a414683"
+    },
+    "apple_ads_platform.models.creative_rejection_reason_query_response.CreativeRejectionReasonQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "671c84ca9b2b6f5d2de7c225d9882eda668dcb960a729e84cf3c0bf6aeeb6997",
+      "source_sha256": "77f2090473f4fe9b1ebfe5dc158b15f8f3f04707844b1f3de2224fb4245c1ff7"
+    },
+    "apple_ads_platform.models.creative_response.CreativeResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "e8c397565f71037819b45490015aca549ff9e1a0bac14973ba74ac0ad8b3c3eb",
+      "source_sha256": "cc42ec9ffa3c55e845e101072d6676a3b508bdd39324f439e074ea8b9b9962fe"
+    },
+    "apple_ads_platform.models.daily_budget.DailyBudget": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "41799e73b2bb16a3492cf4ef8803c306d298978ff38dac3be600883e20bfa77f",
+      "source_sha256": "b28f1c19dd0ff5badf669ccad803b2ba9c3cb5dbc13b21dc6e49d4da052d95cf"
+    },
+    "apple_ads_platform.models.daily_cap_recommendation.DailyCapRecommendation": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "promotedObjectType",
+          "recommendationType",
+          "state",
+          "status"
+        ],
+        "field_count": 27,
+        "identifier_fields": [
+          "campaignId",
+          "id",
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "campaignId",
+          "campaignName",
+          "expectedImpressions",
+          "expectedInstalls",
+          "expectedTaps",
+          "id",
+          "impression",
+          "installs",
+          "promotedObjectId",
+          "taps",
+          "ttr"
+        ]
+      },
+      "schema_sha256": "ebe56cf4f4cba70d746bd2b73860fe247b30417b96e7f2b6037d734666823920",
+      "source_sha256": "330a9a9280e4f2184ab21839468e492ffc33fb9635982f2df49c46eb0d3cdd47"
+    },
+    "apple_ads_platform.models.daily_cap_recommendation_history.DailyCapRecommendationHistory": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "promotedObjectType",
+          "recommendationType",
+          "state",
+          "status"
+        ],
+        "field_count": 38,
+        "identifier_fields": [
+          "campaignId",
+          "promotedObjectId",
+          "recommendationId"
+        ],
+        "strict_fields": [
+          "campaignId",
+          "campaignName",
+          "expectedImpressions",
+          "expectedImpressionsHigh",
+          "expectedImpressionsLow",
+          "expectedInstalls",
+          "expectedInstallsHigh",
+          "expectedInstallsLow",
+          "expectedTaps",
+          "expectedTapsHigh",
+          "expectedTapsLow",
+          "impression",
+          "installs",
+          "promotedObjectId",
+          "rank",
+          "recommendationId",
+          "taps",
+          "ttr"
+        ]
+      },
+      "schema_sha256": "5c6372b64a5e43285572187c4d8bc8259fc543189babe82343721f7a53658945",
+      "source_sha256": "c64f01b2f53572d87c6ca33eeaa70346f4f1aecd032056d222df734180b8262e"
+    },
+    "apple_ads_platform.models.delegation.Delegation": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "resourceType"
+        ],
+        "field_count": 4,
+        "identifier_fields": [
+          "resourceId"
+        ],
+        "strict_fields": [
+          "resourceId",
+          "resourceName"
+        ]
+      },
+      "schema_sha256": "6b982f66ce7b74d6e4d15ea757671a1947c8a1426b7d767b3615a71578d89e93",
+      "source_sha256": "f14bcfffbace51ce30d1a9aaee3c5f46150f1442aac46ffc9ef6cecbe139fce1"
+    },
+    "apple_ads_platform.models.destination.Destination": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "destinationType"
+        ],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "url"
+        ]
+      },
+      "schema_sha256": "2eab7146aea1435a144b77a1c91ff2dbd1357f57f556b7a78d879c54ce265f88",
+      "source_sha256": "089c33b54bfb0798985c3422e872050ede6403420f6b4fc6afa66d909870460f"
+    },
+    "apple_ads_platform.models.destination_parameter.DestinationParameter": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [
+          "adamId",
+          "productPageId"
+        ],
+        "strict_fields": [
+          "adamId",
+          "productPageId"
+        ]
+      },
+      "schema_sha256": "5290e47ea006e1a6b9889b7ebaa312e211766ad8766ca173b1b10441532355c1",
+      "source_sha256": "eea0b4ec121f566abb41d8b9b5d01cf97f301c57b04be4b7fee08b82e62bd2c7"
+    },
+    "apple_ads_platform.models.device_asset_group.DeviceAssetGroup": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "appPreviewDeviceFallBackDevices"
+        ]
+      },
+      "schema_sha256": "5d713cd11e4d86cc4145fc98d5312b59baca362742ebc0c05e551bd59b51f703",
+      "source_sha256": "ab5ddcbb4467a2e9e72a11ae9355f58bbb68e204949e51a8f990829dee0b1cc8"
+    },
+    "apple_ads_platform.models.eligibility.Eligibility": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "status"
+        ],
+        "field_count": 5,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "d5bea2bec1df412b175694544ac170561373edc432e54f9720d80e6c8a32a04d",
+      "source_sha256": "7d586b3fbbce54956a7f93aa25740112e578c214859f07a92335ed0276164561"
+    },
+    "apple_ads_platform.models.eligibility_query_response.EligibilityQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "6b6163a4fa72f67d0e4dcf0400187b3f528b530e6ecabf7066aa12f6f7e261d0",
+      "source_sha256": "85de9eec0b5345e594296a9a93630fa95dea38b5e25aaa9d13acf0ccab0cfa91"
+    },
+    "apple_ads_platform.models.eligibility_response.EligibilityResponse": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "state"
+        ],
+        "enum_fields": [],
+        "field_count": 8,
+        "identifier_fields": [
+          "adamId"
+        ],
+        "strict_fields": [
+          "adamId",
+          "countryOrRegion",
+          "deviceClass",
+          "minAge",
+          "state",
+          "supplyPlacement",
+          "supplySource"
+        ]
+      },
+      "schema_sha256": "50be09211f261ce934b7e97f62a911c52369bf5d9ce41fd82bfca9e49890904b",
+      "source_sha256": "75415693b648e0bd68d5990cd6feff04c0858f3d236cfc324ff3460f9f0eaec5"
+    },
+    "apple_ads_platform.models.error.Error": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "code",
+          "message"
+        ]
+      },
+      "schema_sha256": "5ab25a8b3fda25297dcaead003afad26bcfd26058bfab4d7c35e98f4b53ee31b",
+      "source_sha256": "06ad86c0aec585d8a6de0ed9c00c828f2783e234785575de52b4d00a19127dff"
+    },
+    "apple_ads_platform.models.error_detail.ErrorDetail": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "code",
+          "message"
+        ]
+      },
+      "schema_sha256": "1e79d240d0209a84b21b2864ec8681361686bb69047468e3e9be8d0125a04c36",
+      "source_sha256": "1a847742ab799ac025692d9730e00f748bec338306a310ed39ae8812aec4aa45"
+    },
+    "apple_ads_platform.models.error_message.ErrorMessage": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "code"
+        ],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "code",
+          "message"
+        ]
+      },
+      "schema_sha256": "fddf999f3efc5df88411397060b6feff304db01475d16512b2decb43ee837b09",
+      "source_sha256": "30022ebb60c9ca6ef9de8a4b7cf78ef004e970075df8acdd0251f1b2b7a78a89"
+    },
+    "apple_ads_platform.models.error_message_details_inner.ErrorMessageDetailsInner": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "code",
+          "info",
+          "message"
+        ]
+      },
+      "schema_sha256": "0cfba8b7f6bae0d2fdc253da7fd1eb257516bfb385963d499b0798d46d9b46a4",
+      "source_sha256": "798c586f125f40b1072a087fcb5d5e210738a9ba96d5df90ed9c10676f59df35"
+    },
+    "apple_ads_platform.models.geo_blocked_group.GeoBlockedGroup": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "reasons"
+        ],
+        "enum_fields": [
+          "supplySource"
+        ],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "reasons"
+        ]
+      },
+      "schema_sha256": "fdbde42415d9e20c74d95f364fcc2b57cf599068cc06a6451ab817533acde3a6",
+      "source_sha256": "8ed89baf9bdb409861e1ebc559cff384c30a5114e609112d6262571520f2ff40"
+    },
+    "apple_ads_platform.models.geo_eligibility.GeoEligibility": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "81241dc153f17552ffc96e450549ec9cb88c16a4871446ee396768d4d036f108",
+      "source_sha256": "4c10dd516958b11bbeb2b6a39144e4b88cca8a83f5b181cf28b20a198c49cb8b"
+    },
+    "apple_ads_platform.models.geo_search_pagination.GeoSearchPagination": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "offset",
+          "pageSize",
+          "totalCount"
+        ]
+      },
+      "schema_sha256": "51e3920f499548ac8402b2acc5b90dc313a95fa83efdc7f7e047aa5d73b4aa7b",
+      "source_sha256": "26fbca9a677aebaec5fbf8b1c8faaca786032f4a80c8347e9a58cb7d4b015e15"
+    },
+    "apple_ads_platform.models.geo_search_response.GeoSearchResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "7b36620807737d86dd2517c8110b63a4a0c379d801f4a9069cc03a1c35c853a8",
+      "source_sha256": "308db714e46785f127a0b204d0152be6c53b9097573872c761a9d5f175bf3605"
+    },
+    "apple_ads_platform.models.impression_share_query_response.ImpressionShareQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "0930bf4650726cfe3e6d0a5e00a603c78261ec0a8eb271d2c333c649e359395c",
+      "source_sha256": "4f0fd931f5db3295d7a3d0f32959e0c7a2cb92de2f4e27849a39725e394b3011"
+    },
+    "apple_ads_platform.models.impression_share_result_container.ImpressionShareResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "19e3d60a4ea65974f794f9ac45b1323d823847cac92e5bb5a955f5493d23694a",
+      "source_sha256": "90c25dd2c03900696061cddc2aa87eeb29ec298bf75ee80b27f578e904108851"
+    },
+    "apple_ads_platform.models.impression_share_row.ImpressionShareRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 11,
+        "identifier_fields": [
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "appName",
+          "countryOrRegion",
+          "highImpressionShare",
+          "lowImpressionShare",
+          "promotedObjectId",
+          "rank",
+          "searchPopularity1to5",
+          "searchTerm"
+        ]
+      },
+      "schema_sha256": "c497703d86a5703a4ee287b000e732e536dca0368e6e1467696d59e5fa21f168",
+      "source_sha256": "5575ac725d21e0011ead5720cd50fd1fa743af30b82975628548b91e156d13da"
+    },
+    "apple_ads_platform.models.include_exclude.IncludeExclude": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": [
+          "include"
+        ]
+      },
+      "schema_sha256": "984ec9a3ca512a85946474a54752f07818ee5143a42741c61d48eb35615ee9ff",
+      "source_sha256": "fd57a18b07c2fabaf6656b5893871736d5b911291ce6ba818b2e48391bc7089c"
+    },
+    "apple_ads_platform.models.invoice_detail.InvoiceDetail": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 6,
+        "identifier_fields": [],
+        "strict_fields": [
+          "billingEmail",
+          "clientName",
+          "orderNumber",
+          "primaryBuyerEmail",
+          "primaryBuyerName"
+        ]
+      },
+      "schema_sha256": "76a88e53251eb5869bbe3a06d04216fce9e50812f8aaf6c029ced4c54424ba0d",
+      "source_sha256": "c4d43fe76249897f6eeb9777de3c1e5df199eaa99472ec2ac102c78ac9902490"
+    },
+    "apple_ads_platform.models.keyword.Keyword": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "displayStatus",
+          "matchType",
+          "status"
+        ],
+        "field_count": 13,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "bid",
+          "campaignId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "deleted",
+          "id",
+          "text"
+        ]
+      },
+      "schema_sha256": "2691d25c9405101ae0148800d146ed68bb2ac92674560e77657f96ed6bb82671",
+      "source_sha256": "ca26f1ef485440dc0aa4dd65944f7ab8b6e34d43df105c77af2322c255d57278"
+    },
+    "apple_ads_platform.models.keyword_create_bulk_response.KeywordCreateBulkResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "fff19f5cd529ad31f51be69c7d2b980f842725e2a434bcb109911fb3d7ff796a",
+      "source_sha256": "14fb34097550e7167a9ff02f32d85b2287d90e6b826eed48733407c7f8f4c6e1"
+    },
+    "apple_ads_platform.models.keyword_insights.KeywordInsights": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "214b15430996e54242f996e00bce108c17f0d6950de8bbfae9e454e4a8a8eda7",
+      "source_sha256": "238a7f8bdef983fc2eff9a5bba05a0ba864dbe5acb2f9d970c1fc7fbf5c07137"
+    },
+    "apple_ads_platform.models.keyword_query_response.KeywordQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "88adafa48bf9dc19a642b23c84a459b749736a4b27ea61ab9c04f38e9b8b587c",
+      "source_sha256": "d7de086f44fb0d4300ef3f9834fb105b4bae5d6f46de1d6d42f09e2cfa77466f"
+    },
+    "apple_ads_platform.models.keyword_response.KeywordResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "648ea66250d0254eaa4870db1f54b5e00b7aa5334fc4f707f2c5081416755edd",
+      "source_sha256": "10a036f03f0b89803db5a045fbdb5877a06192211df82756c89dbf211b4cfa30"
+    },
+    "apple_ads_platform.models.keyword_suggestion.KeywordSuggestion": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "text"
+        ]
+      },
+      "schema_sha256": "ae8ccd93ca6a442e164bab63220748308338d7877d8bb11c14b7a6fc6baa5600",
+      "source_sha256": "fa0fa16dc2d6fa046a6fbe3b3e5677d96a31306a3f805c28ecae17386cf38b4c"
+    },
+    "apple_ads_platform.models.keyword_update_bulk_response.KeywordUpdateBulkResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "3af4ea59cce86010b5b54abde7ff6303a8a89d54c60632ab634d8fccf3f5004d",
+      "source_sha256": "d80ba9c1bb8879b0bf77d229f60ab8fbbdba8af0e8a4b06f4463a7cdd2cf288f"
+    },
+    "apple_ads_platform.models.legacy_app_limited_status_reason_details.LegacyAppLimitedStatusReasonDetails": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": [
+          "countryOrRegionLimitedStatusReasons"
+        ]
+      },
+      "schema_sha256": "2371ed2b4ebd0e8c35134856cd196ed4a0bf1bc88d3e75b8caa6ee85d0f05ad5",
+      "source_sha256": "2dc4bde0f4075da63e8b225c11c9fad9e728a69ecaef6584e82894595318c8a8"
+    },
+    "apple_ads_platform.models.legacy_app_limited_status_reason_details_response.LegacyAppLimitedStatusReasonDetailsResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "f172b766c4f986a5aea6f12b7486313de9fb5e224c79197dbb15d3d177d5c9ee",
+      "source_sha256": "266b75dacb2a36c6748864fef20f5a18d9e78c726e78c1412a60ec4b25b1c5b9"
+    },
+    "apple_ads_platform.models.locale_info.LocaleInfo": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "language",
+          "languageCode"
+        ]
+      },
+      "schema_sha256": "11a326fa4b5be1191b85e42ecff40a42529a90c6f84660a8ac1107f980b13ac9",
+      "source_sha256": "aff9b82fc303de36c7220cee5c7133cca2db67a36fd22d3fc7ec4f1cd25db592"
+    },
+    "apple_ads_platform.models.location.Location": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "status"
+        ],
+        "enum_fields": [],
+        "field_count": 12,
+        "identifier_fields": [
+          "brandId",
+          "id"
+        ],
+        "strict_fields": [
+          "brandId",
+          "categories",
+          "countryOrRegion",
+          "id",
+          "name",
+          "status"
+        ]
+      },
+      "schema_sha256": "084081308fea2522660485343c38044044c3156df091f8a2194dd25e9c91a98a",
+      "source_sha256": "ed7575d82851b215f97831597e19cb956b7925307bee4c541e13f914d3a1c074"
+    },
+    "apple_ads_platform.models.location_address.LocationAddress": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 15,
+        "identifier_fields": [],
+        "strict_fields": [
+          "adminArea",
+          "adminAreaCode",
+          "building",
+          "countryOrRegion",
+          "floor",
+          "fullAddress",
+          "fullThoroughfare",
+          "locality",
+          "postalCode",
+          "subAdminArea",
+          "subLocality",
+          "subThoroughfare",
+          "thoroughfare",
+          "unit"
+        ]
+      },
+      "schema_sha256": "0cb19d6318ae39b493c938546d6eba8d7e2003a84b1d1ad3b9d1bdd8b0be6332",
+      "source_sha256": "831e50f7af63012a6619ff6692abd741afe9ad75d570d5f42e3211446c7f994f"
+    },
+    "apple_ads_platform.models.location_display_point.LocationDisplayPoint": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "latitude",
+          "longitude"
+        ]
+      },
+      "schema_sha256": "1be2e0159e08824d0615d543d3fee962bce16ed3f038d6dcb48e51c229c7ce75",
+      "source_sha256": "d2e70725960dce57da2ce24e4ebb049cd2121b322442e3fa4c692e6f361d3370"
+    },
+    "apple_ads_platform.models.location_group.LocationGroup": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "systemStatus"
+        ],
+        "enum_fields": [
+          "groupType"
+        ],
+        "field_count": 16,
+        "identifier_fields": [
+          "adAccountId",
+          "brandId",
+          "id",
+          "locationIds"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "brandId",
+          "description",
+          "groupTotal",
+          "id",
+          "isAllLocationsGroup",
+          "locationIds",
+          "name",
+          "query",
+          "systemStatus"
+        ]
+      },
+      "schema_sha256": "aaf6edaee426bcd1978fd9e9c54ca3e321d1f3744798ba44171c772cd4a137bc",
+      "source_sha256": "f1fba1d25c1675a6b07b7472a1af98e40a0952f0f9df88312f36b56aff7a63e3"
+    },
+    "apple_ads_platform.models.location_group_query_response.LocationGroupQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "09132f446267ebbc1f1ef7f69f9a1bae51ed8018108b9656e3a6343e2e1db45e",
+      "source_sha256": "1db0f977da5f7c8a74a1808b4a64b325e5de98e580177ab593cd634365935c75"
+    },
+    "apple_ads_platform.models.location_group_response.LocationGroupResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "a8f724d802beab5e091231032a7c1fae5ca1f4b43ac6ecf9408174e1e6164504",
+      "source_sha256": "f5b8f2789707cc7120701bf449dc581ad529965a74a031356d888830c84dc499"
+    },
+    "apple_ads_platform.models.location_query_response.LocationQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "7b1276f25fd0122c8e4e4f0320b5667883ee9fd202890c1216a5a2f744c6d9fe",
+      "source_sha256": "4f678df7c58716e2e55b7213078e646cc881af491ab6adaa9ad681254c5a3a2e"
+    },
+    "apple_ads_platform.models.location_response.LocationResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "48edc8ea5ebf8b969dba4dfa8ff6826a4c943b9892662d9a95a7dd771b176409",
+      "source_sha256": "2fda29cad20a8acf51c1aa6fea07d4abd8d8432b6a3d2bba570a457f2d9ddfe6"
+    },
+    "apple_ads_platform.models.me.Me": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [
+          "orgId",
+          "userId"
+        ],
+        "strict_fields": [
+          "orgId",
+          "userId"
+        ]
+      },
+      "schema_sha256": "8ab78630a1314a7b6ebd74d267d8a8e3b91d02b40f3c38e5120c3b1e264eb22f",
+      "source_sha256": "8383a3129a5cb39b5f94b688c94efe4afd97753d265678cc55fe72ff6c36feda"
+    },
+    "apple_ads_platform.models.me_response.MeResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "3b1fcf8bf0ea2bf717d03a06590c79485eb193b03b66066af4ce9d5bf1aeca41",
+      "source_sha256": "3d88fd3124e350360a92213f95f7e5f15a519da0a0bac9231ed1f61be7b4c62e"
+    },
+    "apple_ads_platform.models.money.Money": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "amount",
+          "currency"
+        ]
+      },
+      "schema_sha256": "4e191c4365aa64bebbcd2dae635295d542c564d6ce4af0de6aea36ae1d2af6c0",
+      "source_sha256": "4a283435732092238356ec54d054f34d3c9fa6563209c62f0fca666097ccfc97"
+    },
+    "apple_ads_platform.models.negative_keyword.NegativeKeyword": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "matchType",
+          "status"
+        ],
+        "field_count": 11,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "deleted",
+          "id",
+          "text"
+        ]
+      },
+      "schema_sha256": "426bd9e2ab0b9a0e2d64107a991ae1131f5db763b81e783db8bcabacc21931b8",
+      "source_sha256": "a254661f4a5a571a2e4ea76ee9a82dd6fa8234535d0a7102192ccb05c59e80b4"
+    },
+    "apple_ads_platform.models.negative_keyword_create_bulk_response.NegativeKeywordCreateBulkResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "036b558605547d3ebb9fc4d296ba6b1dce785fc84b5b60e1109d6f7c5702fd1d",
+      "source_sha256": "feca5c5dad14db406d1fa91914395d681f0350ab8b65bcd6df96bcda587ac807"
+    },
+    "apple_ads_platform.models.negative_keyword_query_response.NegativeKeywordQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "df8f16a2f7cd6d1802f96b67b98857009f785364b3c02f7cfec706ca477dcb15",
+      "source_sha256": "1bf211c722447b8a43fa941007fc16916917a78d6dc0a8fdd83202d4fe71aa56"
+    },
+    "apple_ads_platform.models.negative_keyword_response.NegativeKeywordResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "1fe6807f3e9d5763762409cb3811035a135e21503c0b21e34670247b611e6375",
+      "source_sha256": "8a56c9aa61e5e8af8fab6f5a01f07f810812c06923b58767c3e5015ddb22a9bb"
+    },
+    "apple_ads_platform.models.negative_keyword_update_bulk_response.NegativeKeywordUpdateBulkResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "9a3cb1ac6c65e7efcf090ca777e04af731e6e87072f746ecfd5d1d32bc063757",
+      "source_sha256": "9599624314e17f8188ad7af16c72d249cc89e9b05230b868678cb3449036ae46"
+    },
+    "apple_ads_platform.models.org.Org": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "currency",
+          "paymentModel",
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 8,
+        "identifier_fields": [
+          "id"
+        ],
+        "strict_fields": [
+          "id",
+          "name",
+          "timezone"
+        ]
+      },
+      "schema_sha256": "ee890153048ec8ac6ae371232848fe7b066bf8493682270768185cb80c544c3c",
+      "source_sha256": "f266f1b9dc5a659a10555e1a1841bc0ca8e5cc209b9b156786c14623ec1323d6"
+    },
+    "apple_ads_platform.models.org_response.OrgResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "2d36013cb3cd57661f2f08634ffdf85bdffe3791641c2da09f689253ddf0ac13",
+      "source_sha256": "e4dea4692483a3aef2ba4ba9998e60fe2e86889503dc3be9cde04c72bba39418"
+    },
+    "apple_ads_platform.models.pagination.Pagination": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "778f547384921abdcf490a540c33a296a9f195e595d030d5de09d5ade7a3e656",
+      "source_sha256": "b60b860db476486fd738024ecc703c0fa7f77d61490d3c79d95feeb2c057a807"
+    },
+    "apple_ads_platform.models.phrase_suggestion.PhraseSuggestion": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "phrase",
+          "popularity"
+        ]
+      },
+      "schema_sha256": "3a93013e05754e39819f6ae96b11d7039f0556dfb9b22260f9557c8dabf84425",
+      "source_sha256": "afff6d41ca6b631480d95078c63f3bd5a9cb8940fb349750d221437e7e99e00f"
+    },
+    "apple_ads_platform.models.policy_assignment_query_response.PolicyAssignmentQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "8194f6ba0a23c9455d1a8cfb5e92eba87b13674c44a044a06cf2973956ba19a1",
+      "source_sha256": "9a71372fe2102aeeb180c253082e6ccfe22645a27a3511edb2d890f775c2cef5"
+    },
+    "apple_ads_platform.models.product_page_details.ProductPageDetails": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 8,
+        "identifier_fields": [
+          "adamId",
+          "id"
+        ],
+        "strict_fields": [
+          "adamId",
+          "deepLink",
+          "id",
+          "name",
+          "state"
+        ]
+      },
+      "schema_sha256": "6823b1a89bd9b39e22473a151fb3bbec12366956831e3354447dc41e858350dc",
+      "source_sha256": "1293c0208b35a600fc3ebd7b5a6ecb330af398908a6f14a3ecbd15d99b6cef63"
+    },
+    "apple_ads_platform.models.product_page_details_query_response.ProductPageDetailsQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "730d15af01b496de50256d780feafc213eb7433b7fe94e6fb4fe7cb5986c2df2",
+      "source_sha256": "fb9877c3a34948e7a3f594ecdc5520049c9cd9ad35cb62627c25979e856b4a08"
+    },
+    "apple_ads_platform.models.product_page_details_response.ProductPageDetailsResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "211a4ab375484bc44e0e84989f56c3b01ddc1e901297a6d054b9385c3d0c89a3",
+      "source_sha256": "5285e3547b9d3beb0fc8f4219699d6ff01346012820d7c7a3649880825fda77f"
+    },
+    "apple_ads_platform.models.product_page_locale_details.ProductPageLocaleDetails": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "deviceClasses"
+        ],
+        "enum_fields": [],
+        "field_count": 11,
+        "identifier_fields": [
+          "adamId",
+          "productPageId"
+        ],
+        "strict_fields": [
+          "adamId",
+          "appName",
+          "deviceClasses",
+          "language",
+          "languageCode",
+          "productPageId",
+          "promotionalText",
+          "shortDescription",
+          "subTitle"
+        ]
+      },
+      "schema_sha256": "7e9206a2fd34059e5d56c9491bcf9acd7468a92685d8cb19a86620d9ebb66804",
+      "source_sha256": "3990bcdb374d319764c0eaf57536340c6d7b232acdf47f9e2b39a2504e09b78a"
+    },
+    "apple_ads_platform.models.product_page_locale_details_query_response.ProductPageLocaleDetailsQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "6341d69226cf6903a1318bc10ddc56904d5d4498374ef376d45f0a3800ef9dd4",
+      "source_sha256": "d63d82d3eb20fc6a6a91e21f27ab9654effc11295ea68220440d8c2162763705"
+    },
+    "apple_ads_platform.models.promoted_object.PromotedObject": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": [
+          "name"
+        ]
+      },
+      "schema_sha256": "cc02ea2df7d983572d8412398c4e3a8956f52ae7dad07670521bf970bb30698b",
+      "source_sha256": "1347624e99e6181652999f3731505880fa99d3189540dbb8c739334d47242ac8"
+    },
+    "apple_ads_platform.models.query_pagination_result.QueryPaginationResult": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "offset",
+          "pageSize",
+          "totalCount"
+        ]
+      },
+      "schema_sha256": "bba0cdb27ab8f522cae8820a5dd8a70867b3a10c12691380b5b6bc6f77de8572",
+      "source_sha256": "78aff66f1b08aa62aa24551a8f3d3c664543deb41219847d3a2c379a32be087a"
+    },
+    "apple_ads_platform.models.rate_metrics.RateMetrics": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": [
+          "tap"
+        ]
+      },
+      "schema_sha256": "8741b3e78cc95f88c4728de896279ecbbd54b608fa0cf227d07faee099a2af33",
+      "source_sha256": "f589f2ac72bff17544a3d519391424e22d11bc5fc85f886f02bce5d2f6eafeea"
+    },
+    "apple_ads_platform.models.recommendation_apply_daily_budget_response.RecommendationApplyDailyBudgetResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "a99c6b4b166e639b52a77d177b5fe2164105c0afe4f8b2d2720c046e8dd8440b",
+      "source_sha256": "8a729079b8676d9bc968cb9da3008f3c2e04f9fde4736b10bfac0a2417a155ce"
+    },
+    "apple_ads_platform.models.recommendation_apply_target_cpa_response.RecommendationApplyTargetCpaResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "7ec92b14e849187a22dcfeae95b5276c628aa89728b1fba7d0124725bd40748d",
+      "source_sha256": "788a7f99fab7d357aef8fe835490ca14fadc4ba826c6d615f5dc52852b0d8f0b"
+    },
+    "apple_ads_platform.models.recommendation_bid_strategy.RecommendationBidStrategy": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "bidStrategyGoal",
+          "bidStrategyType"
+        ]
+      },
+      "schema_sha256": "79f8fa5848347dcc61a6b3180ec6804d48f71a07d5754f803f47da1e13837dfb",
+      "source_sha256": "18a6155b0ef2e149448ef93efa295c90804b0e58d396158108a6d2c5ed8a1fde"
+    },
+    "apple_ads_platform.models.recommendation_dismiss_daily_budget_response.RecommendationDismissDailyBudgetResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "63fcdf54f9e91cd5d7d06684cf7e4e84f440fe4a850d3e2299ca49f9d5ebf22a",
+      "source_sha256": "16f67b1a259dda1b49d654d2573f239edc1aced771eccb0364d561e7f9ba7f81"
+    },
+    "apple_ads_platform.models.recommendation_dismiss_target_cpa_response.RecommendationDismissTargetCpaResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "fed731d0fa40e2cae4f4f1fb7b5dfdc71d9f233d1049a88de551cd311535603d",
+      "source_sha256": "9321e608628cafe0b84929ebe5d09ec18a1d173287b091c7386daa04a033acdd"
+    },
+    "apple_ads_platform.models.recommendation_money.RecommendationMoney": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "amount",
+          "currency"
+        ]
+      },
+      "schema_sha256": "91700f88d8690b81be7360056318c0b2ee5a545e31c5d93392be4419c856d203",
+      "source_sha256": "6eba891805df52b0c2def854a412a852f5d8fc16a79fbe78cc8d9fe6f25acc98"
+    },
+    "apple_ads_platform.models.recommendation_query_category_suggestion_response.RecommendationQueryCategorySuggestionResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "dc36b5f5364444bfaaedd89de132d6552d5823f283706aadb5221f572f9032ad",
+      "source_sha256": "852ea2799d0b4b4e7ab90894a5fc3f9366f4762d5263a76dc6d4c0903455459e"
+    },
+    "apple_ads_platform.models.recommendation_query_daily_budget_response.RecommendationQueryDailyBudgetResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "d98c54e73ed7dae1292588904bd6845d927050b4c7acb7f874b45b5d53a5aa23",
+      "source_sha256": "82e1f36b10dbe9feb5f301a7eb8af8805d565e40985e3200fc27691706cd44fa"
+    },
+    "apple_ads_platform.models.recommendation_query_keyword_suggestion_response.RecommendationQueryKeywordSuggestionResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "5649a795fda7a66b2bb17d4426381a1d2d2aa87aee9f54a45861629cf9148873",
+      "source_sha256": "63bb15174863ac37c63a51241deb06c9baa7753c718b850ade799b5c18b04eab"
+    },
+    "apple_ads_platform.models.recommendation_query_phrase_suggestion_response.RecommendationQueryPhraseSuggestionResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "0396385a2dd60dd1f56adcdd09bae024041674b2bddc66ab1799a1c568450107",
+      "source_sha256": "104bc81ea0cfe4d093fac6f6b64361a1b500a3a16b513d12ffe1d090fe366844"
+    },
+    "apple_ads_platform.models.recommendation_query_target_cpa_response.RecommendationQueryTargetCpaResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "f49a37c3428dfc34538b8698701d3dfa96fdb0c0f7032a454d7305a3900e7a0d",
+      "source_sha256": "47ef56490ca27237e87119bad804873e6455d1c09c3942a615835bc5d83b39df"
+    },
+    "apple_ads_platform.models.recommendation_query_target_cpa_suggestion_response.RecommendationQueryTargetCpaSuggestionResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "560b7006c955f5767a921ac2ee5aa611a25877aff130a3378aff2e725406fe6f",
+      "source_sha256": "1e2e3032c96e8f6d2c9ddcbfeace7cbad190d6d2707f59fa57ab0ca68ada1a20"
+    },
+    "apple_ads_platform.models.recommendation_response_error.RecommendationResponseError": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "code",
+          "message"
+        ]
+      },
+      "schema_sha256": "f6857863483de9db8fe10a5fe2964be6bdf3b4cfa24656848c04d1006835a962",
+      "source_sha256": "d26814e95fdba83c05fba5485ebd8169e1f194cb8697989a924cc79ce14d05c5"
+    },
+    "apple_ads_platform.models.recommendation_response_error_detail.RecommendationResponseErrorDetail": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "code",
+          "message"
+        ]
+      },
+      "schema_sha256": "b9587fd7c690a1bc34e91afcdb4b15a1b9f0d97e77f782b37cf1dbab1a6406ae",
+      "source_sha256": "b7ce5442582f8912f6a77dae3ffa77fbbd7e061768528d9dc3b595888b1c4cce"
+    },
+    "apple_ads_platform.models.recommendation_response_pagination.RecommendationResponsePagination": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "offset",
+          "pageSize",
+          "totalCount"
+        ]
+      },
+      "schema_sha256": "76c8f1809be001bd183dc4c7c2c66d57219f730a4786e795c9e5fb11ea0ec935",
+      "source_sha256": "8a872c8b10379679a76c9197ac7c8a48b0f7ad0834f2cbdd97405cf1cbc909fd"
+    },
+    "apple_ads_platform.models.regulation_response.RegulationResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "regulationType",
+          "responseValue"
+        ],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "0f3ce457cc886ddb379ffdee3c1f9184560dfefc876fd11adee7084fbe7c66f5",
+      "source_sha256": "9ca28a68879e684047b32e0b3fce980a6d3c03a37c61c5b1264b98592acc99b2"
+    },
+    "apple_ads_platform.models.rejection_reason_response.RejectionReasonResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "fb8f8e2e5d4b4774e51cbb69566cd44433ea4f298e06b8e80d7ef718964148e5",
+      "source_sha256": "a4a89d81e0fa05c5026155e55bbe0bf13bf0e13303847e7b9b000a643eb0fd49"
+    },
+    "apple_ads_platform.models.reporting_ad_group_min.ReportingAdGroupMin": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "deleted",
+          "name"
+        ]
+      },
+      "schema_sha256": "f2dee06caae20426a98d844a94dd508d057c68e467921bb42785775801b3fb6f",
+      "source_sha256": "5853c650400d62ff06555d0f386b73b52e1f72d72e2905d0c494bce04cee34ed"
+    },
+    "apple_ads_platform.models.reporting_bid_strategy.ReportingBidStrategy": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "bidStrategyType"
+        ],
+        "field_count": 3,
+        "identifier_fields": [
+          "bid"
+        ],
+        "strict_fields": []
+      },
+      "schema_sha256": "fca92949cfee321c83330eb336958213729613a68c19e3e28a2473e55a51ad6f",
+      "source_sha256": "aba46c115c8c78f0155da8b5f0b9a0930d21d15c9b49b784be02525fe30b289e"
+    },
+    "apple_ads_platform.models.reporting_creative_spec.ReportingCreativeSpec": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": [
+          "language"
+        ]
+      },
+      "schema_sha256": "bb4e6c7570ad637435c8e7b71e9b53c74dfba7b4e6c5ebdccc7c03e0605a27c2",
+      "source_sha256": "1f50b3a63871daf7c47a2440169a6357f376c0ddfbd709e544b10658bffc7f6f"
+    },
+    "apple_ads_platform.models.reporting_destination.ReportingDestination": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "776d42320e87e8ac19df21f77ea432c9ca71288c3fae12171ca72d2f413ca234",
+      "source_sha256": "df5b3782ef39b3c149c2f57253365a7677e231c7aebf21abf8a4da5289393c8e"
+    },
+    "apple_ads_platform.models.reporting_keyword.ReportingKeyword": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "matchType",
+          "status"
+        ],
+        "enum_fields": [],
+        "field_count": 16,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "bid",
+          "campaignId",
+          "id"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "countryOrRegion",
+          "deleted",
+          "deviceClass",
+          "displayStatus",
+          "id",
+          "matchType",
+          "status",
+          "text"
+        ]
+      },
+      "schema_sha256": "208281c1ec29f7ec6d1fcf2b33fc9ea4324896a1648977bd0d8f6fd1c45aa162",
+      "source_sha256": "202b4dcd46aa6b9f19c25d5612729089b600e5d664f3e21b8dc3723b5a5b68df"
+    },
+    "apple_ads_platform.models.reporting_keyword_bid_recommendation.ReportingKeywordBidRecommendation": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": [
+          "suggestedBidAmount"
+        ]
+      },
+      "schema_sha256": "a087aa68fec2beaa92fffac43de132f6cb015b9bfb62569be0b9da6225df2afc",
+      "source_sha256": "4d6ce452eb770980511c2b55e57e46b1c6eea1f90f92ee78fd130dd35a971024"
+    },
+    "apple_ads_platform.models.reporting_money.ReportingMoney": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "d67e6834c529828ab8552d334162beb5ce89c8176188986a835c83eacad33266",
+      "source_sha256": "ea1143afc8ae75677fa5f13e2d98fc5c365bf12223fb0411650c05489c348302"
+    },
+    "apple_ads_platform.models.reporting_search_term.ReportingSearchTerm": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 10,
+        "identifier_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId"
+        ],
+        "strict_fields": [
+          "adAccountId",
+          "adGroupId",
+          "campaignId",
+          "countryOrRegion",
+          "deviceClass",
+          "searchTermSource",
+          "searchTermText"
+        ]
+      },
+      "schema_sha256": "b7333ad52d1f350b0d24f15622686e88727864261388d8fbd6ffff589ab82d4d",
+      "source_sha256": "545541073bdeedaf3af0869578baebae78037d37648bc6f28a82893c03c04881"
+    },
+    "apple_ads_platform.models.response.Response": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "2d13ce1f4000cff01756d7667819a7fa5ed5cbb5c253a2513e48865170dd3b55",
+      "source_sha256": "f00d18f422fd717ec6106fb27deab08b5b67c4d1f7862ed0a50b20f504939bc1"
+    },
+    "apple_ads_platform.models.response_pagination.ResponsePagination": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "offset",
+          "pageSize",
+          "totalCount"
+        ]
+      },
+      "schema_sha256": "05c0afa073f7263961f414eda0b1b3429090b9398d6eb8db675d4af21ae4f1d4",
+      "source_sha256": "d592b7b517aafb1c9e199aac76dec22db932dfd9bda50633e6e69c9aafd13b1f"
+    },
+    "apple_ads_platform.models.rule.Rule": {
+      "field_audit": {
+        "custom_validator_fields": [
+          "field",
+          "operator"
+        ],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": [
+          "field",
+          "operator"
+        ]
+      },
+      "schema_sha256": "eff099399d49ce8ddfffc14fd3a2c48bc421b84edc96f8c66bf746641fa85f27",
+      "source_sha256": "e70fb41633ed4cf926a384f6c373d7c9d1f738ae3c99c899bd0501aed943591f"
+    },
+    "apple_ads_platform.models.search_response.SearchResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "entity"
+        ],
+        "field_count": 10,
+        "identifier_fields": [
+          "id",
+          "legacyId"
+        ],
+        "strict_fields": [
+          "adminArea",
+          "countryOrRegion",
+          "displayName",
+          "id",
+          "legacyId",
+          "locality",
+          "postalCode"
+        ]
+      },
+      "schema_sha256": "1470030547060112f5bd438c9bc30b33f6431af775ed6d5050334abea6a97138",
+      "source_sha256": "78d0a6e3bd01660c9cf0b2c305bd5d12ae512f9ad57a9ce33b0fe54f988ab8cf"
+    },
+    "apple_ads_platform.models.search_term_popularity_query_response.SearchTermPopularityQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "c26f3e38512866bbcd969a99b23165d7fc193e6f105295f62c208746f5e13f86",
+      "source_sha256": "825271301d9e81be359b5f91be8874219734ffdfad4513484c20d7a311e4c1b6"
+    },
+    "apple_ads_platform.models.search_term_popularity_result_container.SearchTermPopularityResultContainer": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "4dc6c32aebe008390022b512e606f6cc455d35ad8708c05d642659f34d0951fb",
+      "source_sha256": "6541f10a45ef3e77965c0c240800de96f5c94b438369fd8ca1b77ebe0c8cbc13"
+    },
+    "apple_ads_platform.models.search_term_popularity_row.SearchTermPopularityRow": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 10,
+        "identifier_fields": [],
+        "strict_fields": [
+          "countryOrRegion",
+          "genre",
+          "month",
+          "rankInGenre",
+          "searchPopularity1to100",
+          "searchPopularity1to5",
+          "searchPopularityInGenre",
+          "searchTerm"
+        ]
+      },
+      "schema_sha256": "5a7b77550e4b512b74a807656bca3f230501e8eef5498b6ccd3ee078c118d05a",
+      "source_sha256": "47ac3f924e5114852fb9a491ea7931a03ba72f7943b257f697206f582c47a32c"
+    },
+    "apple_ads_platform.models.shared_budget.SharedBudget": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "systemStatus",
+          "systemStatusReasons"
+        ],
+        "field_count": 14,
+        "identifier_fields": [
+          "adAccountIds",
+          "id",
+          "orgId"
+        ],
+        "strict_fields": [
+          "adAccountIds",
+          "deleted",
+          "id",
+          "name",
+          "orgId"
+        ]
+      },
+      "schema_sha256": "48884f311ee9fcd18586ec795133a9453b0d64e1fe13a0b1d268e78cf1d0f795",
+      "source_sha256": "45f3416c5ad385d360603307602767e61263cac6b1df59206f66cd0a1d26bb44"
+    },
+    "apple_ads_platform.models.shared_budget_assignment.SharedBudgetAssignment": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [
+          "budgetId"
+        ],
+        "strict_fields": [
+          "budgetId"
+        ]
+      },
+      "schema_sha256": "f1631f317fb83c1963fb616e2578521d1932d80d065e4d631d8558d4f55fde5b",
+      "source_sha256": "3316a27897bdc8eeb101af34ba34b44122e85ba548f77e226e16f64eac761fd9"
+    },
+    "apple_ads_platform.models.shared_budget_query_response.SharedBudgetQueryResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 4,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "e9cf774b2887088819a7d34c17dea434c944460bb321b9bbbaa62fb415deefec",
+      "source_sha256": "ad7edb52b473501ff28f19487962dd1b509230fa501bffee16ccda01df66a459"
+    },
+    "apple_ads_platform.models.shared_budget_response.SharedBudgetResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "a79271a1ba4e5294721c5bbb41c47b3c3938b9fe6eb0ddb7d67850675b2bd18f",
+      "source_sha256": "0b1c5716bb3e2a3353a31b2d875ea7a0d1ee4685ad729b18ea0b0376646350e0"
+    },
+    "apple_ads_platform.models.target_cpa_recommendation.TargetCpaRecommendation": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "promotedObjectType",
+          "recommendationType",
+          "state",
+          "status"
+        ],
+        "field_count": 25,
+        "identifier_fields": [
+          "campaignId",
+          "id",
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "campaignId",
+          "campaignName",
+          "expectedInstalls",
+          "expectedTaps",
+          "id",
+          "impression",
+          "installs",
+          "promotedObjectId",
+          "taps",
+          "ttr"
+        ]
+      },
+      "schema_sha256": "e929da7367cdff2ac092ebf01a1f06ab2581869bd3a1a71906896c11da6bfacd",
+      "source_sha256": "422ade733b169e9298ef71f1b4011fcfb5f7c65b5265a956c213ade3f00b546e"
+    },
+    "apple_ads_platform.models.target_cpa_recommendation_history.TargetCpaRecommendationHistory": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [
+          "promotedObjectType",
+          "recommendationType",
+          "state",
+          "status"
+        ],
+        "field_count": 27,
+        "identifier_fields": [
+          "campaignId",
+          "promotedObjectId",
+          "recommendationId"
+        ],
+        "strict_fields": [
+          "campaignId",
+          "campaignName",
+          "expectedInstalls",
+          "expectedTaps",
+          "impression",
+          "installs",
+          "promotedObjectId",
+          "rank",
+          "recommendationId",
+          "taps",
+          "ttr"
+        ]
+      },
+      "schema_sha256": "1cb05842b1cf54dcd2c51bb4cd61fa01ab6ae40b9e8d078690841a3563761204",
+      "source_sha256": "516e27bc70d18c51be765961f5909a218c19aef3cde3cf2817c5a1aa1f71713b"
+    },
+    "apple_ads_platform.models.target_cpa_suggestion.TargetCpaSuggestion": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 5,
+        "identifier_fields": [
+          "promotedObjectId"
+        ],
+        "strict_fields": [
+          "appCategory",
+          "countryOrRegion",
+          "promotedObjectId"
+        ]
+      },
+      "schema_sha256": "e6e7cbe6af860c59845cebf1c13bb1ff3846612299411c983a6896550cbc30be",
+      "source_sha256": "c3828449e8566593c64b1606cdbb1d041fd394bca317438842a5622cd9dbeb0c"
+    },
+    "apple_ads_platform.models.targeting_data.TargetingData": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "exclude",
+          "include"
+        ]
+      },
+      "schema_sha256": "3144d9ed6fae2ad59a60ec8a4c61f5bf6c4a48b31d34d46aa1c95ae8531ed328",
+      "source_sha256": "70a854d4a1b65149d77ccd4f5adee8d8ae121f9d4e86ba72573dc0212d33e786"
+    },
+    "apple_ads_platform.models.user_access_result.UserAccessResult": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 2,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "14a2f8ddae52ac952f5ea02484f216b68968b446c2b11e95f04c805c26856089",
+      "source_sha256": "fe8ace1a39fb065bc15b248679252517c86d14855048ffd0bdd4e52c7aa40fb3"
+    },
+    "apple_ads_platform.models.user_acl.UserAcl": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": [
+          "roles"
+        ]
+      },
+      "schema_sha256": "1184ebc2e4f8b286f24755c2318ad7ecb0cad9cc870fd557c11f20af460c0a8d",
+      "source_sha256": "49f48d0e468f526a8f5df7e5355ab919ddff6898e31253a15c5b001c46fe00d3"
+    },
+    "apple_ads_platform.models.user_acl_list_response.UserAclListResponse": {
+      "field_audit": {
+        "custom_validator_fields": [],
+        "enum_fields": [],
+        "field_count": 3,
+        "identifier_fields": [],
+        "strict_fields": []
+      },
+      "schema_sha256": "71b18cc7ac444b74f7c04af28a1a3f6e433c3700d8e081999d6784b12ccc23f3",
+      "source_sha256": "22c14c4c944474ddf356c946ced36eeb15c9b457e3e500da5111fc062b40e648"
+    }
+  },
+  "schema_version": 2,
   "sdk": {
     "api_class": "apple_ads_platform.api.apple_ads_api.AppleAdsApi",
     "api_source_sha256": "16e4fdca2e470824593edd42df37d7dec7dea8595ae5fcf452a3f6e5c69ebd6f",

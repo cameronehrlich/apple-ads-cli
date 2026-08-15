@@ -82,3 +82,9 @@ uv run python scripts/generate_skill_references.py --check
 ```
 
 If the installed SDK, manifest provenance, generated references, and runtime command registration disagree, stop and report the mismatch. Do not guess or test against the live API.
+
+The manifest also inventories every SDK response model. If a live read fails
+deserialization, preserve the nonzero failure and consult
+`references/safety-and-output-contracts.md`; do not coerce the response, retry a
+mutation, or generalize an existing compatibility case without a sanitized
+fixture and sibling/near-miss tests.

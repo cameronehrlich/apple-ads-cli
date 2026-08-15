@@ -181,7 +181,13 @@ def load_manifest(path: Path = DEFAULT_MANIFEST) -> dict[str, Any]:
     except json.JSONDecodeError as exc:
         raise ValueError(f"Invalid JSON manifest {path}: {exc}") from exc
 
-    required = {"schema_version", "sdk", "operations", "request_models"}
+    required = {
+        "schema_version",
+        "sdk",
+        "operations",
+        "request_models",
+        "response_models",
+    }
     missing = sorted(required.difference(payload))
     if missing:
         raise ValueError(f"Manifest is missing top-level fields: {', '.join(missing)}")
@@ -199,6 +205,7 @@ def load_manifest(path: Path = DEFAULT_MANIFEST) -> dict[str, Any]:
             "context",
             "body_parameters",
             "return_annotation",
+            "response_model",
             "mutation",
             "pagination",
             "special_handling",

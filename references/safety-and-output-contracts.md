@@ -6,6 +6,15 @@ Read this reference before mutations, unattended use, report comparisons, or int
 
 Authentication, transport, HTTP, deserialization, and invalid-response failures must exit nonzero. Never convert them into an empty campaign list, report, recommendation set, or healthy no-op.
 
+The official SDK deserializer is authoritative by default. A compatibility
+fallback is allowed only for a sanitized, live-confirmed response mismatch with
+an exact response type, field path, rejected type/value, and regression fixture.
+Validate a patched copy of the complete response through the SDK before
+returning the original raw JSON; otherwise a known first-row error can hide a
+different failure later in the payload. Boolean values must never be accepted
+as integer identifiers merely because Python treats `bool` as a subclass of
+`int`.
+
 Use bounded connection and read timeouts. Token refresh may retry authentication. Do not automatically retry other mutation requests because the first request may have succeeded even when the response was lost.
 
 For unattended work, run the documented read-only preflight first and treat any nonzero exit as a hard stop.

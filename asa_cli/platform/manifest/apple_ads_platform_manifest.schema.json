@@ -169,6 +169,9 @@
           "pattern": "^/",
           "type": "string"
         },
+        "response_model": {
+          "type": "string"
+        },
         "return_annotation": {
           "type": "string"
         },
@@ -200,6 +203,7 @@
         "body_parameters",
         "multipart_parameters",
         "return_annotation",
+        "response_model",
         "mutation",
         "pagination",
         "special_handling",
@@ -226,6 +230,70 @@
         "schema",
         "schema_sha256",
         "source_sha256"
+      ],
+      "type": "object"
+    },
+    "response_model": {
+      "additionalProperties": false,
+      "properties": {
+        "field_audit": {
+          "additionalProperties": false,
+          "properties": {
+            "custom_validator_fields": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "enum_fields": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "field_count": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "identifier_fields": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            },
+            "strict_fields": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array",
+              "uniqueItems": true
+            }
+          },
+          "required": [
+            "field_count",
+            "strict_fields",
+            "identifier_fields",
+            "enum_fields",
+            "custom_validator_fields"
+          ],
+          "type": "object"
+        },
+        "schema_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema_sha256",
+        "source_sha256",
+        "field_audit"
       ],
       "type": "object"
     },
@@ -257,7 +325,7 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/cameronehrlich/apple-search-ads-cli/schemas/apple-ads-platform-manifest-v1.json",
+  "$id": "https://github.com/cameronehrlich/apple-search-ads-cli/schemas/apple-ads-platform-manifest-v2.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -277,8 +345,14 @@
       },
       "type": "object"
     },
+    "response_models": {
+      "additionalProperties": {
+        "$ref": "#/$defs/response_model"
+      },
+      "type": "object"
+    },
     "schema_version": {
-      "const": 1
+      "const": 2
     },
     "sdk": {
       "additionalProperties": false,
@@ -339,7 +413,8 @@
     "generated_at",
     "sdk",
     "operations",
-    "request_models"
+    "request_models",
+    "response_models"
   ],
   "title": "Apple Ads Platform SDK manifest",
   "type": "object"

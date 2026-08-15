@@ -37,10 +37,10 @@ python3.12 -m pip install -e '.[dev]'
 asa version
 ```
 
-Automation should install the exact 1.1.0 tag rather than following `main`:
+Automation should install the exact 1.1.1 tag rather than following `main`:
 
 ```bash
-uv tool install 'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.1.0'
+uv tool install 'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.1.1'
 ```
 
 ## Configure
@@ -260,7 +260,28 @@ uv run python scripts/check_release.py
 uv build
 ```
 
-The checked-in manifest records the SDK version and source commit, all 99 method signatures, HTTP paths, context modes, parameter classifications, mutation and pagination metadata, and JSON Schemas with hashes for 35 request models.
+The checked-in manifest records the SDK version and source commit, all 99 method
+signatures, HTTP paths, context modes, parameter classifications, mutation and
+pagination metadata, and JSON Schemas with hashes for 35 request models. It also
+maps every operation to one of 71 root response models and audits all 220 models
+reachable through those responses, including strict fields, identifiers, enums,
+and custom validators.
+
+### Live response drift
+
+Apple's live service can occasionally disagree with the generated SDK model.
+The CLI always attempts official SDK deserialization first. A raw JSON response
+is preserved only for a small, tested set of live-confirmed mismatches. Before
+that fallback is accepted, a patched copy is run through the SDK again so a
+known first error cannot hide a later unrelated type or enum failure. The
+original wire values remain unchanged in CLI output.
+
+When updating the SDK, review both request- and response-model manifest diffs.
+Do not broaden compatibility based on a plausible example alone: capture a
+sanitized live failure, match its response type and exact field/type condition,
+add near-miss tests, and retain fail-closed behavior for everything else.
+See the [SDK response-drift audit](references/sdk-response-drift-audit.md) for
+the current inventory, confirmed exceptions, and deliberately unhandled risks.
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for endpoint and regression-test guidance.
 
@@ -272,10 +293,11 @@ The CLI uses semantic versions and bare tags such as `1.1.0`. GitHub Releases co
 |---|---|
 | `1.0.0` | Immutable legacy Campaign Management API v5 baseline from the former `main` code line |
 | `1.1.0` | Backward-compatible Platform API v1 default, explicit `asa v5` fallback, generated skill, and strategy-aware workflows |
+| `1.1.1` | Response-model drift inventory and fail-closed validation hardening for confirmed live SDK mismatches |
 
 CLI and SDK versions are intentionally independent:
 
-- `asa 1.1.0` describes this project’s command and behavior contract.
+- `asa 1.1.1` describes this project’s command and behavior contract.
 - `apple-ads-platform 1.109.0` identifies the exact Apple SDK contract it wraps.
 
 Automation should pin a CLI release, run `asa config test`, and perform a safe read before depending on an endpoint. See [RELEASING.md](RELEASING.md) for the release process and versioning policy.
