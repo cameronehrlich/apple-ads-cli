@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "asa-cli"
 version = "1.0.0"
-description = "Apple Search Ads CLI - manage campaigns, keywords, and reporting using Apple's recommended 4-campaign structure"
+description = "Complete CLI wrapper for Apple's official Apple Ads Platform SDK, with safe mutations and v5 compatibility"
 readme = "README.md"
 requires-python = ">=3.12"
 license = "MIT"
@@ -47,6 +47,7 @@ asa = "asa_cli.main:app"
 "Homepage" = "https://github.com/cameronehrlich/apple-search-ads-cli"
 "Documentation" = "https://github.com/cameronehrlich/apple-search-ads-cli#readme"
 "Issues" = "https://github.com/cameronehrlich/apple-search-ads-cli/issues"
+"Releases" = "https://github.com/cameronehrlich/apple-search-ads-cli/releases"
 
 [tool.setuptools.packages.find]
 where = ["."]

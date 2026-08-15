@@ -1,0 +1,9 @@
+include CONTRIBUTING.md
+include LICENSE
+include README.md
+include RELEASING.md
+include SKILL.md
+recursive-include agents *.yaml
+recursive-include references *.md
+recursive-include scripts *.py
+recursive-include tests *.py

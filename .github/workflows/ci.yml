@@ -26,3 +26,4 @@ jobs:
       - run: uv sync --extra dev
       - run: uv run ruff check .
       - run: uv run pytest -q
+      - run: uv run python scripts/check_release.py

@@ -1,0 +1,120 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - '[0-9]*.[0-9]*.[0-9]*'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7.0.1
+        with:
+          fetch-depth: 0
+
+      - uses: astral-sh/setup-uv@v9.0.0
+        with:
+          python-version: '3.12'
+          enable-cache: true
+
+      - name: Validate tag and package metadata
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if [[ ! "$RELEASE_TAG" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "::error::Release tags must match X.Y.Z; got ${RELEASE_TAG}"
+            exit 1
+          fi
+          git fetch origin main:refs/remotes/origin/main
+          if ! git merge-base --is-ancestor "$(git rev-parse HEAD)" origin/main; then
+            echo "::error::Release tags must point to a commit already present on origin/main"
+            exit 1
+          fi
+          python scripts/check_release.py --version "$RELEASE_TAG"
+
+      - name: Install development dependencies
+        run: uv sync --extra dev
+
+      - name: Run release gates
+        run: |
+          set -euo pipefail
+          uv run ruff check .
+          uv run pytest -q
+          uv run python -m asa_cli.platform.generate_manifest --check
+          uv run python scripts/generate_skill_references.py --check
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Verify source distribution contents
+        run: |
+          set -euo pipefail
+          sdist="$(find dist -maxdepth 1 -name 'asa_cli-*.tar.gz' -print -quit)"
+          test -n "$sdist"
+          for required in CONTRIBUTING.md RELEASING.md SKILL.md agents/openai.yaml references/command-index.md scripts/check_release.py; do
+            tar -tzf "$sdist" | grep -E "/${required}$"
+          done
+
+      - name: Smoke-test built wheel
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          smoke_dir="$(mktemp -d)"
+          uv venv "$smoke_dir/venv" --python 3.12
+          uv pip install --python "$smoke_dir/venv/bin/python" dist/asa_cli-*.whl
+          "$smoke_dir/venv/bin/asa" version | tee "$smoke_dir/version.txt"
+          grep -F "asa ${RELEASE_TAG}" "$smoke_dir/version.txt"
+          "$smoke_dir/venv/bin/asa" --help >/dev/null
+
+      - name: Generate checksums
+        run: |
+          set -euo pipefail
+          cd dist
+          shasum -a 256 asa_cli-*.tar.gz asa_cli-*.whl > SHA256SUMS
+          shasum -a 256 -c SHA256SUMS
+
+      - name: Create draft GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            echo "::error::A GitHub release already exists for ${RELEASE_TAG}"
+            exit 1
+          fi
+          gh release create "$RELEASE_TAG" \
+            dist/asa_cli-*.tar.gz \
+            dist/asa_cli-*.whl \
+            dist/SHA256SUMS \
+            --draft \
+            --generate-notes \
+            --title "$RELEASE_TAG" \
+            --verify-tag
+
+      - name: Verify uploaded release assets
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: |
+          set -euo pipefail
+          verify_dir="$(mktemp -d)"
+          gh release download "$RELEASE_TAG" --dir "$verify_dir"
+          cd "$verify_dir"
+          shasum -a 256 -c SHA256SUMS
+
+      - name: Publish verified release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ github.ref_name }}
+        run: gh release edit "$RELEASE_TAG" --draft=false --latest

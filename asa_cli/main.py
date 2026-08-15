@@ -1,5 +1,8 @@
 """Apple Ads CLI entry point."""
 
+import importlib.metadata
+import platform
+
 import typer
 from rich.console import Console
 from rich.panel import Panel
@@ -41,7 +44,11 @@ app.add_typer(
 @app.command("version")
 def version() -> None:
     """Show version information."""
-    console.print(f"ASA CLI version {__version__}")
+    sdk_version = importlib.metadata.version("apple-ads-platform")
+    python_version = platform.python_version()
+    console.print(
+        f"asa {__version__} (apple-ads-platform {sdk_version}, Python {python_version})"
+    )
 
 
 @app.command("help")
