@@ -24,7 +24,10 @@ classifiers = [
 ]
 dependencies = [
     "apple-ads-platform==1.109.0",
-    "typer>=0.9.0",
+    # The generated command catalog introspects Typer's Click tree. Keep both
+    # exact until an upgrade is reconciled across all 99 + v5/workflow leaves.
+    "typer==0.24.0",
+    "click==8.3.1",
     "rich>=13.0.0",
     "pyjwt[crypto]>=2.8.0",
     "requests>=2.31.0",
