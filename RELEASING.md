@@ -64,9 +64,9 @@ If a run fails after creating its draft, inspect that draft and the workflow log
 ## After publishing
 
 ```bash
-gh release view 1.1.1 --repo cameronehrlich/apple-search-ads-cli
+gh release view 1.1.1 --repo cameronehrlich/apple-ads-cli
 uv tool install --force \
-  'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.1.1'
+  'git+https://github.com/cameronehrlich/apple-ads-cli.git@1.1.1'
 asa version
 asa config test
 ```

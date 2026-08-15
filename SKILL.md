@@ -1,6 +1,6 @@
 ---
-name: apple-search-ads-cli
-description: Use the ASA CLI for Apple Ads Platform API v1 and legacy Apple Search Ads API v5. Trigger when Codex needs exact CLI syntax for campaigns, ad groups, ads, creatives, keywords, negatives, budgets, accounts, apps, Apple Maps brands or locations, reports, impression share, search-term popularity, recommendations, suggestions, change history, v5 migration or fallback, or this repository's strategy audit, manual search-results, Maximize Conversions, campaign-structure, and optimization workflows. Also use when mapping an Apple SDK endpoint to its CLI wrapper or safely executing Apple Ads mutations.
+name: apple-ads-cli
+description: Use the ASA CLI for Apple Ads Platform API v1 and legacy Campaign Management API v5. Trigger when Codex needs exact CLI syntax for campaigns, ad groups, ads, creatives, keywords, negatives, budgets, accounts, apps, Apple Maps brands or locations, reports, impression share, search-term popularity, recommendations, suggestions, change history, v5 migration or fallback, or this repository's strategy audit, manual search-results, Maximize Conversions, campaign-structure, and optimization workflows. Also use when mapping an Apple SDK endpoint to its CLI wrapper or safely executing Apple Ads mutations.
 ---
 
 # Apple Ads CLI

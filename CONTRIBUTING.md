@@ -5,8 +5,8 @@ Contributions are welcome, especially reproducible endpoint fixes, official-SDK 
 ## Development setup
 
 ```bash
-git clone https://github.com/cameronehrlich/apple-search-ads-cli.git
-cd apple-search-ads-cli
+git clone https://github.com/cameronehrlich/apple-ads-cli.git
+cd apple-ads-cli
 uv sync --all-extras
 uv run pytest -q
 ```

@@ -10,7 +10,7 @@ from typer.testing import CliRunner
 
 from asa_cli import __version__
 from asa_cli.main import app
-from scripts.check_release import validate
+from scripts.check_release import CANONICAL_REPOSITORY, validate
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -38,3 +38,21 @@ def test_cli_framework_version_is_pinned_to_the_verified_command_tree():
     assert "click==8.3.1" in project["dependencies"]
     assert version("typer") == "0.24.0"
     assert version("click") == "8.3.1"
+
+
+def test_public_metadata_uses_the_canonical_repository_without_renaming_the_cli():
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+
+    assert project["name"] == "asa-cli"
+    assert project["scripts"] == {"asa": "asa_cli.main:app"}
+    assert project["urls"] == {
+        "Homepage": CANONICAL_REPOSITORY,
+        "Documentation": f"{CANONICAL_REPOSITORY}#readme",
+        "Issues": f"{CANONICAL_REPOSITORY}/issues",
+        "Releases": f"{CANONICAL_REPOSITORY}/releases",
+    }
+
+    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    agent_metadata = (ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    assert "name: apple-ads-cli\n" in skill
+    assert "$apple-ads-cli" in agent_metadata

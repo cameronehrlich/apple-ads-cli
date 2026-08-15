@@ -1,6 +1,6 @@
 interface:
   display_name: "Apple Ads CLI"
   short_description: "Run every Apple Ads API command safely"
-  default_prompt: "Use $apple-search-ads-cli to select and safely run the exact Apple Ads command for this request."
+  default_prompt: "Use $apple-ads-cli to select and safely run the exact Apple Ads command for this request."
 policy:
   allow_implicit_invocation: true

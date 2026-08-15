@@ -325,7 +325,7 @@
       "type": "object"
     }
   },
-  "$id": "https://github.com/cameronehrlich/apple-search-ads-cli/schemas/apple-ads-platform-manifest-v2.json",
+  "$id": "https://github.com/cameronehrlich/apple-ads-cli/schemas/apple-ads-platform-manifest-v2.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {

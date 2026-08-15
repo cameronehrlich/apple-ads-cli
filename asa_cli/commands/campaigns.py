@@ -594,7 +594,7 @@ def clone_campaign(
 ):
     """Duplicate a campaign (with ad groups, keywords, and negatives).
 
-    Apple Search Ads has no native campaign-duplication endpoint, so
+    Apple Ads Campaign Management API v5 has no native campaign-duplication endpoint, so
     this reads the source and re-creates it. Useful to escape a stuck
     TOTAL_BUDGET_EXHAUSTED state after clearing a lifetime budget —
     Apple caches that flag even after the cap is gone, and only a fresh

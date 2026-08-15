@@ -78,10 +78,11 @@ def setup_config(
 
     console.print("\n[bold green]Configuration complete![/bold green]")
     console.print("\nNext steps:")
-    console.print("  1. Run [cyan]asa v5 campaigns audit[/cyan] to check existing campaigns")
+    console.print("  1. Run [cyan]asa --help[/cyan] to explore Platform API v1 resources")
     console.print(
-        "  2. Run [cyan]asa v5 campaigns setup[/cyan] to create the 4-campaign structure"
+        "  2. Run [cyan]asa workflows campaigns audit --strategy auto[/cyan] for a safe audit"
     )
+    console.print("  3. Run [cyan]asa v5 --help[/cyan] for the legacy compatibility surface")
 
 
 @app.command("show")
@@ -151,7 +152,7 @@ def test_connection():
 
         client = SearchAdsClient(credentials)
 
-        with console.status("[bold blue]Connecting to Apple Search Ads API..."):
+        with console.status("[bold blue]Connecting to Apple Ads API..."):
             campaigns = client.get_campaigns()
 
         console.print("[green]Connection successful![/green]")
@@ -160,7 +161,7 @@ def test_connection():
 
     except ImportError as e:
         console.print(f"[red]Missing dependency: {e}[/red]")
-        console.print("  Run: pip install -e . (from the apple-search-ads directory)")
+        console.print("  Run: pip install -e . (from the apple-ads-cli directory)")
         raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Connection failed: {e}[/red]")

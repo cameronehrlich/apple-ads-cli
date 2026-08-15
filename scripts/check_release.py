@@ -13,6 +13,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SEMVER = re.compile(r"(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)\.(?:0|[1-9]\d*)")
+CANONICAL_REPOSITORY = "https://github.com/cameronehrlich/apple-ads-cli"
 
 
 def package_version() -> str:
@@ -66,6 +67,17 @@ def validate(expected_version: str | None = None) -> tuple[str, str]:
     readme = (ROOT / "README.md").read_text()
     if f"Apple Ads Platform SDK {sdk_version}" not in readme:
         raise ValueError("README SDK badge or version statement is stale")
+
+    expected_urls = {
+        "Homepage": CANONICAL_REPOSITORY,
+        "Documentation": f"{CANONICAL_REPOSITORY}#readme",
+        "Issues": f"{CANONICAL_REPOSITORY}/issues",
+        "Releases": f"{CANONICAL_REPOSITORY}/releases",
+    }
+    if project.get("urls") != expected_urls:
+        raise ValueError("project URLs do not match the canonical Apple Ads CLI repository")
+    if CANONICAL_REPOSITORY not in readme:
+        raise ValueError("README does not reference the canonical Apple Ads CLI repository")
 
     return project_version, sdk_version
 

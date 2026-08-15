@@ -17,7 +17,7 @@ from .workflows.cli import app as workflows_app
 
 app = typer.Typer(
     name="asa",
-    help="Apple Ads Platform API v1, legacy v5, and opinionated workflows.",
+    help="Apple Ads Platform API v1, legacy v5, and optional higher-level workflows.",
     no_args_is_help=True,
     rich_markup_mode="rich",
 )
@@ -31,7 +31,7 @@ app.add_typer(v5_app, name="v5", help="Legacy Campaign Management API v5 command
 app.add_typer(
     workflows_app,
     name="workflows",
-    help="Opinionated workflows built on Platform API v1",
+    help="Safety-focused workflows built on Platform API v1",
 )
 app.add_typer(
     platform_app,
@@ -69,7 +69,7 @@ def help_command() -> None:
     [cyan]asa campaigns create --file campaign.json[/cyan]
     [cyan]asa campaigns create --file campaign.json --confirm[/cyan]
 
-[bold]Opinionated workflows[/bold]
+[bold]Optional higher-level workflows[/bold]
     [cyan]asa workflows campaigns audit[/cyan]
     [cyan]asa workflows campaigns plan-four-structure[/cyan]
     [cyan]asa workflows campaigns plan-maximize-conversions[/cyan]

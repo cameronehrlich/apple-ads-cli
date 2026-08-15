@@ -1,6 +1,6 @@
 # ASA CLI — API Completion Plan
 
-Complete coverage of Apple Search Ads Campaign Management API v5.
+Complete coverage of the legacy Apple Ads Campaign Management API v5.
 
 ## Current State
 
@@ -175,10 +175,10 @@ Every API method gets:
 ### Running Tests
 ```bash
 # Unit tests only (fast, no API calls)
-cd ~/apple-search-ads-cli && uv run pytest tests/ -v
+cd ~/apple-ads-cli && uv run pytest tests/ -v
 
 # Including integration tests (requires API credentials)
-cd ~/apple-search-ads-cli && uv run pytest tests/ -v -m integration
+cd ~/apple-ads-cli && uv run pytest tests/ -v -m integration
 ```
 
 ---
@@ -202,5 +202,5 @@ cd ~/apple-search-ads-cli && uv run pytest tests/ -v -m integration
 ## Notes
 
 - The sosumi research agent is currently pulling the complete API v5 endpoint reference from Apple's docs. Once that completes, this plan should be updated with any endpoints we missed.
-- All changes should be committed to `~/apple-search-ads-cli` main branch per Cameron's request.
+- All changes should be committed to `~/apple-ads-cli` main branch per Cameron's request.
 - The `research` command added during this session is a stub — update it once we confirm whether keyword recommendation endpoints exist in v5.

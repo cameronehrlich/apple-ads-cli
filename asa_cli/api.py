@@ -1,4 +1,4 @@
-"""Backward-compatible imports for the Apple Search Ads v5 client.
+"""Backward-compatible imports for the Apple Ads Campaign Management API v5 client.
 
 New code should import from :mod:`asa_cli.v5.api`.
 """

@@ -1,4 +1,4 @@
-"""Configuration management for Apple Search Ads CLI."""
+"""Configuration management for Apple Ads CLI."""
 
 import json
 import os
@@ -113,7 +113,7 @@ CAMPAIGN_TYPE_NAMES = {
 
 
 class Credentials(BaseModel):
-    """API credentials for Apple Search Ads."""
+    """API credentials for Apple Ads."""
 
     org_id: Optional[int] = Field(
         None,
@@ -372,7 +372,7 @@ def parse_campaign_name(name: str, app_name: Optional[str] = None) -> Optional[t
 
 def prompt_for_credentials() -> Credentials:
     """Interactively prompt for API credentials."""
-    console.print("\n[bold]Apple Search Ads API Credentials Setup[/bold]\n")
+    console.print("\n[bold]Apple Ads API Credentials Setup[/bold]\n")
     console.print("You'll need to create API credentials in Apple Ads dashboard first.")
     console.print("See: https://ads.apple.com/help/campaigns/0022-use-the-campaign-management-api\n")
 
