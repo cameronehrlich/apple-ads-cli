@@ -115,23 +115,21 @@ def detect_campaign_strategy(campaign: dict[str, Any]) -> dict[str, Any]:
         mode = StrategyMode.NON_SEARCH_OR_UNSUPPORTED
         confidence = "high"
         reason = "non-search placement or MAPS supply source"
-    elif bid_strategy_type == "MAX_CONVERSIONS":
+    elif placements.intersection(SEARCH_RESULTS_PLACEMENTS) and bid_strategy_type == "MAX_CONVERSIONS":
         mode = StrategyMode.MAXIMIZE_CONVERSIONS
         confidence = "high"
-        reason = "bidStrategy.bidStrategyType is MAX_CONVERSIONS"
+        reason = "App Store search-results placement uses MAX_CONVERSIONS"
     elif placements.intersection(SEARCH_RESULTS_PLACEMENTS) and bid_strategy_type == "MANUAL_CPT":
         mode = StrategyMode.MANUAL_SEARCH_RESULTS
         confidence = "high"
         reason = "App Store search-results placement uses MANUAL_CPT"
-    elif not placements and bid_strategy_type == "MANUAL_CPT":
-        mode = StrategyMode.MANUAL_SEARCH_RESULTS
-        confidence = "medium"
-        reason = "MANUAL_CPT is present but placement is unavailable"
     else:
         mode = StrategyMode.NON_SEARCH_OR_UNSUPPORTED
         confidence = "low"
         reason = (
-            "campaign name suggests a manual theme but cannot establish strategy alone"
+            "bid strategy is present but search-results placement evidence is unavailable"
+            if bid_strategy_type in {"MANUAL_CPT", "MAX_CONVERSIONS"}
+            else "campaign name suggests a manual theme but cannot establish strategy alone"
             if evidence["themeNameHint"]
             else "strategy evidence is missing, mixed, or unsupported"
         )

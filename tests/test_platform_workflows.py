@@ -129,6 +129,17 @@ def test_theme_name_alone_does_not_establish_strategy():
     assert detected["confidence"] == "low"
 
 
+def test_bid_strategy_without_placement_does_not_establish_search_results_strategy():
+    for bid_strategy in ("MANUAL_CPT", "MAX_CONVERSIONS"):
+        detected = detect_campaign_strategy(
+            {"id": 1, "bidStrategy": {"bidStrategyType": bid_strategy}}
+        )
+
+        assert detected["strategy"] == "non-search-or-unsupported"
+        assert detected["confidence"] == "low"
+        assert "placement evidence is unavailable" in detected["reason"]
+
+
 def test_strategy_contract_has_three_explicit_modes():
     contract = load_strategy_contract()
 
@@ -204,6 +215,35 @@ def test_manual_audit_can_verify_ad_group_structure(monkeypatch):
     assert result["detectedStrategy"] == "manual-search-results"
     assert result["fullyVerified"] is True
     assert {check["state"] for check in result["checks"]} == {"pass"}
+
+
+def test_manual_audit_requires_search_match_on_discovery_evidence(monkeypatch):
+    monkeypatch.setattr(campaigns, "load_app_config", lambda: None)
+    result = campaigns.campaign_audit(
+        [
+            {
+                "id": 1,
+                "name": "Search Results",
+                "targeting": {"supplyPlacement": {"include": ["SEARCH_RESULTS"]}},
+                "bidStrategy": {"bidStrategyType": "MANUAL_CPT"},
+            }
+        ],
+        evidence={
+            "adGroups": [
+                {"name": "Brand", "matchType": "EXACT", "searchMatch": True},
+                {"name": "Category", "matchType": "EXACT"},
+                {"name": "Competitor", "matchType": "EXACT"},
+                {"name": "Discovery", "matchType": "BROAD", "searchMatch": False},
+            ],
+            "negativeKeywordOverlapCount": 0,
+        },
+    )
+
+    search_match = next(
+        check for check in result["checks"] if check["id"] == "manual.search-match-discovery"
+    )
+    assert search_match["state"] == "fail"
+    assert search_match["evidence"] == {"groups": []}
 
 
 def test_maximize_audit_does_not_apply_manual_theme_failures(monkeypatch):
@@ -337,6 +377,29 @@ def test_maximize_plan_preserves_ineligible_and_unavailable_evidence():
     assert result["targetCpa"]["source"] is None
     assert result["unresolvedInputs"] == ["targetCpa"]
     assert "Apple eligibility evidence is negative." in result["warnings"]
+    assert result["launchGuard"]["ready"] is False
+    assert result["launchGuard"]["blockingReasons"] == [
+        "Apple eligibility is not affirmative",
+        "target CPA is unresolved",
+        "daily budget capacity is unresolved or insufficient",
+    ]
+
+
+def test_maximize_plan_is_ready_only_after_affirmative_planning_gates():
+    result = campaigns.maximize_conversions_plan(
+        adam_id="42",
+        countries=["US"],
+        daily_budget=60,
+        target_cpa=12,
+        evidence={"eligibility": {"eligible": True}},
+    )
+
+    assert result["launchGuard"] == {
+        "preOrder": False,
+        "ready": True,
+        "blockingReasons": [],
+        "message": "Eligibility, target CPA, and budget-capacity planning gates are satisfied.",
+    }
 
 
 def test_maximize_cli_live_evidence_uses_only_read_methods(monkeypatch):

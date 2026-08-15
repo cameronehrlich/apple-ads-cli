@@ -32,9 +32,9 @@
   ],
   "detectionPrecedence": [
     "MAPS supply source or a non-search placement",
-    "MAX_CONVERSIONS bid strategy",
+    "APPSTORE search-results placement with MAX_CONVERSIONS",
     "APPSTORE search-results placement with MANUAL_CPT",
-    "manual theme-name evidence when placement and bid strategy are absent",
+    "bid-strategy or campaign-name hints retained as evidence without establishing strategy",
     "non-search-or-unsupported when evidence is missing, mixed, or conflicting"
   ],
   "modes": {

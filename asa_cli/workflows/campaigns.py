@@ -197,7 +197,9 @@ def _manual_checks(
         search_match_groups = [
             item.get("id") or item.get("name")
             for item in ad_groups
-            if isinstance(item, dict) and item.get("searchMatch") is True
+            if isinstance(item, dict)
+            and detect_campaign_type(str(item.get("name", ""))) == CampaignType.DISCOVERY
+            and item.get("searchMatch") is True
         ]
         checks.append(
             _check(
@@ -769,6 +771,19 @@ def maximize_conversions_plan(
         unresolved.append("targetCpa")
     if eligible is None:
         unresolved.append("eligibility")
+    budget_sufficient = (
+        daily_budget >= minimum_budget if minimum_budget is not None else None
+    )
+    launch_blockers = [
+        message
+        for condition, message in (
+            (pre_order, "app is in pre-order"),
+            (eligible is not True, "Apple eligibility is not affirmative"),
+            (resolved_target_cpa is None, "target CPA is unresolved"),
+            (budget_sufficient is not True, "daily budget capacity is unresolved or insufficient"),
+        )
+        if condition
+    ]
 
     return {
         "workflow": "maximize-conversions-plan",
@@ -789,9 +804,7 @@ def maximize_conversions_plan(
             "amount": daily_budget,
             "approved": False,
             "recommendedMinimum": minimum_budget,
-            "supportsFiveConversionsPerDay": (
-                daily_budget >= minimum_budget if minimum_budget is not None else None
-            ),
+            "supportsFiveConversionsPerDay": budget_sufficient,
         },
         "eligibility": {
             "eligible": eligible,
@@ -810,8 +823,13 @@ def maximize_conversions_plan(
         },
         "launchGuard": {
             "preOrder": pre_order,
-            "ready": not pre_order,
-            "message": "Maximize Conversions is a post-launch strategy." if pre_order else None,
+            "ready": not launch_blockers,
+            "blockingReasons": launch_blockers,
+            "message": (
+                "Resolve every blocking reason before launch."
+                if launch_blockers
+                else "Eligibility, target CPA, and budget-capacity planning gates are satisfied."
+            ),
         },
         "recommendationEvidencePresent": recommendation_items is not None,
         "unresolvedInputs": unresolved,
