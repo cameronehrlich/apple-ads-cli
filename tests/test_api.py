@@ -51,6 +51,7 @@ def mock_client(mock_credentials, mock_app_config):
     """Create a mock SearchAdsClient."""
     with patch.object(SearchAdsClient, "_get_access_token", return_value="mock_token"):
         client = SearchAdsClient(mock_credentials, app_config=mock_app_config)
+        client._currency = "USD"
         return client
 
 
@@ -337,6 +338,79 @@ class TestCampaignOperations:
             results = mock_client.get_ad_groups(123)
 
         assert len(results) == 2
+
+
+class TestOrgCurrencyDetection:
+    """Tests for org currency detection and caching."""
+
+    def test_get_org_currency_caches_detected_currency(self, mock_client):
+        """Test a discovered currency is cached for later calls."""
+        mock_client._currency = None
+        response = {
+            "data": [
+                {"orgId": 999999, "currency": "USD"},
+                {"orgId": "123456", "currency": "eur"},
+            ],
+        }
+
+        with patch.object(mock_client, "_request", return_value=response) as mock_request:
+            assert mock_client.get_org_currency() == "EUR"
+            assert mock_client.get_org_currency() == "EUR"
+
+        assert mock_client._currency == "EUR"
+        assert mock_request.call_count == 1
+        mock_request.assert_called_once_with("GET", "/acls", skip_org_context=True)
+
+    @pytest.mark.parametrize(
+        "response",
+        [
+            {"data": []},
+            {"data": [{"orgId": 123456}]},
+            {"data": [{"orgId": 123456, "currency": ""}]},
+            {"data": [{"orgId": 123456, "currency": 123}]},
+            {"data": "not-a-list"},
+            [],
+        ],
+    )
+    def test_get_org_currency_fails_closed_without_matching_currency(self, mock_client, response):
+        """Test missing or malformed ACL currency never falls back to USD."""
+        mock_client._currency = None
+        with patch.object(mock_client, "_request", return_value=response):
+            with pytest.raises(SearchAdsAPIError, match="organization 123456"):
+                mock_client.get_org_currency()
+
+        assert mock_client._currency is None
+
+    def test_get_org_currency_propagates_request_errors(self, mock_client):
+        """Test request errors surface to the caller."""
+        mock_client._currency = None
+        with patch.object(mock_client, "_request", side_effect=RuntimeError("boom")):
+            with pytest.raises(RuntimeError, match="boom"):
+                mock_client.get_org_currency()
+
+    def test_money_writes_use_detected_org_currency(self, mock_client):
+        """Test every client-owned money payload uses the resolved currency."""
+        mock_client._currency = "EUR"
+        response = {"data": [{"id": 1}]}
+
+        with patch.object(mock_client, "_request", return_value=response) as request:
+            mock_client.create_campaign("Campaign", budget=100, daily_budget=10, countries=["DE"])
+            campaign_payload = request.call_args.kwargs["data"]
+            assert campaign_payload["budgetAmount"]["currency"] == "EUR"
+            assert campaign_payload["dailyBudgetAmount"]["currency"] == "EUR"
+
+            mock_client.create_ad_group(1, "Exact", 1.5, cpa_goal=2.5)
+            ad_group_payload = request.call_args.kwargs["data"]
+            assert ad_group_payload["defaultBidAmount"]["currency"] == "EUR"
+            assert ad_group_payload["cpaGoal"]["currency"] == "EUR"
+
+            mock_client.add_keywords(1, 2, ["fax"], MatchType.EXACT, bid_amount=3)
+            keyword_payload = request.call_args.kwargs["data"]
+            assert keyword_payload[0]["bidAmount"]["currency"] == "EUR"
+
+            mock_client.update_keyword_bid(1, 2, 3, 4)
+            update_payload = request.call_args.kwargs["data"]
+            assert update_payload[0]["bidAmount"]["currency"] == "EUR"
 
     def test_get_negative_keywords_uses_pagination(self, mock_client):
         """Test get_negative_keywords uses pagination."""

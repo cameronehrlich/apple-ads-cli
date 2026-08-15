@@ -175,8 +175,8 @@ def list_campaigns(
 @app.command("setup")
 def setup_campaigns(
     countries: str = typer.Option("US", "--countries", "-c", help="Comma-separated country codes"),
-    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget per campaign (USD)"),
-    bid: float = typer.Option(1.50, "--bid", help="Default keyword bid (USD)"),
+    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget per campaign (organization currency)"),
+    bid: float = typer.Option(1.50, "--bid", help="Default keyword bid (organization currency)"),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Preview without creating"),
 ):
     """Set up the 4-campaign structure (Brand, Category, Competitor, Discovery)."""
@@ -199,8 +199,8 @@ def setup_campaigns(
     console.print(Panel("[bold]Campaign Structure Setup[/bold]", expand=False))
     console.print(f"\nApp: [cyan]{app_config.app_name}[/cyan] (ID: {app_config.app_id})")
     console.print(f"Countries: [cyan]{', '.join(country_list)}[/cyan]")
-    console.print(f"Daily Budget: [cyan]${budget}[/cyan] per campaign")
-    console.print(f"Default Bid: [cyan]${bid}[/cyan]\n")
+    console.print(f"Daily Budget: [cyan]{budget}[/cyan] per campaign (organization currency)")
+    console.print(f"Default Bid: [cyan]{bid}[/cyan] (organization currency)\n")
 
     table = Table(title="Campaigns to Create", show_header=True)
     table.add_column("Type")
@@ -211,7 +211,7 @@ def setup_campaigns(
     for ctype, config in CAMPAIGN_STRUCTURE.items():
         campaign_name = get_campaign_name(ctype, app_name=app_name)
         ad_groups = ", ".join([ag.name for ag in config.ad_groups])
-        table.add_row(ctype.value.upper(), campaign_name, ad_groups, f"${budget}/day")
+        table.add_row(ctype.value.upper(), campaign_name, ad_groups, f"{budget}/day (org currency)")
 
     console.print(table)
 
@@ -452,7 +452,7 @@ def enable_campaign(
 @app.command("create")
 def create_campaign(
     name: str = typer.Argument(..., help="Campaign name"),
-    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget (USD)"),
+    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget (organization currency)"),
     countries: str = typer.Option("US", "--countries", "-c", help="Comma-separated country codes"),
     status: str = typer.Option("ENABLED", "--status", "-s", help="Initial status (ENABLED or PAUSED)"),
 ):
@@ -475,9 +475,10 @@ def create_campaign(
         raise typer.Exit(1)
 
     client = SearchAdsClient(credentials)
+    currency = client.get_org_currency()
 
     console.print(f"\nCreating campaign: [cyan]{name}[/cyan]")
-    console.print(f"  Daily Budget: [cyan]${budget}[/cyan]")
+    console.print(f"  Daily Budget: [cyan]{budget} {currency}[/cyan]")
     console.print(f"  Countries: [cyan]{', '.join(country_list)}[/cyan]")
     console.print(f"  Status: [cyan]{status_upper}[/cyan]")
 
@@ -503,10 +504,10 @@ def create_campaign(
 def update_campaign(
     campaign_id: int = typer.Argument(..., help="Campaign ID to update"),
     name: Optional[str] = typer.Option(None, "--name", "-n", help="New campaign name"),
-    budget: Optional[float] = typer.Option(None, "--budget", "-b", help="New daily budget (USD)"),
+    budget: Optional[float] = typer.Option(None, "--budget", "-b", help="New daily budget (organization currency)"),
     lifetime_budget: Optional[float] = typer.Option(
         None, "--lifetime-budget", "-L",
-        help="New lifetime budget (USD). NOTE: Apple is discontinuing lifetime budgets on 2026-06-16; prefer --clear-lifetime.",
+        help="New lifetime budget (organization currency). NOTE: Apple is discontinuing lifetime budgets on 2026-06-16; prefer --clear-lifetime.",
     ),
     clear_lifetime: bool = typer.Option(
         False, "--clear-lifetime",
@@ -544,21 +545,35 @@ def update_campaign(
         changes.append(f"Name: {campaign.get('name')} -> {name}")
 
     if budget:
-        updates["dailyBudgetAmount"] = {"amount": str(budget), "currency": "USD"}
-        old_budget = campaign.get("dailyBudgetAmount", {}).get("amount", "?")
-        changes.append(f"Daily Budget: ${old_budget} -> ${budget}")
+        current_budget = campaign.get("dailyBudgetAmount") or {}
+        current_lifetime = campaign.get("budgetAmount") or {}
+        currency = (
+            current_budget.get("currency")
+            or current_lifetime.get("currency")
+            or client.get_org_currency()
+        )
+        updates["dailyBudgetAmount"] = {"amount": str(budget), "currency": currency}
+        old_budget = current_budget.get("amount", "?")
+        changes.append(f"Daily Budget: {old_budget} {currency} -> {budget} {currency}")
 
     if clear_lifetime:
         updates["budgetAmount"] = None
         old = campaign.get("budgetAmount") or {}
         old_amt = old.get("amount") if isinstance(old, dict) else None
-        changes.append(f"Lifetime Budget: ${old_amt or '-'} -> cleared")
+        old_currency = old.get("currency", "") if isinstance(old, dict) else ""
+        changes.append(f"Lifetime Budget: {old_amt or '-'} {old_currency} -> cleared")
 
     if lifetime_budget is not None:
-        updates["budgetAmount"] = {"amount": str(lifetime_budget), "currency": "USD"}
-        old = campaign.get("budgetAmount") or {}
-        old_amt = old.get("amount") if isinstance(old, dict) else "-"
-        changes.append(f"Lifetime Budget: ${old_amt} -> ${lifetime_budget}")
+        current_lifetime = campaign.get("budgetAmount") or {}
+        current_daily = campaign.get("dailyBudgetAmount") or {}
+        currency = (
+            current_lifetime.get("currency")
+            or current_daily.get("currency")
+            or client.get_org_currency()
+        )
+        updates["budgetAmount"] = {"amount": str(lifetime_budget), "currency": currency}
+        old_amt = current_lifetime.get("amount", "-")
+        changes.append(f"Lifetime Budget: {old_amt} {currency} -> {lifetime_budget} {currency}")
 
     if status:
         status_upper = status.upper()

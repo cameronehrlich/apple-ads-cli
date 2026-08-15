@@ -36,6 +36,7 @@ def mock_client(mock_credentials, mock_app_config):
     """Create a mock SearchAdsClient."""
     with patch.object(SearchAdsClient, "_get_access_token", return_value="mock_token"):
         client = SearchAdsClient(mock_credentials, app_config=mock_app_config)
+        client._currency = "USD"
         return client
 
 
@@ -152,7 +153,9 @@ class TestGetBudgetOrder:
 
     def test_get_budget_order_not_found(self, mock_client):
         """Test fetching a non-existent budget order returns None."""
-        with patch.object(mock_client, "_request", side_effect=Exception("API error 404: Not Found")):
+        with patch.object(
+            mock_client, "_request", side_effect=Exception("API error 404: Not Found")
+        ):
             result = mock_client.get_budget_order(99999)
 
         assert result is None
@@ -170,11 +173,12 @@ class TestCreateBudgetOrder:
 
     def test_create_budget_order_success(self, mock_client):
         """Test creating a budget order."""
+        mock_client._currency = "EUR"
         mock_response = {
             "data": {
                 "id": 100,
                 "name": "New Budget",
-                "budget": {"amount": "10000", "currency": "USD"},
+                "budget": {"amount": "10000", "currency": "EUR"},
                 "startDate": "2025-06-01",
                 "endDate": "2025-12-31",
                 "status": "ACTIVE",
@@ -198,7 +202,7 @@ class TestCreateBudgetOrder:
         data = call_args.kwargs.get("data") or call_args[1].get("data")
         assert data["name"] == "New Budget"
         assert data["budget"]["amount"] == "10000.0"
-        assert data["budget"]["currency"] == "USD"
+        assert data["budget"]["currency"] == "EUR"
         assert data["startDate"] == "2025-06-01"
         assert data["endDate"] == "2025-12-31"
 
@@ -356,13 +360,7 @@ class TestCampaignBudgetStatus:
             "pagination": {"totalResults": 1, "startIndex": 0, "itemsPerPage": 1000},
         }
 
-        mock_report = {
-            "data": {
-                "reportingDataResponse": {
-                    "row": []
-                }
-            }
-        }
+        mock_report = {"data": {"reportingDataResponse": {"row": []}}}
 
         def mock_request(method, endpoint, **kwargs):
             if endpoint == "/reports/campaigns":

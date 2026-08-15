@@ -229,7 +229,7 @@ def add_keywords(
         "-t",
         help="Campaign type: brand, category, competitor",
     ),
-    bid: Optional[float] = typer.Option(None, "--bid", "-b", help="Bid amount (USD)"),
+    bid: Optional[float] = typer.Option(None, "--bid", "-b", help="Bid amount (organization currency)"),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Preview without adding"),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation prompt"),
 ):
@@ -284,7 +284,7 @@ def add_keywords(
     console.print(f"\nKeywords: [cyan]{', '.join(keyword_list)}[/cyan]")
     console.print(f"Target: [cyan]{campaign_type.value.upper()}[/cyan] campaign")
     if bid:
-        console.print(f"Bid: [cyan]${bid}[/cyan]")
+        console.print(f"Bid: [cyan]{bid}[/cyan] (organization currency)")
 
     console.print("\n[bold]Routing Plan:[/bold]")
     console.print(f"  1. Add as EXACT to {target_campaign.get('name')}")
@@ -474,7 +474,7 @@ def promote_keywords(
         "-t",
         help="Target campaign type: brand, category, competitor",
     ),
-    bid: Optional[float] = typer.Option(None, "--bid", "-b", help="Bid amount (USD)"),
+    bid: Optional[float] = typer.Option(None, "--bid", "-b", help="Bid amount (organization currency)"),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Preview without changes"),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation prompt"),
 ):
@@ -676,7 +676,7 @@ def update_bid(
     campaign_id: Optional[int] = typer.Option(None, "--campaign", "-c", help="Campaign ID"),
     ad_group_id: Optional[int] = typer.Option(None, "--ad-group", "-g", help="Ad group ID"),
     keyword_id: Optional[int] = typer.Option(None, "--keyword", "-k", help="Keyword ID"),
-    bid: float = typer.Option(..., "--bid", "-b", help="New bid amount (USD)"),
+    bid: float = typer.Option(..., "--bid", "-b", help="New bid amount (organization currency)"),
 ):
     """Update bid amount for a keyword."""
     credentials = load_credentials()
@@ -717,7 +717,11 @@ def update_bid(
 
         for idx, kw in enumerate(keywords, 1):
             current_bid = kw.get("bidAmount", {})
-            bid_str = f"${current_bid.get('amount', '?')}" if current_bid else "-"
+            bid_str = (
+                f"{current_bid.get('amount', '?')} {current_bid.get('currency', '')}".strip()
+                if current_bid
+                else "-"
+            )
             table.add_row(str(idx), kw.get("text", ""), bid_str, kw.get("status", ""))
 
         console.print(table)
@@ -729,11 +733,12 @@ def update_bid(
                 break
             console.print("[red]Invalid selection.[/red]")
 
-    with console.status(f"[bold blue]Updating bid to ${bid}..."):
+    currency = client.get_org_currency()
+    with console.status(f"[bold blue]Updating bid to {bid} {currency}..."):
         result = client.update_keyword_bid(campaign_id, ad_group_id, keyword_id, bid)
 
     if result:
-        console.print(f"[green]Updated keyword {keyword_id} bid to ${bid}.[/green]")
+        console.print(f"[green]Updated keyword {keyword_id} bid to {bid} {currency}.[/green]")
     else:
         console.print(f"[red]Failed to update bid for keyword {keyword_id}.[/red]")
 
@@ -1178,7 +1183,7 @@ def find_keywords(
 
 @app.command("update-bids-bulk")
 def update_bids_bulk(
-    bid: float = typer.Option(..., "--bid", "-b", help="New bid amount (USD) for all keywords"),
+    bid: float = typer.Option(..., "--bid", "-b", help="New bid amount (organization currency) for all keywords"),
     campaign_id: Optional[int] = typer.Option(None, "--campaign", "-c", help="Campaign ID"),
     ad_group_id: Optional[int] = typer.Option(None, "--ad-group", "-g", help="Ad group ID"),
     force: bool = typer.Option(False, "--force", "-f", help="Skip confirmation prompt"),
@@ -1213,6 +1218,8 @@ def update_bids_bulk(
         console.print("[yellow]No keywords found.[/yellow]")
         return
 
+    currency = client.get_org_currency()
+
     # Show current bids
     table = Table(title="Current Bids", show_header=True)
     table.add_column("ID", style="cyan")
@@ -1223,17 +1230,21 @@ def update_bids_bulk(
 
     for kw in keywords:
         current_bid = kw.get("bidAmount", {})
-        current_str = f"${current_bid.get('amount', '?')}" if current_bid else "-"
+        current_str = (
+            f"{current_bid.get('amount', '?')} {current_bid.get('currency', '')}".strip()
+            if current_bid
+            else "-"
+        )
         table.add_row(
             str(kw.get("id")),
             kw.get("text", ""),
             current_str,
-            f"${bid:.2f}",
+            f"{bid:.2f} {currency}",
             kw.get("status", ""),
         )
 
     console.print(table)
-    console.print(f"\n[bold]Updating {len(keywords)} keyword(s) to ${bid:.2f}[/bold]")
+    console.print(f"\n[bold]Updating {len(keywords)} keyword(s) to {bid:.2f} {currency}[/bold]")
 
     if not force and not Confirm.ask("\nProceed?"):
         console.print("[yellow]Cancelled.[/yellow]")
@@ -1241,7 +1252,7 @@ def update_bids_bulk(
 
     # Build bulk update payload
     updates = [
-        {"id": kw.get("id"), "bidAmount": {"amount": str(bid), "currency": "USD"}}
+        {"id": kw.get("id"), "bidAmount": {"amount": str(bid), "currency": currency}}
         for kw in keywords
     ]
 
@@ -1249,6 +1260,9 @@ def update_bids_bulk(
         result = client.update_keywords_bulk(campaign_id, ad_group_id, updates)
 
     if result is not None:
-        console.print(f"\n[bold green]Updated {len(keywords)} keyword bids to ${bid:.2f}.[/bold green]")
+        console.print(
+            f"\n[bold green]Updated {len(keywords)} keyword bids to "
+            f"{bid:.2f} {currency}.[/bold green]"
+        )
     else:
         console.print("[red]Failed to update keyword bids.[/red]")

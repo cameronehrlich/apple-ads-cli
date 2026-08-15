@@ -71,7 +71,7 @@ def list_adgroups(
 def create_adgroup(
     campaign_id: int = typer.Option(..., "--campaign", "-c", help="Campaign ID"),
     name: str = typer.Argument(..., help="Ad group name"),
-    bid: float = typer.Option(1.50, "--bid", "-b", help="Default bid amount (USD)"),
+    bid: float = typer.Option(1.50, "--bid", "-b", help="Default bid amount (organization currency)"),
     search_match: bool = typer.Option(False, "--search-match/--no-search-match", help="Enable Search Match"),
     status: str = typer.Option("ENABLED", "--status", "-s", help="Initial status (ENABLED or PAUSED)"),
 ):
@@ -94,9 +94,10 @@ def create_adgroup(
         console.print("[red]Status must be ENABLED or PAUSED.[/red]")
         raise typer.Exit(1)
 
+    currency = client.get_org_currency()
     console.print(f"\nCreating ad group in campaign [cyan]{campaign.get('name')}[/cyan]:")
     console.print(f"  Name: [cyan]{name}[/cyan]")
-    console.print(f"  Default Bid: [cyan]${bid}[/cyan]")
+    console.print(f"  Default Bid: [cyan]{bid} {currency}[/cyan]")
     console.print(f"  Search Match: [cyan]{'ON' if search_match else 'OFF'}[/cyan]")
     console.print(f"  Status: [cyan]{status_upper}[/cyan]")
 
@@ -123,7 +124,7 @@ def update_adgroup(
     adgroup_id: int = typer.Argument(..., help="Ad group ID to update"),
     campaign_id: int = typer.Option(..., "--campaign", "-c", help="Campaign ID"),
     name: Optional[str] = typer.Option(None, "--name", "-n", help="New name"),
-    bid: Optional[float] = typer.Option(None, "--bid", "-b", help="New default bid (USD)"),
+    bid: Optional[float] = typer.Option(None, "--bid", "-b", help="New default bid (organization currency)"),
     search_match: Optional[bool] = typer.Option(None, "--search-match/--no-search-match", help="Toggle Search Match"),
     status: Optional[str] = typer.Option(None, "--status", "-s", help="New status (ENABLED or PAUSED)"),
 ):
@@ -148,8 +149,9 @@ def update_adgroup(
         changes.append(f"Name → {name}")
 
     if bid is not None:
-        updates["defaultBidAmount"] = {"amount": str(bid), "currency": "USD"}
-        changes.append(f"Default Bid → ${bid}")
+        currency = client.get_org_currency()
+        updates["defaultBidAmount"] = {"amount": str(bid), "currency": currency}
+        changes.append(f"Default Bid → {bid} {currency}")
 
     if search_match is not None:
         updates["automatedKeywordsOptIn"] = search_match

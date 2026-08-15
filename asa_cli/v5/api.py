@@ -36,6 +36,7 @@ class SearchAdsClient:
         self.app_config = app_config or get_current_app_config()
         self._access_token: Optional[str] = None
         self._token_expiry: Optional[float] = None
+        self._currency: Optional[str] = None
 
     def _create_client_secret(self) -> str:
         """Create a JWT client secret for Apple OAuth.
@@ -235,6 +236,33 @@ class SearchAdsClient:
             )
         return self.credentials.org_id
 
+    def get_org_currency(self) -> str:
+        """Return the configured v5 organization's ISO currency code.
+
+        Currency is resolved from the authoritative ACL record instead of a
+        sample campaign, so new organizations with no campaigns are handled
+        correctly. A missing or malformed value fails closed rather than
+        allowing a write with an assumed currency.
+        """
+        if self._currency is not None:
+            return self._currency
+
+        target_org_id = self.org_id
+        response = self._request("GET", "/acls", skip_org_context=True)
+        acls = response.get("data") if isinstance(response, dict) else None
+        if isinstance(acls, list):
+            for acl in acls:
+                if not isinstance(acl, dict) or str(acl.get("orgId")) != str(target_org_id):
+                    continue
+                currency = acl.get("currency")
+                if isinstance(currency, str) and currency.strip():
+                    self._currency = currency.strip().upper()
+                    return self._currency
+
+        raise SearchAdsAPIError(
+            f"Apple Ads ACL did not return a currency for organization {target_org_id}"
+        )
+
     # =========================================================================
     # Campaign Operations
     # =========================================================================
@@ -276,10 +304,11 @@ class SearchAdsClient:
             raise ValueError("Either daily_budget or budget (lifetime) must be provided.")
 
         try:
+            currency = self.get_org_currency()
             campaign_data: dict[str, Any] = {
                 "name": name,
                 "adamId": self.app_config.app_id,
-                "dailyBudgetAmount": {"amount": str(daily_budget or budget), "currency": "USD"},
+                "dailyBudgetAmount": {"amount": str(daily_budget or budget), "currency": currency},
                 "countriesOrRegions": countries or ["US"],
                 "status": status,
                 "supplySources": supply_sources or ["APPSTORE_SEARCH_RESULTS"],
@@ -287,7 +316,7 @@ class SearchAdsClient:
                 "billingEvent": billing_event,
             }
             if budget is not None:
-                campaign_data["budgetAmount"] = {"amount": str(budget), "currency": "USD"}
+                campaign_data["budgetAmount"] = {"amount": str(budget), "currency": currency}
 
             response = self._request("POST", "/campaigns", data=campaign_data)
             return response.get("data") if isinstance(response, dict) else None
@@ -463,10 +492,11 @@ class SearchAdsClient:
             from datetime import datetime, timezone
 
             start_time = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%S.000")
+            currency = self.get_org_currency()
 
             ad_group_data = {
                 "name": name,
-                "defaultBidAmount": {"amount": str(default_bid), "currency": "USD"},
+                "defaultBidAmount": {"amount": str(default_bid), "currency": currency},
                 "automatedKeywordsOptIn": search_match_enabled,
                 "pricingModel": "CPC",
                 "startTime": start_time,
@@ -485,7 +515,7 @@ class SearchAdsClient:
                 }
 
             if cpa_goal:
-                ad_group_data["cpaGoal"] = {"amount": str(cpa_goal), "currency": "USD"}
+                ad_group_data["cpaGoal"] = {"amount": str(cpa_goal), "currency": currency}
 
             response = self._request(
                 "POST", f"/campaigns/{campaign_id}/adgroups", data=ad_group_data
@@ -555,12 +585,13 @@ class SearchAdsClient:
             return [], []
 
         default_bid = bid_amount or (self.app_config.default_bid if self.app_config else 1.50)
+        currency = self.get_org_currency()
 
         keyword_objects = [
             {
                 "text": kw.strip().lower(),
                 "matchType": match_type.value,
-                "bidAmount": {"amount": str(default_bid), "currency": "USD"},
+                "bidAmount": {"amount": str(default_bid), "currency": currency},
             }
             for kw in keywords
             if kw.strip()
@@ -686,8 +717,12 @@ class SearchAdsClient:
         """Update bid amount for a keyword."""
         try:
             # Use bulk update endpoint with keyword object including ID
+            currency = self.get_org_currency()
             update_data = [
-                {"id": keyword_id, "bidAmount": {"amount": str(bid_amount), "currency": "USD"}}
+                {
+                    "id": keyword_id,
+                    "bidAmount": {"amount": str(bid_amount), "currency": currency},
+                }
             ]
             response = self._request(
                 "PUT",
@@ -1305,7 +1340,7 @@ class SearchAdsClient:
 
         Args:
             name: Budget order name
-            budget: Budget amount in USD
+            budget: Budget amount in the organization's currency
             start_date: Start date (YYYY-MM-DD)
             end_date: End date (YYYY-MM-DD)
             **kwargs: Additional fields (e.g. clientName, primaryBuyerEmail)
@@ -1314,9 +1349,10 @@ class SearchAdsClient:
             Created budget order data or None on failure
         """
         try:
+            currency = self.get_org_currency()
             bo_data: dict[str, Any] = {
                 "name": name,
-                "budget": {"amount": str(budget), "currency": "USD"},
+                "budget": {"amount": str(budget), "currency": currency},
                 "startDate": start_date,
                 "endDate": end_date,
             }

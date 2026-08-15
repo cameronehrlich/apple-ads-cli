@@ -199,7 +199,7 @@ def budget_status():
 @app.command("create")
 def create_budget_order(
     name: str = typer.Option(..., "--name", "-n", help="Budget order name"),
-    budget: float = typer.Option(..., "--budget", "-b", help="Budget amount (USD)"),
+    budget: float = typer.Option(..., "--budget", "-b", help="Budget amount (organization currency)"),
     start_date: str = typer.Option(..., "--start", "-s", help="Start date (YYYY-MM-DD)"),
     end_date: str = typer.Option(..., "--end", "-e", help="End date (YYYY-MM-DD)"),
     client_name: Optional[str] = typer.Option(None, "--client-name", help="Client name"),
@@ -212,6 +212,7 @@ def create_budget_order(
         raise typer.Exit(1)
 
     client = SearchAdsClient(credentials)
+    currency = client.get_org_currency()
 
     kwargs = {}
     if client_name:
@@ -220,7 +221,7 @@ def create_budget_order(
         kwargs["primaryBuyerEmail"] = primary_buyer_email
 
     console.print(f"\nCreating budget order: [cyan]{name}[/cyan]")
-    console.print(f"  Budget:     [cyan]${budget:,.2f}[/cyan]")
+    console.print(f"  Budget:     [cyan]{budget:,.2f} {currency}[/cyan]")
     console.print(f"  Start Date: [cyan]{start_date}[/cyan]")
     console.print(f"  End Date:   [cyan]{end_date}[/cyan]")
 

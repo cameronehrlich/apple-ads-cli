@@ -149,7 +149,7 @@ Create a new ad group in a campaign.
 |---|---|---|---|---|---|---|
 | option | `--campaign`, `-c` | yes | `integer` | — | — | Campaign ID |
 | argument | `NAME` | yes | `text` | — | — |  |
-| option | `--bid`, `-b` | no | `float` | `1.5` | — | Default bid amount (USD) |
+| option | `--bid`, `-b` | no | `float` | `1.5` | — | Default bid amount (organization currency) |
 | option | `--search-match`, `--no-search-match` | no | `boolean` | `False` | — | Enable Search Match |
 | option | `--status`, `-s` | no | `text` | `ENABLED` | — | Initial status (ENABLED or PAUSED) |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
@@ -223,7 +223,7 @@ Update an ad group's settings.
 | argument | `ADGROUP_ID` | yes | `integer` | — | — |  |
 | option | `--campaign`, `-c` | yes | `integer` | — | — | Campaign ID |
 | option | `--name`, `-n` | no | `text` | — | — | New name |
-| option | `--bid`, `-b` | no | `float` | — | — | New default bid (USD) |
+| option | `--bid`, `-b` | no | `float` | — | — | New default bid (organization currency) |
 | option | `--search-match`, `--no-search-match` | no | `boolean` | — | — | Toggle Search Match |
 | option | `--status`, `-s` | no | `text` | — | — | New status (ENABLED or PAUSED) |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
@@ -343,7 +343,7 @@ Create a new budget order.
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
 | option | `--name`, `-n` | yes | `text` | — | — | Budget order name |
-| option | `--budget`, `-b` | yes | `float` | — | — | Budget amount (USD) |
+| option | `--budget`, `-b` | yes | `float` | — | — | Budget amount (organization currency) |
 | option | `--start`, `-s` | yes | `text` | — | — | Start date (YYYY-MM-DD) |
 | option | `--end`, `-e` | yes | `text` | — | — | End date (YYYY-MM-DD) |
 | option | `--client-name` | no | `text` | — | — | Client name |
@@ -442,7 +442,7 @@ Create a new campaign with custom settings.
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
 | argument | `NAME` | yes | `text` | — | — |  |
-| option | `--budget`, `-b` | no | `float` | `50.0` | — | Daily budget (USD) |
+| option | `--budget`, `-b` | no | `float` | `50.0` | — | Daily budget (organization currency) |
 | option | `--countries`, `-c` | no | `text` | `US` | — | Comma-separated country codes |
 | option | `--status`, `-s` | no | `text` | `ENABLED` | — | Initial status (ENABLED or PAUSED) |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
@@ -518,8 +518,8 @@ Set up the 4-campaign structure (Brand, Category, Competitor, Discovery).
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
 | option | `--countries`, `-c` | no | `text` | `US` | — | Comma-separated country codes |
-| option | `--budget`, `-b` | no | `float` | `50.0` | — | Daily budget per campaign (USD) |
-| option | `--bid` | no | `float` | `1.5` | — | Default keyword bid (USD) |
+| option | `--budget`, `-b` | no | `float` | `50.0` | — | Daily budget per campaign (organization currency) |
+| option | `--bid` | no | `float` | `1.5` | — | Default keyword bid (organization currency) |
 | option | `--dry-run`, `-n` | no | `boolean` | `False` | — | Preview without creating |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
 
@@ -535,8 +535,8 @@ Update a campaign's name, budget, lifetime budget, or status.
 |---|---|---|---|---|---|---|
 | argument | `CAMPAIGN_ID` | yes | `integer` | — | — |  |
 | option | `--name`, `-n` | no | `text` | — | — | New campaign name |
-| option | `--budget`, `-b` | no | `float` | — | — | New daily budget (USD) |
-| option | `--lifetime-budget`, `-L` | no | `float` | — | — | New lifetime budget (USD). NOTE: Apple is discontinuing lifetime budgets on 2026-06-16; prefer --clear-lifetime. |
+| option | `--budget`, `-b` | no | `float` | — | — | New daily budget (organization currency) |
+| option | `--lifetime-budget`, `-L` | no | `float` | — | — | New lifetime budget (organization currency). NOTE: Apple is discontinuing lifetime budgets on 2026-06-16; prefer --clear-lifetime. |
 | option | `--clear-lifetime` | no | `boolean` | `False` | — | Remove the lifetime budget cap on the campaign (sets budgetAmount=null). Use this to unblock campaigns that silently stopped serving after hitting their lifetime cap. |
 | option | `--status`, `-s` | no | `text` | — | — | New status (ENABLED or PAUSED) |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
@@ -689,7 +689,7 @@ Keywords are added to:
 |---|---|---|---|---|---|---|
 | argument | `KEYWORDS` | yes | `text` | — | — |  |
 | option | `--type`, `-t` | no | `choice` | `CampaignType.CATEGORY` | — | Campaign type: brand, category, competitor |
-| option | `--bid`, `-b` | no | `float` | — | — | Bid amount (USD) |
+| option | `--bid`, `-b` | no | `float` | — | — | Bid amount (organization currency) |
 | option | `--dry-run`, `-n` | no | `boolean` | `False` | — | Preview without adding |
 | option | `--force`, `-f` | no | `boolean` | `False` | — | Skip confirmation prompt |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
@@ -835,7 +835,7 @@ This command:
 |---|---|---|---|---|---|---|
 | argument | `KEYWORDS` | yes | `text` | — | — |  |
 | option | `--target`, `-t` | no | `choice` | `CampaignType.CATEGORY` | — | Target campaign type: brand, category, competitor |
-| option | `--bid`, `-b` | no | `float` | — | — | Bid amount (USD) |
+| option | `--bid`, `-b` | no | `float` | — | — | Bid amount (organization currency) |
 | option | `--dry-run`, `-n` | no | `boolean` | `False` | — | Preview without changes |
 | option | `--force`, `-f` | no | `boolean` | `False` | — | Skip confirmation prompt |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
@@ -871,7 +871,7 @@ Update bid amount for a keyword.
 | option | `--campaign`, `-c` | no | `integer` | — | — | Campaign ID |
 | option | `--ad-group`, `-g` | no | `integer` | — | — | Ad group ID |
 | option | `--keyword`, `-k` | no | `integer` | — | — | Keyword ID |
-| option | `--bid`, `-b` | yes | `float` | — | — | New bid amount (USD) |
+| option | `--bid`, `-b` | yes | `float` | — | — | New bid amount (organization currency) |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
 
 ## `asa v5 keywords update-bids-bulk`
@@ -884,7 +884,7 @@ Update all keyword bids in a campaign/ad group at once.
 
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
-| option | `--bid`, `-b` | yes | `float` | — | — | New bid amount (USD) for all keywords |
+| option | `--bid`, `-b` | yes | `float` | — | — | New bid amount (organization currency) for all keywords |
 | option | `--campaign`, `-c` | no | `integer` | — | — | Campaign ID |
 | option | `--ad-group`, `-g` | no | `integer` | — | — | Ad group ID |
 | option | `--force`, `-f` | no | `boolean` | `False` | — | Skip confirmation prompt |
