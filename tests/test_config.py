@@ -171,6 +171,18 @@ class TestCredentials:
         assert creds.org_id == 123456
         assert creds.client_id == "SEARCHADS.abc123"
 
+    def test_platform_credentials_do_not_require_legacy_org_id(self):
+        creds = Credentials(
+            ad_account_id="account-123",
+            client_id="SEARCHADS.abc123",
+            team_id="SEARCHADS.team456",
+            key_id="key789",
+            private_key_path="/path/to/key.pem",
+        )
+
+        assert creds.org_id is None
+        assert creds.ad_account_id == "account-123"
+
     def test_save_and_load_credentials(self):
         """Test saving and loading credentials."""
         with tempfile.TemporaryDirectory() as tmpdir:

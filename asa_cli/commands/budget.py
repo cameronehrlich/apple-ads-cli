@@ -7,8 +7,8 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import detect_campaign_type, get_current_app_config, is_multi_app, load_credentials
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Budget management commands")
 console = Console()

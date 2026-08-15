@@ -36,7 +36,10 @@ def setup_config(
         existing_creds = load_credentials()
         if existing_creds:
             console.print("[yellow]Existing credentials found.[/yellow]")
-            console.print(f"  Org ID: {existing_creds.org_id}")
+            if existing_creds.org_id is not None:
+                console.print(f"  Legacy v5 Org ID: {existing_creds.org_id}")
+            if existing_creds.ad_account_id:
+                console.print(f"  Platform Ad Account ID: {existing_creds.ad_account_id}")
             console.print(f"  Client ID: {existing_creds.client_id[:20]}...")
 
             if not Confirm.ask("Overwrite existing credentials?"):
@@ -95,7 +98,10 @@ def show_config():
         table.add_column("Key", style="cyan")
         table.add_column("Value")
 
-        table.add_row("Org ID", str(credentials.org_id))
+        if credentials.org_id is not None:
+            table.add_row("Legacy v5 Org ID", str(credentials.org_id))
+        if credentials.ad_account_id:
+            table.add_row("Ad Account ID", credentials.ad_account_id)
         table.add_row("Client ID", credentials.client_id[:30] + "...")
         table.add_row("Team ID", credentials.team_id)
         table.add_row("Key ID", credentials.key_id)
@@ -139,7 +145,7 @@ def test_connection():
     console.print("[bold]Testing API connection...[/bold]\n")
 
     try:
-        from ..api import SearchAdsClient
+        from ..v5.api import SearchAdsClient
 
         client = SearchAdsClient(credentials)
 

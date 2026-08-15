@@ -5,8 +5,22 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 
-from asa_cli.api import REQUEST_TIMEOUT, SearchAdsAPIError, SearchAdsClient
 from asa_cli.config import AppConfig, Credentials, MatchType
+from asa_cli.v5.api import REQUEST_TIMEOUT, SearchAdsAPIError, SearchAdsClient
+
+
+def test_v5_org_context_requires_explicit_legacy_org_id():
+    credentials = Credentials(
+        ad_account_id="account-123",
+        client_id="client",
+        team_id="team",
+        key_id="key",
+        private_key_path="/tmp/private-key.pem",
+    )
+    client = SearchAdsClient(credentials=credentials)
+
+    with pytest.raises(ValueError, match="Legacy API v5 requires an organization ID"):
+        _ = client.org_id
 
 
 @pytest.fixture
@@ -141,7 +155,7 @@ class TestRequestFailures:
         response.json.return_value = {"data": []}
 
         with patch.object(mock_client, "_get_access_token", return_value="mock_token"):
-            with patch("asa_cli.api.requests.request", return_value=response) as request:
+            with patch("asa_cli.v5.api.requests.request", return_value=response) as request:
                 mock_client._request("GET", "/campaigns")
 
         assert request.call_args.kwargs["timeout"] == REQUEST_TIMEOUT
@@ -149,7 +163,7 @@ class TestRequestFailures:
     def test_api_network_error_raises_typed_error(self, mock_client):
         with patch.object(mock_client, "_get_access_token", return_value="mock_token"):
             with patch(
-                "asa_cli.api.requests.request",
+                "asa_cli.v5.api.requests.request",
                 side_effect=requests.Timeout("timed out"),
             ):
                 with pytest.raises(SearchAdsAPIError, match="GET /campaigns"):
@@ -158,7 +172,7 @@ class TestRequestFailures:
     def test_oauth_network_error_raises_typed_error(self, mock_client):
         with patch.object(mock_client, "_create_client_secret", return_value="secret"):
             with patch(
-                "asa_cli.api.requests.post",
+                "asa_cli.v5.api.requests.post",
                 side_effect=requests.Timeout("timed out"),
             ):
                 with pytest.raises(SearchAdsAPIError, match="Apple OAuth"):

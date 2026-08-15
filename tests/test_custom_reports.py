@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from asa_cli.api import SearchAdsAPIError, SearchAdsClient
 from asa_cli.config import AppConfig, Credentials
+from asa_cli.v5.api import SearchAdsAPIError, SearchAdsClient
 
 
 @pytest.fixture
@@ -246,7 +246,7 @@ class TestDownloadCustomReport:
         response = MagicMock()
         response.content = b"Date,Search Term\n2024-01-01,screenshot\n"
 
-        with patch("asa_cli.api.requests.get", return_value=response) as get:
+        with patch("asa_cli.v5.api.requests.get", return_value=response) as get:
             result = mock_client.download_custom_report(
                 "https://example.com/impression-share.csv"
             )

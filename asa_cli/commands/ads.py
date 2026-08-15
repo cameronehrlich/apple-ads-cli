@@ -9,9 +9,9 @@ from rich.console import Console
 from rich.prompt import Confirm
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import get_current_app_config, load_credentials
 from ..experiments import CPPExperimentManifest, load_experiment_manifest
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Ad variation and creative management commands")
 console = Console()

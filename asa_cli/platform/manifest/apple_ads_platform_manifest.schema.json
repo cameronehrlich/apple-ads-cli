@@ -1,0 +1,346 @@
+{
+  "$defs": {
+    "body_parameter": {
+      "additionalProperties": false,
+      "properties": {
+        "annotation": {
+          "type": "string"
+        },
+        "container": {
+          "enum": [
+            "model",
+            "list",
+            "primitive"
+          ]
+        },
+        "default": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "model": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "wire_name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "annotation",
+        "required",
+        "default",
+        "wire_name",
+        "model",
+        "container"
+      ],
+      "type": "object"
+    },
+    "cli": {
+      "additionalProperties": false,
+      "properties": {
+        "command_path": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "implementation_status": {
+          "type": "string"
+        },
+        "input_example": {
+          "type": "string"
+        },
+        "verification": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "command_path",
+        "implementation_status"
+      ],
+      "type": "object"
+    },
+    "located_parameter": {
+      "additionalProperties": false,
+      "properties": {
+        "annotation": {
+          "type": "string"
+        },
+        "default": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        },
+        "wire_name": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "annotation",
+        "required",
+        "default",
+        "wire_name"
+      ],
+      "type": "object"
+    },
+    "operation": {
+      "additionalProperties": false,
+      "properties": {
+        "aliases": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        },
+        "body_parameters": {
+          "items": {
+            "$ref": "#/$defs/body_parameter"
+          },
+          "type": "array"
+        },
+        "cli": {
+          "$ref": "#/$defs/cli"
+        },
+        "context": {
+          "enum": [
+            "required",
+            "optional",
+            "none"
+          ]
+        },
+        "http_method": {
+          "enum": [
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE"
+          ]
+        },
+        "multipart_parameters": {
+          "items": {
+            "$ref": "#/$defs/located_parameter"
+          },
+          "type": "array"
+        },
+        "mutation": {
+          "type": "boolean"
+        },
+        "pagination": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "path_parameters": {
+          "items": {
+            "$ref": "#/$defs/located_parameter"
+          },
+          "type": "array"
+        },
+        "query_parameters": {
+          "items": {
+            "$ref": "#/$defs/located_parameter"
+          },
+          "type": "array"
+        },
+        "resource_family": {
+          "type": "string"
+        },
+        "resource_path": {
+          "pattern": "^/",
+          "type": "string"
+        },
+        "return_annotation": {
+          "type": "string"
+        },
+        "sdk_method": {
+          "type": "string"
+        },
+        "signature": {
+          "items": {
+            "$ref": "#/$defs/signature_parameter"
+          },
+          "type": "array"
+        },
+        "special_handling": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array"
+        }
+      },
+      "required": [
+        "sdk_method",
+        "resource_family",
+        "http_method",
+        "resource_path",
+        "signature",
+        "context",
+        "path_parameters",
+        "query_parameters",
+        "body_parameters",
+        "multipart_parameters",
+        "return_annotation",
+        "mutation",
+        "pagination",
+        "special_handling",
+        "aliases"
+      ],
+      "type": "object"
+    },
+    "request_model": {
+      "additionalProperties": false,
+      "properties": {
+        "schema": {
+          "type": "object"
+        },
+        "schema_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schema",
+        "schema_sha256",
+        "source_sha256"
+      ],
+      "type": "object"
+    },
+    "signature_parameter": {
+      "additionalProperties": false,
+      "properties": {
+        "annotation": {
+          "type": "string"
+        },
+        "default": {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "name": {
+          "type": "string"
+        },
+        "required": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "name",
+        "annotation",
+        "required",
+        "default"
+      ],
+      "type": "object"
+    }
+  },
+  "$id": "https://github.com/cameronehrlich/apple-search-ads-cli/schemas/apple-ads-platform-manifest-v1.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "generated_at": {
+      "format": "date",
+      "type": "string"
+    },
+    "operations": {
+      "items": {
+        "$ref": "#/$defs/operation"
+      },
+      "type": "array"
+    },
+    "request_models": {
+      "additionalProperties": {
+        "$ref": "#/$defs/request_model"
+      },
+      "type": "object"
+    },
+    "schema_version": {
+      "const": 1
+    },
+    "sdk": {
+      "additionalProperties": false,
+      "properties": {
+        "api_class": {
+          "type": "string"
+        },
+        "api_source_sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        },
+        "canonical_method_count": {
+          "minimum": 1,
+          "type": "integer"
+        },
+        "distribution": {
+          "type": "string"
+        },
+        "excluded_method_suffixes": {
+          "items": {
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "git_commit": {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        "release_url": {
+          "format": "uri",
+          "type": "string"
+        },
+        "repository": {
+          "format": "uri",
+          "type": "string"
+        },
+        "version": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "distribution",
+        "version",
+        "repository",
+        "release_url",
+        "git_commit",
+        "api_class",
+        "api_source_sha256",
+        "canonical_method_count",
+        "excluded_method_suffixes"
+      ],
+      "type": "object"
+    }
+  },
+  "required": [
+    "schema_version",
+    "generated_at",
+    "sdk",
+    "operations",
+    "request_models"
+  ],
+  "title": "Apple Ads Platform SDK manifest",
+  "type": "object"
+}

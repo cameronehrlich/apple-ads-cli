@@ -9,7 +9,6 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import (
     CampaignType,
     get_current_app_config,
@@ -25,6 +24,7 @@ from ..reporting import (
     parse_impression_share_csv,
     performance_totals,
 )
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Reporting and analytics commands")
 console = Console()

@@ -8,7 +8,6 @@ from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import (
     CAMPAIGN_STRUCTURE,
     CampaignType,
@@ -19,6 +18,7 @@ from ..config import (
     load_credentials,
     parse_campaign_name,
 )
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Campaign management commands")
 console = Console()
