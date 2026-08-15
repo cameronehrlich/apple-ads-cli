@@ -4,8 +4,8 @@ from unittest.mock import patch
 
 import pytest
 
-from asa_cli.api import SearchAdsClient
 from asa_cli.config import AppConfig, Credentials
+from asa_cli.v5.api import SearchAdsClient
 
 
 @pytest.fixture

@@ -10,7 +10,6 @@ from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import (
     CampaignType,
     MatchType,
@@ -19,6 +18,7 @@ from ..config import (
     is_multi_app,
     load_credentials,
 )
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Automated campaign optimization")
 console = Console()
@@ -405,13 +405,13 @@ def optimize_cmd(
 
     \b
     Examples:
-        asa optimize --dry-run           # Preview changes
-        asa optimize --days 7            # Analyze last 7 days
-        asa optimize --cpa-threshold 3   # Stricter winner criteria
-        asa optimize --auto-approve      # Skip confirmation
-        asa optimize --json              # Output as JSON
-        asa optimize --min-impressions 10  # Only terms with 10+ impressions
-        asa optimize --exclude "test,demo" # Exclude specific terms
+        asa v5 optimize --dry-run           # Preview changes
+        asa v5 optimize --days 7            # Analyze last 7 days
+        asa v5 optimize --cpa-threshold 3   # Stricter winner criteria
+        asa v5 optimize --auto-approve      # Skip confirmation
+        asa v5 optimize --json              # Output as JSON
+        asa v5 optimize --min-impressions 10  # Only terms with 10+ impressions
+        asa v5 optimize --exclude "test,demo" # Exclude specific terms
     """
     if ctx.invoked_subcommand is not None:
         return

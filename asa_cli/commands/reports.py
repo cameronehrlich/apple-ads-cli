@@ -9,7 +9,6 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import (
     CampaignType,
     get_current_app_config,
@@ -25,6 +24,7 @@ from ..reporting import (
     parse_impression_share_csv,
     performance_totals,
 )
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Reporting and analytics commands")
 console = Console()
@@ -974,11 +974,15 @@ def report_search_terms(
     if show_winners and terms:
         console.print("\n[bold]To promote these keywords:[/bold]")
         keyword_list = ",".join([t["search_term"] for t in terms[:10] if t["search_term"]])
-        console.print(f'[cyan]asa keywords promote "{keyword_list}" --target category[/cyan]')
+        console.print(
+            f'[cyan]asa v5 keywords promote "{keyword_list}" --target category[/cyan]'
+        )
     elif show_negatives and terms:
         console.print("\n[bold]To add as negatives:[/bold]")
         keyword_list = ",".join([t["search_term"] for t in terms[:10] if t["search_term"]])
-        console.print(f'[cyan]asa keywords add-negatives "{keyword_list}" --all[/cyan]')
+        console.print(
+            f'[cyan]asa v5 keywords add-negatives "{keyword_list}" --all[/cyan]'
+        )
 
 
 @app.command("custom")
@@ -1047,7 +1051,9 @@ def report_custom(
 
     if state != "COMPLETED":
         console.print(f"[yellow]Report still processing after {max_polls * 10}s (state: {state}).[/yellow]")
-        console.print(f"Check later with: [cyan]asa reports custom-get {report_id}[/cyan]")
+        console.print(
+            f"Check later with: [cyan]asa v5 reports custom-get {report_id}[/cyan]"
+        )
         return
 
     download_uri = report.get("downloadUri")

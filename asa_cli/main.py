@@ -1,223 +1,105 @@
-"""Apple Search Ads CLI - Main entry point."""
+"""Apple Ads CLI entry point."""
 
-from typing import Optional
+import importlib.metadata
+import platform
 
 import typer
 from rich.console import Console
 from rich.panel import Panel
 
 from . import __version__
-from .commands import (
-    acl,
-    adgroups,
-    ads,
-    budget,
-    campaigns,
-    config,
-    geo,
-    keywords,
-    optimize,
-    reports,
-)
 from .config import set_current_app
+from .platform.cli import app as platform_app
+from .platform.cli import register_platform_commands
+from .platform.config_cli import app as config_app
+from .v5.cli import app as v5_app
+from .workflows.cli import app as workflows_app
 
 app = typer.Typer(
     name="asa",
-    help="Apple Search Ads CLI - manage campaigns, keywords, and reporting.",
+    help="Apple Ads Platform API v1, legacy v5, and opinionated workflows.",
     no_args_is_help=True,
     rich_markup_mode="rich",
 )
-
 console = Console()
 
-# Register command groups
-app.add_typer(config.app, name="config", help="Configuration management")
-app.add_typer(campaigns.app, name="campaigns", help="Campaign management")
-app.add_typer(adgroups.app, name="adgroups", help="Ad group management")
-app.add_typer(keywords.app, name="keywords", help="Keyword management")
-app.add_typer(reports.app, name="reports", help="Reporting and analytics")
-app.add_typer(optimize.app, name="optimize", help="Automated campaign optimization")
-app.add_typer(budget.app, name="budget", help="Budget order management")
-app.add_typer(geo.app, name="geo", help="Geo targeting and location search")
-app.add_typer(ads.app, name="ads", help="Ad variations, creatives, and product pages")
-app.add_typer(acl.app, name="acl", help="Access control, user management, and app search")
+# Platform API v1 is the default resource surface. The legacy implementation is
+# frozen under the explicit v5 namespace.
+app.add_typer(config_app, name="config", help="Credentials and local app configuration")
+register_platform_commands(app)
+app.add_typer(v5_app, name="v5", help="Legacy Campaign Management API v5 commands")
+app.add_typer(
+    workflows_app,
+    name="workflows",
+    help="Opinionated workflows built on Platform API v1",
+)
+app.add_typer(
+    platform_app,
+    name="platform",
+    help="Temporary explicit alias for the default Platform API v1 commands",
+    hidden=True,
+)
 
 
 @app.command("version")
-def version():
+def version() -> None:
     """Show version information."""
-    console.print(f"ASA CLI version {__version__}")
+    sdk_version = importlib.metadata.version("apple-ads-platform")
+    python_version = platform.python_version()
+    console.print(
+        f"asa {__version__} (apple-ads-platform {sdk_version}, Python {python_version})"
+    )
 
 
 @app.command("help")
-def help_command():
-    """Show help and quick start guide."""
+def help_command() -> None:
+    """Show the command architecture and representative examples."""
     help_text = """
-[bold cyan]Apple Search Ads CLI[/bold cyan]
+[bold cyan]Apple Ads CLI[/bold cyan]
 
-A command-line tool for managing Apple Search Ads campaigns following
-Apple's recommended 4-campaign structure.
+[bold]Platform API v1 — default[/bold]
+  Exact official-SDK wrappers, one command per endpoint:
+    [cyan]asa campaigns get --id CAMPAIGN_ID[/cyan]
+    [cyan]asa campaigns query --file query.json[/cyan]
+    [cyan]asa insights impression-share --file request.json[/cyan]
+    [cyan]asa insights search-term-popularity --file request.json[/cyan]
+    [cyan]asa recommendations daily-budget-query --file request.json[/cyan]
 
-[bold]Quick Start:[/bold]
+  Mutations preview by default and require [cyan]--confirm[/cyan]:
+    [cyan]asa campaigns create --file campaign.json[/cyan]
+    [cyan]asa campaigns create --file campaign.json --confirm[/cyan]
 
-  1. Configure credentials and app settings:
-     [cyan]asa config setup[/cyan]
+[bold]Opinionated workflows[/bold]
+    [cyan]asa workflows campaigns audit[/cyan]
+    [cyan]asa workflows campaigns plan-four-structure[/cyan]
+    [cyan]asa workflows campaigns plan-maximize-conversions[/cyan]
 
-  2. Test your API connection:
-     [cyan]asa config test[/cyan]
+[bold]Legacy Campaign Management API v5[/bold]
+  The previous implementation remains explicit and unchanged:
+    [cyan]asa v5 campaigns list[/cyan]
+    [cyan]asa v5 reports summary[/cyan]
+    [cyan]asa v5 optimize --dry-run[/cyan]
 
-  3. Audit your current campaign structure:
-     [cyan]asa campaigns audit[/cyan]
-
-  4. Set up the 4-campaign structure:
-     [cyan]asa campaigns setup --countries US --budget 50[/cyan]
-
-[bold]Common Commands:[/bold]
-
-  [bold cyan]Campaigns:[/bold cyan]
-    asa campaigns list          - List all campaigns
-    asa campaigns create        - Create a new campaign
-    asa campaigns update [ID]   - Update campaign name/budget/status
-    asa campaigns audit         - Audit structure vs Apple recommendations
-    asa campaigns setup         - Create 4-campaign structure
-    asa campaigns pause [ID]    - Pause a campaign
-    asa campaigns enable [ID]   - Enable a campaign
-
-  [bold cyan]Ad Groups:[/bold cyan]
-    asa adgroups list [CID]     - List ad groups for a campaign
-    asa adgroups create         - Create ad group in a campaign
-    asa adgroups update [ID]    - Update ad group settings
-    asa adgroups pause [ID]     - Pause an ad group
-    asa adgroups enable [ID]    - Enable an ad group
-
-  [bold cyan]Keywords:[/bold cyan]
-    asa keywords list           - List keywords in a campaign
-    asa keywords add            - Add keywords with automatic routing
-    asa keywords add-negatives  - Block unwanted search terms
-    asa keywords list-negatives - List all negative keywords
-    asa keywords delete-negatives - Remove negative keywords
-    asa keywords find           - Search keywords across ad groups
-    asa keywords update-bids-bulk - Bulk update keyword bids
-    asa keywords promote        - Graduate Discovery keywords to exact
-
-  [bold cyan]Reports:[/bold cyan]
-    asa reports summary         - Performance summary across campaigns
-    asa reports keywords        - Keyword performance report
-    asa reports search-terms    - Discover new keywords and negatives
-    asa reports impression-share - True async Apple impression-share report
-    asa reports ads --json      - Stable complete-window ad performance
-    asa reports custom          - Create async custom report
-    asa reports custom-list     - List custom reports
-    asa reports custom-get      - Get/download custom report
-    asa reports ads             - Ad-level performance report
-    asa reports bid-recommendations - Keyword bid recommendations
-
-  [bold cyan]Budget:[/bold cyan]
-    asa budget list             - List budget orders
-    asa budget get [ID]         - Get budget order details
-    asa budget status           - Campaign budget health overview
-    asa budget create           - Create a budget order
-
-  [bold cyan]Geo:[/bold cyan]
-    asa geo search              - Search for geo locations
-    asa geo show                - Show campaign geo targeting
-    asa geo set                 - Set campaign geo targeting
-
-  [bold cyan]Ads:[/bold cyan]
-    asa ads list                - List ad variations
-    asa ads create              - Create an ad variation
-    asa ads experiment          - Validate/apply an existing CPP manifest
-    asa ads delete              - Delete an ad variation
-    asa ads creatives           - List creative sets
-    asa ads product-pages       - List product page results
-    asa ads rejections          - View ad rejection reasons
-
-  [bold cyan]ACL:[/bold cyan]
-    asa acl list                - List access control entries
-    asa acl me                  - Show current user info
-    asa acl search-apps         - Search for apps
-    asa acl eligibility         - Check campaign eligibility
-    asa acl countries           - List supported countries
-
-  [bold cyan]Optimization:[/bold cyan]
-    asa optimize                - Run automated optimization workflow
-    asa optimize --dry-run      - Preview changes without applying
-    asa optimize --days 7       - Analyze last 7 days
-
-[bold]Campaign Structure:[/bold]
-
-  This tool implements Apple's recommended 4-campaign structure:
-
-  • [green]Brand[/green]      - Your app/company name keywords (exact match)
-  • [green]Category[/green]   - Non-branded category keywords (exact match)
-  • [green]Competitor[/green] - Competitor app names (exact match)
-  • [green]Discovery[/green]  - Keyword mining (broad + search match)
-
-[bold]Examples:[/bold]
-
-  Add brand keywords:
-    [cyan]asa keywords add "myapp,my app" --type brand[/cyan]
-
-  Add category keywords:
-    [cyan]asa keywords add "photo editor,image filter" --type category[/cyan]
-
-  Block irrelevant terms:
-    [cyan]asa keywords add-negatives "auto clicker,testflight" --all[/cyan]
-
-  Promote winning search terms:
-    [cyan]asa keywords promote "best photo app" --target category[/cyan]
-
-  Find keywords to promote:
-    [cyan]asa reports search-terms --winners[/cyan]
-
-  Find terms to block:
-    [cyan]asa reports search-terms --negatives[/cyan]
-
-  Run weekly optimization:
-    [cyan]asa optimize --dry-run[/cyan]
-    [cyan]asa optimize --auto-approve[/cyan]
-
-[bold]Multi-App Management:[/bold]
-
-  Add a second app:
-    [cyan]asa config add-app[/cyan]
-
-  List all configured apps:
-    [cyan]asa config list-apps[/cyan]
-
-  Switch active app:
-    [cyan]asa config switch colorcub[/cyan]
-
-  Run a command for a specific app:
-    [cyan]asa --app stitchit campaigns list[/cyan]
-    [cyan]asa --app colorcub campaigns setup --countries US --budget 50[/cyan]
-
-[bold]Documentation:[/bold]
-
-  Apple Search Ads Best Practices:
-    https://ads.apple.com/app-store/best-practices/campaign-structure
-
-  API Documentation:
-    https://developer.apple.com/documentation/apple_ads
-
-  GitHub:
-    https://github.com/cameronehrlich/apple-search-ads-cli
+[bold]Configuration and discovery[/bold]
+    [cyan]asa config setup[/cyan]
+    [cyan]asa config test[/cyan]
+    [cyan]asa <resource> <action> --help[/cyan]
+    [cyan]python scripts/lookup_command.py "search term popularity"[/cyan]
 """
     console.print(Panel(help_text, title="ASA CLI Help", border_style="cyan"))
 
 
 @app.callback()
 def main(
-    ctx: typer.Context,
-    app_slug: Optional[str] = typer.Option(
+    app_slug: str | None = typer.Option(
         None,
         "--app",
         "-A",
-        help="App slug to operate on (e.g., 'stitchit', 'colorcub'). Overrides active app.",
+        help="App slug to operate on; overrides the active local app.",
         envvar="ASA_APP",
     ),
-):
-    """Apple Search Ads CLI - manage campaigns, keywords, and reporting."""
+) -> None:
+    """Manage Apple Ads through Platform API v1, workflows, or explicit v5."""
     if app_slug:
         set_current_app(app_slug)
 

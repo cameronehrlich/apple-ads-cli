@@ -1,358 +1,291 @@
-# 🍎 Apple Search Ads CLI
+# Apple Ads CLI
 
-> **The missing command-line interface for Apple Search Ads.** Manage campaigns, keywords, and reporting using Apple's recommended 4-campaign structure.
+An independent, scriptable command-line interface for Apple Ads. It wraps every public operation in Apple’s official Python SDK, preserves the previous Campaign Management API v5 implementation, and adds safety-focused workflows for real advertising accounts.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
-[![Apple Ads API v5](https://img.shields.io/badge/Apple%20Ads%20API-v5-black.svg)](https://developer.apple.com/documentation/apple_ads)
+[![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
+[![Apple Ads Platform SDK 1.109.0](https://img.shields.io/badge/Apple%20Ads%20Platform%20SDK-1.109.0-black.svg)](https://github.com/apple/apple-ads-platform-api-python/releases/tag/v1.109.0)
 [![CI](https://github.com/cameronehrlich/apple-search-ads-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/cameronehrlich/apple-search-ads-cli/actions/workflows/ci.yml)
 
-```bash
-# Add keywords with automatic routing
-$ asa keywords add "photo editor,image filter" --type category
+## Why this CLI
 
-✓ Added 2 keywords to Category campaign (exact match)
-✓ Added 2 keywords to Discovery campaign (broad match)
-✓ Added 2 negative keywords to Discovery (prevents overlap)
-```
+- **Complete SDK coverage:** all 99 canonical methods in `apple-ads-platform==1.109.0`, organized into 24 explicit resource families.
+- **New Apple insights:** impression share, search-term popularity, country/region reporting, recommendations, and suggestions.
+- **Safe account operations:** mutations preview by default, require `--confirm`, expose the resolved ad-account context, and reject account mismatches before sending.
+- **A deliberate migration path:** the official Platform API is the default; proven higher-level behavior lives under `workflows`; the previous implementation remains under `v5`.
+- **Agent-ready documentation:** the repository includes a generated Codex skill with exact commands, options, request schemas, and safety rules.
 
-## ✨ Features
+Coverage is checked mechanically against a pinned SDK manifest. That proves local CLI completeness, not that Apple has enabled every endpoint for every account.
 
-- **🎯 4-Campaign Structure** — Implements Apple's best practices with Brand, Category, Competitor, and Discovery campaigns
-- **🔀 Smart Keyword Routing** — Add keywords once; they're automatically distributed to the right campaigns with the right match types
-- **📈 Automated Optimization** — One command analyzes Discovery, promotes winners, and blocks losers
-- **📊 Rich Reporting** — Performance summaries, keyword reports, search term analysis, impression share, ad-level reports, bid recommendations, and async custom reports
-- **💰 Budget Management** — Monitor budget orders, check campaign budget health with color-coded status
-- **🌍 Geo Targeting** — Search locations, view and set campaign geo targeting by country/region
-- **🎨 Ad Management** — List, create, and delete ad variations; manage creatives and product pages; view rejection reasons
-- **🔐 Access Control** — List ACLs, check user info, search apps, verify eligibility, list supported countries
-- **📦 Bulk Operations** — Bulk keyword bid updates, bulk negative keyword management, cross-campaign keyword search
-- **🔒 Dry-Run Mode** — Preview every change before it happens
-- **🤖 Claude Code Integration** — Includes SKILL.md for AI-assisted campaign management
+## Quick start
 
-## 🚀 Quick Start
-
-### Installation
+Python 3.12 or newer and [uv](https://docs.astral.sh/uv/) are required for the recommended development install.
 
 ```bash
-# Clone the repo
 git clone https://github.com/cameronehrlich/apple-search-ads-cli.git
 cd apple-search-ads-cli
 
-# Run with uv (recommended, no install needed)
+uv sync --all-extras
+uv run asa version
 uv run asa --help
-
-# Or install with pip
-pip install -e .
-asa --help
 ```
 
-### Setup
+An editable pip install also works:
 
 ```bash
-# Configure your Apple Ads API credentials
+python3.12 -m pip install -e '.[dev]'
+asa version
+```
+
+Automation should install the exact 1.1.0 tag rather than following `main`:
+
+```bash
+uv tool install 'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.1.0'
+```
+
+## Configure
+
+```bash
 asa config setup
-
-# Test connection
+asa config show
 asa config test
-
-# Audit your existing campaigns
-asa campaigns audit
 ```
 
-<details>
-<summary>📝 Getting API Credentials</summary>
+Credentials use Apple’s client ID, team ID, key ID, and EC private key. The saved credentials file uses mode `0600`; private keys and credential files are ignored by Git.
 
-1. Go to [Apple Ads](https://ads.apple.com/) → **Account Settings** → **API**
-2. Create an API user with appropriate permissions
-3. Generate an EC key pair:
-   ```bash
-   openssl ecparam -genkey -name prime256v1 -noout -out private-key.pem
-   openssl ec -in private-key.pem -pubout -out public-key.pem
-   ```
-4. Upload the public key to Apple Ads dashboard
-5. Note your **Client ID**, **Team ID**, **Key ID**, and **Org ID**
+Most ad-serving resources also require an Apple Ads Platform ad-account context. Supply it, in precedence order, through:
 
-</details>
+1. `--ad-account AD_ACCOUNT_ID`
+2. `ASA_AD_ACCOUNT_ID`
+3. `ad_account_id` saved by `asa config setup`
 
-## 📖 Usage
+The legacy v5 organization ID is intentionally never treated as the Platform API ad-account ID.
 
-### Campaign Management
+## Command architecture
+
+| Surface | Contract | Example |
+|---|---|---|
+| `asa <resource> <action>` | Exact wrappers around the official Platform SDK | `asa campaigns query --file query.json` |
+| `asa workflows ...` | Selected higher-level behavior above the SDK | `asa workflows campaigns audit` |
+| `asa v5 ...` | Frozen compatibility surface for the prior CLI | `asa v5 reports summary --days 7` |
+
+Use concrete help as the runtime source of truth:
 
 ```bash
-# List all campaigns
-asa campaigns list
-
-# Audit against Apple's recommendations
-asa campaigns audit --verbose
-
-# Create the 4-campaign structure
-asa campaigns setup --countries US --budget 50 --dry-run
-asa campaigns setup --countries US --budget 50
-
-# Pause/enable campaigns
-asa campaigns pause --all
-asa campaigns enable 12345678
+asa campaigns --help
+asa campaigns query --help
+asa insights search-term-popularity --help
 ```
 
-### Keywords
+### Official Platform API examples
 
 ```bash
-# Add keywords (automatically routes to correct campaigns)
-asa keywords add "my app,myapp" --type brand
-asa keywords add "photo editor,image filter" --type category
-asa keywords add "vsco,snapseed" --type competitor
+asa campaigns get --id CAMPAIGN_ID
+asa campaigns query --file query.json
+asa ad-groups query --file query.json
+asa keywords bulk-create --file keywords.json
+asa negative-keywords query --file query.json
 
-# Block irrelevant terms
-asa keywords add-negatives "auto clicker,testflight,crypto" --all
+asa insights impression-share --file impression-share.json
+asa insights search-term-popularity --file popularity.json
 
-# Promote winning keywords from Discovery
-asa keywords promote "best photo app" --target category
+asa recommendations daily-budget-query --file recommendations.json
+asa recommendations target-cpa-query --file recommendations.json
+asa suggestions keywords --file suggestions.json
 
-# List and filter keywords
-asa keywords list --campaign 12345
-asa keywords list --filter "photo" --status ACTIVE
-
-# Negative keyword management
-asa keywords list-negatives                    # List all negatives
-asa keywords delete-negatives 123,456          # Remove negatives by ID
-
-# Search across campaigns
-asa keywords find "photo"                      # Find keywords matching text
-
-# Bulk bid updates
-asa keywords update-bids-bulk --bid 2.50       # Update all bids at once
+asa reports-apps campaign --file report.json
+asa reports-apps search-term --file report.json
 ```
 
-### Reporting
+Body-based methods accept JSON through `--file`; use `--file -` for standard input.
 
 ```bash
-# Performance summary
-asa reports summary --days 7
-
-# Stable JSON over an exact inclusive, completed-date window
-asa reports summary --start 2026-08-01 --end 2026-08-07 --json
-
-# Keyword performance (sortable)
-asa reports keywords --sort cpa
-
-# Complete configured keyword inventory for integrations
-asa -A myapp reports keywords --all --include-zero \
-  --start 2026-08-01 --end 2026-08-07 --json
-
-# Search term analysis
-asa reports search-terms --winners    # Terms worth promoting
-asa reports search-terms --negatives  # Terms to block
-
-# Apple's true async impression-share data (app/search term/country deciles)
-asa reports impression-share --adam-id <APP_ID> --countries US --days 14
-
-# Ad-level performance
-asa reports ads
-
-# Bid recommendations (from Apple's keyword insights)
-asa reports bid-recommendations
-
-# Async custom reports (Apple limits custom date windows to 30 days)
-asa reports custom --days 30
-asa reports custom-list                        # List pending/completed reports
-asa reports custom-get <ID>                    # Download specific report
+printf '{"pagination":{"pageSize":100}}' \
+  | asa campaigns query --file -
 ```
 
-### Budget Management
+### Impression share
+
+Impression share measures bounded paid visibility for an app, search term, and country/region. It is not organic rank, exact search volume, competitor bid data, or share of installs. Apple supports first-slot and all-slot views.
+
+```json
+{
+  "filters": [
+    {
+      "field": "promotedObjectId",
+      "operator": "EQUALS",
+      "value": "123456789"
+    }
+  ],
+  "options": {
+    "impressionShareReportType": "ALL_SLOTS"
+  },
+  "timeRange": {
+    "start": "2026-08-02",
+    "end": "2026-08-08",
+    "granularity": "WEEKLY_SUN_SAT"
+  }
+}
+```
 
 ```bash
-# List budget orders
-asa budget list
-
-# Campaign budget health (color-coded)
-asa budget status
-
-# Get budget order details
-asa budget get <ID>
-
-# Create a budget order
-asa budget create --name "Q1 2025" --amount 5000 --start 2025-01-01 --end 2025-03-31
+asa insights impression-share \
+  --file impression-share.json \
+  --ad-account AD_ACCOUNT_ID
 ```
 
-### Geo Targeting
+### Search-term popularity
+
+Search-term popularity is market-level relative demand by country/region and App Store genre. It is not the promoted app’s traffic or an exact query count. Weekly data has rolling 65-week retention; monthly data has rolling 15-month retention.
+
+```json
+{
+  "timeRange": {
+    "start": "2026-08-02",
+    "end": "2026-08-08",
+    "granularity": "WEEKLY_SUN_SAT"
+  },
+  "pagination": {
+    "offset": 0,
+    "pageSize": 5000
+  }
+}
+```
 
 ```bash
-# Search for geo locations
-asa geo search "California"
-
-# Show campaign geo targeting
-asa geo show
-
-# Set geo targeting
-asa geo set --campaign <ID> --countries US,CA,GB
+asa insights search-term-popularity \
+  --file popularity.json \
+  --ad-account AD_ACCOUNT_ID
 ```
 
-### Ads & Creatives
+Keep the returned country/region, genre, and period attached to every interpretation.
+
+## Mutation safety
+
+Create, update, delete, upload, and recommendation apply/dismiss commands validate and print a JSON preview unless `--confirm` is present.
 
 ```bash
-# List ad variations
-asa ads list --campaign <ID>
+# Preview only
+asa campaigns create --file campaign.json
 
-# Create/delete ad variations; creation requires immediate readback
-asa ads create "Focused CPP" --campaign <ID> --adgroup <ID> --creative <ID> --dry-run
-asa ads delete <AD_ID> --campaign <ID> --adgroup <ID>
+# Explicit validation-only mode
+asa campaigns create --file campaign.json --dry-run
 
-# Validate a CPP manifest without mutating, then explicitly attach it
-asa ads experiment experiment.json
-asa ads experiment experiment.json --apply
-
-# View creative sets and product pages
-asa ads creatives --campaign <ID> --ad-group <ID>
-asa ads product-pages
-
-# Check ad rejection reasons
-asa ads rejections
+# Sends one mutation after review
+asa campaigns create --file campaign.json --confirm
 ```
 
-### Access Control
+The preview includes the resolved context and exact ad-account ID. A conflicting `adAccountId` in the request body fails before SDK invocation. Asset uploads require an existing, readable PNG, JPEG, or HEIC file.
+
+After every confirmed mutation, read the resource back and compare each intended field. A successful request without matching readback is unverified.
+
+## Resource families
+
+- Access, ad accounts, apps, and eligibility
+- Campaigns, ad groups, ads, creatives, and product pages
+- Keywords and negative keywords
+- Shared budgets
+- Business brands, business categories, geos, locations, and location groups
+- Assets and creative rejection reasons
+- App and business-brand reports
+- Impression share and search-term popularity insights
+- Daily-budget and target-CPA recommendations
+- Category, keyword, phrase, and target-CPA suggestions
+- Change-history summaries and details
+
+The complete inventory and all 35 request-model schemas are in the [generated command index](references/command-index.md).
+
+## Opinionated workflows
+
+Only behavior that remains useful above the official SDK is ported into `asa workflows`.
 
 ```bash
-# List access control entries
-asa acl list
+# Complete, paginated, read-only strategy audit
+asa workflows campaigns audit --strategy auto --ad-account AD_ACCOUNT_ID
 
-# Current user info
-asa acl me
+# Manual App Store search-results themes; never sends a request
+asa workflows campaigns plan-four-structure \
+  --grouping themed-ad-groups \
+  --daily-budget 100
 
-# Search for apps eligible for ads
-asa acl search-apps "My App"
-
-# Check campaign eligibility
-asa acl eligibility <APP_ID>
-
-# List supported countries
-asa acl countries
+# Maximize Conversions plan; optional Apple reads, never a mutation
+asa workflows campaigns plan-maximize-conversions \
+  --adam-id APP_ADAM_ID \
+  --countries US,GB \
+  --target-cpa 12 \
+  --daily-budget 60
 ```
 
-### Automated Optimization
+The audit detects `manual-search-results`, `maximize-conversions`, or `non-search-or-unsupported` from placement, supply-source, and bid-strategy evidence before considering campaign names. It never applies one strategy's health failures to another strategy. Optional `--strategy manual|maximize-conversions` overrides fail closed when they conflict with reliable API evidence.
 
-The `optimize` command is your weekly campaign maintenance in one line:
+Brand, Category, Competitor, and Discovery are manual search-results themes, not a universal account requirement. The manual planner supports separate campaigns or themed ad groups, keeps every budget unapproved, and documents exact-match, Search Match, and negative-overlap intent. The Maximize Conversions planner instead preserves target-CPA provenance, eligibility, an approximate five-conversions-per-day budget-capacity check, and a two-week learning guard. Both emit `dryRun=true` and `mutationAvailable=false`.
+
+Search tab, Today tab, product pages, and Apple Maps require placement-specific plans. They are intentionally outside these search-results planners; see the [multi-placement decision](references/placement-strategy-decision.md).
+
+Four-campaign setup, cloning, keyword promotion/routing, search-term optimization, custom reports, and CPP experiments remain available under `asa v5` until deliberately ported or retired.
 
 ```bash
-# Preview changes
-asa optimize --dry-run
-
-# Run with confirmation
-asa optimize
-
-# Fully automated (for cron jobs)
-asa optimize --auto-approve
+asa v5 campaigns audit
+asa v5 keywords promote 'winning term' --target category
+asa v5 reports custom --days 30
+asa v5 optimize --dry-run
 ```
 
-**What it does:**
-1. Analyzes Discovery search terms (last 14 days)
-2. Identifies **winners**: ≥2 installs, CPA ≤ $5
-3. Identifies **losers**: ≥$1 spend, 0 installs
-4. Promotes winners → exact match in target campaign + negative in Discovery
-5. Blocks losers in Discovery by default (`--negative-scope managed` is explicit)
+The Python import path `asa_cli.api` remains a compatibility re-export of `asa_cli.v5.api`. New compatibility code should import `asa_cli.v5.api` explicitly.
+
+## Codex skill and command discovery
+
+This repository is also a Codex skill. [SKILL.md](SKILL.md) is a compact router backed by generated, release-pinned references.
 
 ```bash
-# Customize thresholds
-asa optimize --days 7 --cpa-threshold 3.00 --min-installs 3 --min-spend 2.00
+python scripts/lookup_command.py 'search term popularity'
+python scripts/lookup_command.py --sdk-method impression_share_query
+python scripts/lookup_command.py --resource recommendations
+python scripts/lookup_command.py 'audit campaign strategy'
+python scripts/lookup_command.py 'manual search results plan'
+python scripts/lookup_command.py 'maximize conversions plan'
 ```
 
-## 🏗️ Campaign Structure
+Generated references cover every v1, v5, and workflow command with exact flags, request shapes, and mutation gates. Do not edit them by hand.
 
-Apple recommends a **4-campaign structure** that separates intent and controls costs:
+## Development
 
-| Campaign | Purpose | Match Type | Search Match |
-|----------|---------|------------|--------------|
-| **Brand** | Your app/company name | Exact | OFF |
-| **Category** | What your app does | Exact | OFF |
-| **Competitor** | Other apps users might try | Exact | OFF |
-| **Discovery** | Find new keywords | Broad | ON |
-
-### How Keyword Routing Works
-
-When you run `asa keywords add "term" --type category`:
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│                                                                 │
-│   "term" ──┬──► Category Campaign (EXACT)                       │
-│            │    Bids on exact matches only                      │
-│            │                                                    │
-│            ├──► Discovery Campaign (BROAD)                      │
-│            │    Finds related search terms                      │
-│            │                                                    │
-│            └──► Discovery Campaign (NEGATIVE)                   │
-│                 Prevents bidding on exact term in Discovery     │
-│                                                                 │
-└─────────────────────────────────────────────────────────────────┘
+```bash
+uv sync --all-extras
+uv run ruff check .
+uv run pytest -q
+uv run python -m asa_cli.platform.generate_manifest --check
+uv run python scripts/generate_skill_references.py --check
+uv run python scripts/check_release.py
+uv build
 ```
 
-This ensures:
-- ✅ Maximum control over high-value exact terms
-- ✅ Continued discovery of related search terms
-- ✅ No duplicate spend on the same intent
+The checked-in manifest records the SDK version and source commit, all 99 method signatures, HTTP paths, context modes, parameter classifications, mutation and pagination metadata, and JSON Schemas with hashes for 35 request models.
 
-## 📁 Configuration
+See [CONTRIBUTING.md](CONTRIBUTING.md) for endpoint and regression-test guidance.
 
-Configuration is stored in `~/.asa-cli/`:
+## Releases and compatibility
 
-```
-~/.asa-cli/
-├── credentials.json    # API credentials (chmod 600)
-└── config.json         # App settings (ID, name, countries, default bid)
-```
+The CLI uses semantic versions and bare tags such as `1.1.0`. GitHub Releases contain the wheel, source distribution, generated release notes, and SHA-256 checksums.
 
-## 🔧 API Behavior
+| Release | Public contract |
+|---|---|
+| `1.0.0` | Immutable legacy Campaign Management API v5 baseline from the former `main` code line |
+| `1.1.0` | Backward-compatible Platform API v1 default, explicit `asa v5` fallback, generated skill, and strategy-aware workflows |
 
-| Feature | Behavior |
-|---------|----------|
-| **Error Handling** | Reports both successes and errors; duplicates don't fail the operation |
-| **Authentication** | Auto-refreshes expired tokens with up to 2 retries |
-| **Pagination** | Automatically handles large result sets (>1000 items) |
-| **Rate Limiting** | Respects Apple's API limits |
+CLI and SDK versions are intentionally independent:
 
-## 📡 API Coverage
+- `asa 1.1.0` describes this project’s command and behavior contract.
+- `apple-ads-platform 1.109.0` identifies the exact Apple SDK contract it wraps.
 
-Full Apple Search Ads Campaign Management API v5 coverage — 72 API methods across 15 categories:
+Automation should pin a CLI release, run `asa config test`, and perform a safe read before depending on an endpoint. See [RELEASING.md](RELEASING.md) for the release process and versioning policy.
 
-| Category | Operations |
-|----------|------------|
-| **Campaigns** | list, get, create, update, pause, enable, delete |
-| **Ad Groups** | list, create, update, pause, enable, delete |
-| **Targeting Keywords** | list, add, find, delete, update bid, bulk update bids, pause, enable |
-| **Campaign Negatives** | list, find, add, update, delete |
-| **Ad Group Negatives** | list, find, add, update, delete |
-| **Reports** | campaign, keyword, ad group, search terms, impression share |
-| **Custom Reports** | create (async), get, list |
-| **Ad-Level Reports** | campaign ads, keyword by ad group, search terms by ad group |
-| **Budget Orders** | list, get, create |
-| **Geo Targeting** | search locations, get geo data, get/set campaign targeting |
-| **Ads / Variations** | list, create, delete |
-| **Creatives** | list creative sets, product page results, rejection reasons |
-| **ACL / Users** | list ACLs, current user info |
-| **App Search** | search apps, campaign eligibility, supported countries |
-| **Optimization** | automated promote/block workflow with configurable thresholds |
+## Project status
 
-## 🤖 Claude Code Integration
+The project is beta software operating against advertising accounts. Local tests and manifest reconciliation do not prove account eligibility, Apple-side rollout state, permissions, or live response behavior. Verify availability with safe reads; never use a mutation as an endpoint probe.
 
-This CLI includes a `SKILL.md` file for use with [Claude Code](https://claude.ai/code). When loaded, Claude can manage your Apple Search Ads campaigns conversationally:
+This project is independent and unofficial. It is not affiliated with, endorsed by, or sponsored by Apple Inc. Apple Ads, App Store, and Apple are trademarks of Apple Inc.
 
-```
-You: Add some category keywords for a photo editing app
-Claude: [Runs asa keywords add "photo editor,image filter,picture effects" --type category]
-```
+## License
 
-## 📚 Documentation
-
-- [Apple Search Ads Best Practices](https://ads.apple.com/app-store/best-practices/campaign-structure)
-- [Apple Ads API Documentation](https://developer.apple.com/documentation/apple_ads)
-- [SKILL.md](SKILL.md) — Full command reference for Claude Code
-- [API Completion Plan](docs/API-COMPLETION-PLAN.md) — Implementation roadmap
-- [Reporting and CPP experiments](docs/REPORTING-AND-CPP.md) — Complete windows, JSON schema, and safe attachment
-
-## 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
-
-## 📄 License
-
-[MIT](LICENSE) © Cameron Ehrlich
+MIT

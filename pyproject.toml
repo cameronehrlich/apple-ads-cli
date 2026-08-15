@@ -4,11 +4,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "asa-cli"
-version = "1.0.0"
-description = "Apple Search Ads CLI - manage campaigns, keywords, and reporting using Apple's recommended 4-campaign structure"
+version = "1.1.0"
+description = "Complete CLI wrapper for Apple's official Apple Ads Platform SDK, with safe mutations and v5 compatibility"
 readme = "README.md"
-requires-python = ">=3.9"
-license = {text = "MIT"}
+requires-python = ">=3.12"
+license = "MIT"
 authors = [
     {name = "Cameron Ehrlich", email = "cameron@ehrlich.io"}
 ]
@@ -17,15 +17,17 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
     "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.9",
-    "Programming Language :: Python :: 3.10",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
 ]
 dependencies = [
-    "typer[all]>=0.9.0",
+    "apple-ads-platform==1.109.0",
+    # The generated command catalog introspects Typer's Click tree. Keep both
+    # exact until an upgrade is reconciled across all 99 + v5/workflow leaves.
+    "typer==0.24.0",
+    "click==8.3.1",
     "rich>=13.0.0",
     "pyjwt[crypto]>=2.8.0",
     "requests>=2.31.0",
@@ -48,21 +50,28 @@ asa = "asa_cli.main:app"
 "Homepage" = "https://github.com/cameronehrlich/apple-search-ads-cli"
 "Documentation" = "https://github.com/cameronehrlich/apple-search-ads-cli#readme"
 "Issues" = "https://github.com/cameronehrlich/apple-search-ads-cli/issues"
+"Releases" = "https://github.com/cameronehrlich/apple-search-ads-cli/releases"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["asa_cli*"]
 
+[tool.setuptools.package-data]
+"asa_cli.platform" = ["manifest/*.json"]
+"asa_cli.workflows" = ["strategy_contract_v1.json"]
+
 [tool.black]
 line-length = 100
-target-version = ["py39", "py310", "py311", "py312"]
+target-version = ["py312"]
 
 [tool.ruff]
 line-length = 100
 
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "N", "UP", "B", "C4"]
-ignore = ["E501", "B008"]  # Typer declares CLI metadata in parameter defaults.
+# The v5 compatibility namespace intentionally preserves its pre-3.12 public
+# annotations and enum spellings while the Platform API implementation is added.
+ignore = ["E501", "B008", "UP017", "UP042", "UP045"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

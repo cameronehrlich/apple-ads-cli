@@ -6,8 +6,8 @@ import typer
 from rich.console import Console
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import load_credentials
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Geo targeting commands")
 console = Console()
