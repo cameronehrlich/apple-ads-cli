@@ -1,4 +1,4 @@
-"""Apple Search Ads Campaign Management API v5 compatibility package."""
+"""Apple Ads Campaign Management API v5 compatibility package."""
 
 from .api import (
     API_BASE_URL,

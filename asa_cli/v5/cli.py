@@ -1,4 +1,4 @@
-"""Typer command tree for the Apple Search Ads v5 implementation."""
+"""Typer command tree for the Apple Ads Campaign Management API v5 implementation."""
 
 from typing import Final
 
@@ -44,7 +44,7 @@ def register_v5_commands(parent: typer.Typer, *, deprecated: bool = False) -> No
 
 app = typer.Typer(
     name="v5",
-    help="Apple Search Ads Campaign Management API v5 commands.",
+    help="Legacy Apple Ads Campaign Management API v5 commands.",
     no_args_is_help=True,
     rich_markup_mode="rich",
 )

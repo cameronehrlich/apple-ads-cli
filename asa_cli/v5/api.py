@@ -1,4 +1,4 @@
-"""Direct API client for Apple Search Ads using JWT OAuth authentication."""
+"""Direct client for Apple Ads Campaign Management API v5 using JWT OAuth."""
 
 import time
 from datetime import datetime, timedelta
@@ -23,7 +23,7 @@ class SearchAdsAPIError(RuntimeError):
 
 
 class SearchAdsClient:
-    """Direct Apple Search Ads API client with JWT authentication."""
+    """Direct Apple Ads Campaign Management API v5 client with JWT authentication."""
 
     def __init__(self, credentials: Optional[Credentials] = None, app_config: Optional[AppConfig] = None):
         """Initialize the API client.
@@ -188,7 +188,7 @@ class SearchAdsClient:
     ) -> list[dict[str, Any]]:
         """Fetch all results from a paginated endpoint.
 
-        Apple Search Ads API defaults to 20 items per page. This method fetches
+        Apple Ads Campaign Management API v5 defaults to 20 items per page. This method fetches
         all pages and returns the combined results.
 
         Args:

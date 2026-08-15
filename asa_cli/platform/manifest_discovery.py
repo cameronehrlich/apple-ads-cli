@@ -538,7 +538,7 @@ def discover_manifest() -> dict[str, Any]:
 
 MANIFEST_SCHEMA: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://github.com/cameronehrlich/apple-search-ads-cli/schemas/apple-ads-platform-manifest-v2.json",
+    "$id": "https://github.com/cameronehrlich/apple-ads-cli/schemas/apple-ads-platform-manifest-v2.json",
     "title": "Apple Ads Platform SDK manifest",
     "type": "object",
     "additionalProperties": False,

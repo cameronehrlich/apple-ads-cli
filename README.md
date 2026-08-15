@@ -2,10 +2,12 @@
 
 An independent, scriptable command-line interface for Apple Ads. It wraps every public operation in Apple’s official Python SDK, preserves the previous Campaign Management API v5 implementation, and adds safety-focused workflows for real advertising accounts.
 
+The project follows Apple’s current Apple Ads name. The established `asa` executable, `asa-cli` Python distribution, and `asa_cli` import package remain unchanged for compatibility. The bundled Codex skill is invoked as `$apple-ads-cli`.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.12+](https://img.shields.io/badge/python-3.12+-blue.svg)](https://www.python.org/downloads/)
 [![Apple Ads Platform SDK 1.109.0](https://img.shields.io/badge/Apple%20Ads%20Platform%20SDK-1.109.0-black.svg)](https://github.com/apple/apple-ads-platform-api-python/releases/tag/v1.109.0)
-[![CI](https://github.com/cameronehrlich/apple-search-ads-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/cameronehrlich/apple-search-ads-cli/actions/workflows/ci.yml)
+[![CI](https://github.com/cameronehrlich/apple-ads-cli/actions/workflows/ci.yml/badge.svg)](https://github.com/cameronehrlich/apple-ads-cli/actions/workflows/ci.yml)
 
 ## Why this CLI
 
@@ -22,8 +24,8 @@ Coverage is checked mechanically against a pinned SDK manifest. That proves loca
 Python 3.12 or newer and [uv](https://docs.astral.sh/uv/) are required for the recommended development install.
 
 ```bash
-git clone https://github.com/cameronehrlich/apple-search-ads-cli.git
-cd apple-search-ads-cli
+git clone https://github.com/cameronehrlich/apple-ads-cli.git
+cd apple-ads-cli
 
 uv sync --all-extras
 uv run asa version
@@ -40,7 +42,7 @@ asa version
 Automation should install the exact 1.1.1 tag rather than following `main`:
 
 ```bash
-uv tool install 'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.1.1'
+uv tool install 'git+https://github.com/cameronehrlich/apple-ads-cli.git@1.1.1'
 ```
 
 ## Configure
@@ -195,7 +197,7 @@ After every confirmed mutation, read the resource back and compare each intended
 
 The complete inventory and all 35 request-model schemas are in the [generated command index](references/command-index.md).
 
-## Opinionated workflows
+## Optional higher-level workflows
 
 Only behavior that remains useful above the official SDK is ported into `asa workflows`.
 

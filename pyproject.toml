@@ -12,7 +12,7 @@ license = "MIT"
 authors = [
     {name = "Cameron Ehrlich", email = "cameron@ehrlich.io"}
 ]
-keywords = ["apple", "search-ads", "asa", "cli", "marketing", "app-store", "ios"]
+keywords = ["apple", "apple-ads", "search-ads", "asa", "cli", "marketing", "app-store", "ios"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Environment :: Console",
@@ -47,10 +47,10 @@ dev = [
 asa = "asa_cli.main:app"
 
 [project.urls]
-"Homepage" = "https://github.com/cameronehrlich/apple-search-ads-cli"
-"Documentation" = "https://github.com/cameronehrlich/apple-search-ads-cli#readme"
-"Issues" = "https://github.com/cameronehrlich/apple-search-ads-cli/issues"
-"Releases" = "https://github.com/cameronehrlich/apple-search-ads-cli/releases"
+"Homepage" = "https://github.com/cameronehrlich/apple-ads-cli"
+"Documentation" = "https://github.com/cameronehrlich/apple-ads-cli#readme"
+"Issues" = "https://github.com/cameronehrlich/apple-ads-cli/issues"
+"Releases" = "https://github.com/cameronehrlich/apple-ads-cli/releases"
 
 [tool.setuptools.packages.find]
 where = ["."]

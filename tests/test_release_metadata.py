@@ -38,3 +38,22 @@ def test_cli_framework_version_is_pinned_to_the_verified_command_tree():
     assert "click==8.3.1" in project["dependencies"]
     assert version("typer") == "0.24.0"
     assert version("click") == "8.3.1"
+
+
+def test_public_metadata_uses_the_canonical_repository_without_renaming_the_cli():
+    project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    canonical_repository = "https://github.com/cameronehrlich/apple-ads-cli"
+
+    assert project["name"] == "asa-cli"
+    assert project["scripts"] == {"asa": "asa_cli.main:app"}
+    assert project["urls"] == {
+        "Homepage": canonical_repository,
+        "Documentation": f"{canonical_repository}#readme",
+        "Issues": f"{canonical_repository}/issues",
+        "Releases": f"{canonical_repository}/releases",
+    }
+
+    skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
+    agent_metadata = (ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
+    assert "name: apple-ads-cli\n" in skill
+    assert "$apple-ads-cli" in agent_metadata
