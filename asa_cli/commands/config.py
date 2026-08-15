@@ -9,7 +9,6 @@ from rich.table import Table
 from ..config import (
     CONFIG_FILE,
     CREDENTIALS_FILE,
-    get_active_app_config,
     get_app_slug,
     load_app_config,
     load_credentials,
@@ -37,7 +36,10 @@ def setup_config(
         existing_creds = load_credentials()
         if existing_creds:
             console.print("[yellow]Existing credentials found.[/yellow]")
-            console.print(f"  Org ID: {existing_creds.org_id}")
+            if existing_creds.org_id is not None:
+                console.print(f"  Legacy v5 Org ID: {existing_creds.org_id}")
+            if existing_creds.ad_account_id:
+                console.print(f"  Platform Ad Account ID: {existing_creds.ad_account_id}")
             console.print(f"  Client ID: {existing_creds.client_id[:20]}...")
 
             if not Confirm.ask("Overwrite existing credentials?"):
@@ -76,8 +78,11 @@ def setup_config(
 
     console.print("\n[bold green]Configuration complete![/bold green]")
     console.print("\nNext steps:")
-    console.print("  1. Run [cyan]asa campaigns audit[/cyan] to check existing campaigns")
-    console.print("  2. Run [cyan]asa campaigns setup[/cyan] to create the 4-campaign structure")
+    console.print("  1. Run [cyan]asa --help[/cyan] to explore Platform API v1 resources")
+    console.print(
+        "  2. Run [cyan]asa workflows campaigns audit --strategy auto[/cyan] for a safe audit"
+    )
+    console.print("  3. Run [cyan]asa v5 --help[/cyan] for the legacy compatibility surface")
 
 
 @app.command("show")
@@ -96,7 +101,10 @@ def show_config():
         table.add_column("Key", style="cyan")
         table.add_column("Value")
 
-        table.add_row("Org ID", str(credentials.org_id))
+        if credentials.org_id is not None:
+            table.add_row("Legacy v5 Org ID", str(credentials.org_id))
+        if credentials.ad_account_id:
+            table.add_row("Ad Account ID", credentials.ad_account_id)
         table.add_row("Client ID", credentials.client_id[:30] + "...")
         table.add_row("Team ID", credentials.team_id)
         table.add_row("Key ID", credentials.key_id)
@@ -131,7 +139,7 @@ def show_config():
 
 @app.command("test")
 def test_connection():
-    """Test API connection with current credentials."""
+    """Test API access; exits nonzero on authentication or transport failure."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
@@ -140,11 +148,11 @@ def test_connection():
     console.print("[bold]Testing API connection...[/bold]\n")
 
     try:
-        from ..api import SearchAdsClient
+        from ..v5.api import SearchAdsClient
 
         client = SearchAdsClient(credentials)
 
-        with console.status("[bold blue]Connecting to Apple Search Ads API..."):
+        with console.status("[bold blue]Connecting to Apple Ads API..."):
             campaigns = client.get_campaigns()
 
         console.print("[green]Connection successful![/green]")
@@ -153,15 +161,15 @@ def test_connection():
 
     except ImportError as e:
         console.print(f"[red]Missing dependency: {e}[/red]")
-        console.print("  Run: pip install -e . (from the apple-search-ads directory)")
-        raise typer.Exit(1)
+        console.print("  Run: pip install -e . (from the apple-ads-cli directory)")
+        raise typer.Exit(1) from e
     except Exception as e:
         console.print(f"[red]Connection failed: {e}[/red]")
         console.print("\nTroubleshooting:")
         console.print("  1. Verify your credentials in Apple Ads dashboard")
         console.print("  2. Ensure private key file exists and is readable")
         console.print("  3. Check that your API user has appropriate permissions")
-        raise typer.Exit(1)
+        raise typer.Exit(1) from e
 
 
 @app.command("add-app")

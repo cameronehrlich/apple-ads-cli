@@ -1,11 +1,26 @@
 """Tests for API client module."""
 
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
+import requests
 
-from asa_cli.api import SearchAdsClient
 from asa_cli.config import AppConfig, Credentials, MatchType
+from asa_cli.v5.api import REQUEST_TIMEOUT, SearchAdsAPIError, SearchAdsClient
+
+
+def test_v5_org_context_requires_explicit_legacy_org_id():
+    credentials = Credentials(
+        ad_account_id="account-123",
+        client_id="client",
+        team_id="team",
+        key_id="key",
+        private_key_path="/tmp/private-key.pem",
+    )
+    client = SearchAdsClient(credentials=credentials)
+
+    with pytest.raises(ValueError, match="Legacy API v5 requires an organization ID"):
+        _ = client.org_id
 
 
 @pytest.fixture
@@ -36,6 +51,7 @@ def mock_client(mock_credentials, mock_app_config):
     """Create a mock SearchAdsClient."""
     with patch.object(SearchAdsClient, "_get_access_token", return_value="mock_token"):
         client = SearchAdsClient(mock_credentials, app_config=mock_app_config)
+        client._currency = "USD"
         return client
 
 
@@ -130,6 +146,66 @@ class TestPagination:
             results = mock_client.get_keywords(123, 456, include_deleted=True)
 
         assert len(results) == 2
+
+
+class TestRequestFailures:
+    """Tests for bounded requests and fail-closed API errors."""
+
+    def test_api_request_uses_bounded_timeout(self, mock_client):
+        response = MagicMock(status_code=200)
+        response.json.return_value = {"data": []}
+
+        with patch.object(mock_client, "_get_access_token", return_value="mock_token"):
+            with patch("asa_cli.v5.api.requests.request", return_value=response) as request:
+                mock_client._request("GET", "/campaigns")
+
+        assert request.call_args.kwargs["timeout"] == REQUEST_TIMEOUT
+
+    def test_api_network_error_raises_typed_error(self, mock_client):
+        with patch.object(mock_client, "_get_access_token", return_value="mock_token"):
+            with patch(
+                "asa_cli.v5.api.requests.request",
+                side_effect=requests.Timeout("timed out"),
+            ):
+                with pytest.raises(SearchAdsAPIError, match="GET /campaigns"):
+                    mock_client._request("GET", "/campaigns")
+
+    def test_oauth_network_error_raises_typed_error(self, mock_client):
+        with patch.object(mock_client, "_create_client_secret", return_value="secret"):
+            with patch(
+                "asa_cli.v5.api.requests.post",
+                side_effect=requests.Timeout("timed out"),
+            ):
+                with pytest.raises(SearchAdsAPIError, match="Apple OAuth"):
+                    mock_client._get_access_token()
+
+    def test_campaign_list_error_is_not_converted_to_empty_data(self, mock_client):
+        with patch.object(
+            mock_client,
+            "_get_all_paginated",
+            side_effect=SearchAdsAPIError("unavailable"),
+        ):
+            with pytest.raises(SearchAdsAPIError, match="unavailable"):
+                mock_client.get_campaigns()
+
+    @pytest.mark.parametrize(
+        ("method_name", "args"),
+        [
+            ("get_campaign_report", (123,)),
+            ("get_keyword_report", (123,)),
+            ("get_ad_group_report", (123,)),
+            ("get_search_terms_report", (123,)),
+            ("get_keyword_adgroup_report", (123, 456)),
+        ],
+    )
+    def test_weekly_report_errors_fail_closed(self, mock_client, method_name, args):
+        with patch.object(
+            mock_client,
+            "_request",
+            side_effect=SearchAdsAPIError("unavailable"),
+        ):
+            with pytest.raises(SearchAdsAPIError, match="unavailable"):
+                getattr(mock_client, method_name)(*args)
 
 
 class TestNegativeKeywordsErrorHandling:
@@ -269,8 +345,12 @@ class TestOrgCurrencyDetection:
 
     def test_get_org_currency_caches_detected_currency(self, mock_client):
         """Test a discovered currency is cached for later calls."""
+        mock_client._currency = None
         response = {
-            "data": [{"dailyBudgetAmount": {"amount": "10", "currency": "EUR"}}],
+            "data": [
+                {"orgId": 999999, "currency": "USD"},
+                {"orgId": "123456", "currency": "eur"},
+            ],
         }
 
         with patch.object(mock_client, "_request", return_value=response) as mock_request:
@@ -279,21 +359,58 @@ class TestOrgCurrencyDetection:
 
         assert mock_client._currency == "EUR"
         assert mock_request.call_count == 1
+        mock_request.assert_called_once_with("GET", "/acls", skip_org_context=True)
 
-    def test_get_org_currency_does_not_cache_usd_fallback(self, mock_client):
-        """Test the USD fallback is returned without populating the cache."""
-        with patch.object(mock_client, "_request", return_value={"data": []}) as mock_request:
-            assert mock_client.get_org_currency() == "USD"
-            assert mock_client.get_org_currency() == "USD"
+    @pytest.mark.parametrize(
+        "response",
+        [
+            {"data": []},
+            {"data": [{"orgId": 123456}]},
+            {"data": [{"orgId": 123456, "currency": ""}]},
+            {"data": [{"orgId": 123456, "currency": 123}]},
+            {"data": "not-a-list"},
+            [],
+        ],
+    )
+    def test_get_org_currency_fails_closed_without_matching_currency(self, mock_client, response):
+        """Test missing or malformed ACL currency never falls back to USD."""
+        mock_client._currency = None
+        with patch.object(mock_client, "_request", return_value=response):
+            with pytest.raises(SearchAdsAPIError, match="organization 123456"):
+                mock_client.get_org_currency()
 
         assert mock_client._currency is None
-        assert mock_request.call_count == 2
 
     def test_get_org_currency_propagates_request_errors(self, mock_client):
         """Test request errors surface to the caller."""
+        mock_client._currency = None
         with patch.object(mock_client, "_request", side_effect=RuntimeError("boom")):
             with pytest.raises(RuntimeError, match="boom"):
                 mock_client.get_org_currency()
+
+    def test_money_writes_use_detected_org_currency(self, mock_client):
+        """Test every client-owned money payload uses the resolved currency."""
+        mock_client._currency = "EUR"
+        response = {"data": [{"id": 1}]}
+
+        with patch.object(mock_client, "_request", return_value=response) as request:
+            mock_client.create_campaign("Campaign", budget=100, daily_budget=10, countries=["DE"])
+            campaign_payload = request.call_args.kwargs["data"]
+            assert campaign_payload["budgetAmount"]["currency"] == "EUR"
+            assert campaign_payload["dailyBudgetAmount"]["currency"] == "EUR"
+
+            mock_client.create_ad_group(1, "Exact", 1.5, cpa_goal=2.5)
+            ad_group_payload = request.call_args.kwargs["data"]
+            assert ad_group_payload["defaultBidAmount"]["currency"] == "EUR"
+            assert ad_group_payload["cpaGoal"]["currency"] == "EUR"
+
+            mock_client.add_keywords(1, 2, ["fax"], MatchType.EXACT, bid_amount=3)
+            keyword_payload = request.call_args.kwargs["data"]
+            assert keyword_payload[0]["bidAmount"]["currency"] == "EUR"
+
+            mock_client.update_keyword_bid(1, 2, 3, 4)
+            update_payload = request.call_args.kwargs["data"]
+            assert update_payload[0]["bidAmount"]["currency"] == "EUR"
 
     def test_get_negative_keywords_uses_pagination(self, mock_client):
         """Test get_negative_keywords uses pagination."""

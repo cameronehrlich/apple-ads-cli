@@ -1,4 +1,4 @@
-"""Configuration management for Apple Search Ads CLI."""
+"""Configuration management for Apple Ads CLI."""
 
 import json
 import os
@@ -19,7 +19,7 @@ CREDENTIALS_FILE = CONFIG_DIR / "credentials.json"
 
 
 class CampaignType(str, Enum):
-    """Campaign types following Apple's 4-campaign structure."""
+    """Manual App Store search-results keyword themes."""
 
     BRAND = "brand"
     CATEGORY = "category"
@@ -59,7 +59,7 @@ class CampaignConfig(BaseModel):
     recommended_budget: float = 50.0
 
 
-# Apple's recommended 4-campaign structure
+# Manual search-results themes; physical campaign grouping is caller-selected.
 CAMPAIGN_STRUCTURE: dict[CampaignType, CampaignConfig] = {
     CampaignType.BRAND: CampaignConfig(
         name_suffix="Brand",
@@ -113,9 +113,16 @@ CAMPAIGN_TYPE_NAMES = {
 
 
 class Credentials(BaseModel):
-    """API credentials for Apple Search Ads."""
+    """API credentials for Apple Ads."""
 
-    org_id: int = Field(..., description="Organization ID")
+    org_id: Optional[int] = Field(
+        None,
+        description="Legacy Campaign Management API v5 organization ID",
+    )
+    ad_account_id: Optional[str] = Field(
+        None,
+        description="Apple Ads Platform API ad account ID",
+    )
     client_id: str = Field(..., description="Client ID from Apple Ads API settings")
     team_id: str = Field(..., description="Team ID from Apple Ads API settings")
     key_id: str = Field(..., description="Key ID from Apple Ads API settings")
@@ -365,11 +372,21 @@ def parse_campaign_name(name: str, app_name: Optional[str] = None) -> Optional[t
 
 def prompt_for_credentials() -> Credentials:
     """Interactively prompt for API credentials."""
-    console.print("\n[bold]Apple Search Ads API Credentials Setup[/bold]\n")
+    console.print("\n[bold]Apple Ads API Credentials Setup[/bold]\n")
     console.print("You'll need to create API credentials in Apple Ads dashboard first.")
     console.print("See: https://ads.apple.com/help/campaigns/0022-use-the-campaign-management-api\n")
 
-    org_id = int(Prompt.ask("Organization ID"))
+    org_id_input = Prompt.ask(
+        "Organization ID (legacy API v5, optional)",
+        default="",
+        show_default=False,
+    ).strip()
+    org_id = int(org_id_input) if org_id_input else None
+    ad_account_id = Prompt.ask(
+        "Ad Account ID (Platform API v1, optional)",
+        default="",
+        show_default=False,
+    ).strip()
     client_id = Prompt.ask("Client ID")
     team_id = Prompt.ask("Team ID")
     key_id = Prompt.ask("Key ID")
@@ -383,6 +400,7 @@ def prompt_for_credentials() -> Credentials:
 
     return Credentials(
         org_id=org_id,
+        ad_account_id=ad_account_id or None,
         client_id=client_id,
         team_id=team_id,
         key_id=key_id,

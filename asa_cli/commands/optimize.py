@@ -10,7 +10,6 @@ from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import (
     CampaignType,
     MatchType,
@@ -19,6 +18,7 @@ from ..config import (
     is_multi_app,
     load_credentials,
 )
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Automated campaign optimization")
 console = Console()
@@ -55,9 +55,16 @@ def get_campaigns_indexed(
 
     for c in campaigns:
         ctype = detect_campaign_type(c.get("name", ""), app_name=app_name)
-        if ctype:
-            by_type[ctype] = c
-            managed.append((c, ctype))
+        if not ctype:
+            continue
+        if ctype in by_type:
+            first_name = by_type[ctype].get("name", "?")
+            second_name = c.get("name", "?")
+            raise ValueError(
+                f"Multiple {ctype.value} campaigns matched: {first_name}, {second_name}"
+            )
+        by_type[ctype] = c
+        managed.append((c, ctype))
 
     return by_type, managed
 
@@ -203,12 +210,12 @@ def display_optimization_summary(
         table.add_column("Spend", justify="right")
         table.add_column("Impressions", justify="right")
 
-        for l in losers[:20]:
+        for loser in losers[:20]:
             table.add_row(
-                l["term"][:35],
-                str(l["installs"]),
-                format_currency(l["spend"]),
-                str(l["impressions"]),
+                loser["term"][:35],
+                str(loser["installs"]),
+                format_currency(loser["spend"]),
+                str(loser["impressions"]),
             )
 
         if len(losers) > 20:
@@ -255,39 +262,55 @@ def execute_promotions(
             match_type=MatchType.EXACT,
         )
 
-    if added and len(added) > 0:
+    added_terms = {
+        str(item.get("text", "")).strip().lower()
+        for item in added
+        if item.get("text")
+    }
+    all_duplicates = bool(errors) and all(
+        error.get("messageCode") == "DUPLICATE_KEYWORD" for error in errors
+    )
+
+    if added:
         console.print(f"[green]✓ Added {len(added)} keywords to {target_campaign.get('name')}[/green]")
-    elif errors:
-        all_duplicates = all(e.get("messageCode") == "DUPLICATE_KEYWORD" for e in errors)
-        if all_duplicates:
-            console.print(f"[dim]↳ {len(errors)} keywords already exist in {target_campaign.get('name')}[/dim]")
-            # Continue with negative keyword addition even if duplicates
-            added = keyword_list  # Treat as success for flow purposes
-        else:
-            console.print(f"[red]✗ Failed: {errors[0].get('message', 'Unknown error')}[/red]")
-            return 0, len(winners)
+    elif all_duplicates:
+        console.print(
+            f"[dim]↳ {len(errors)} keywords already exist in "
+            f"{target_campaign.get('name')}[/dim]"
+        )
     else:
-        console.print(f"[red]✗ Failed to add keywords to target campaign[/red]")
+        message = errors[0].get("message", "Unknown error") if errors else "Unknown error"
+        console.print(f"[red]✗ Failed: {message}[/red]")
+        return 0, len(winners)
+
+    safe_terms = (
+        keyword_list
+        if all_duplicates
+        else [term for term in keyword_list if term.strip().lower() in added_terms]
+    )
+    if not safe_terms:
+        console.print("[yellow]No confirmed promotions to negate in Discovery.[/yellow]")
         return 0, len(winners)
 
     with console.status("[bold blue]Adding negatives to Discovery..."):
-        neg_added, neg_errors = client.add_negative_keywords(discovery_id, keyword_list)
+        neg_added, neg_errors = client.add_negative_keywords(discovery_id, safe_terms)
 
     if neg_added and len(neg_added) > 0:
         console.print(f"[green]✓ Added {len(neg_added)} negatives to Discovery[/green]")
     elif neg_errors:
         # Check if all errors are duplicates (which is fine)
-        all_duplicates = all(e.get("messageCode") == "DUPLICATE_KEYWORD" for e in neg_errors)
-        if all_duplicates:
+        negatives_are_duplicates = all(
+            error.get("messageCode") == "DUPLICATE_KEYWORD" for error in neg_errors
+        )
+        if negatives_are_duplicates:
             console.print(f"[dim]↳ {len(neg_errors)} negatives already exist in Discovery[/dim]")
         else:
             console.print(f"[yellow]⚠ Could not add negatives to Discovery: {neg_errors[0].get('message', 'Unknown error')}[/yellow]")
     else:
-        console.print(f"[yellow]⚠ Could not add negatives to Discovery[/yellow]")
+        console.print("[yellow]⚠ Could not add negatives to Discovery[/yellow]")
 
-    # Return count based on what was actually promoted
-    promoted_count = len(added) if isinstance(added, list) else len(keyword_list)
-    return promoted_count, 0
+    promoted_count = len(safe_terms)
+    return promoted_count, len(winners) - promoted_count
 
 
 def execute_negatives(
@@ -302,11 +325,11 @@ def execute_negatives(
     if not losers:
         return 0, 0
 
-    keyword_list = [l["term"] for l in losers]
+    keyword_list = [loser["term"] for loser in losers]
     success_count = 0
     failure_count = 0
 
-    for campaign, ctype in managed_campaigns:
+    for campaign, _campaign_type in managed_campaigns:
         cid = campaign.get("id")
         cname = campaign.get("name")
 
@@ -362,6 +385,11 @@ def optimize_cmd(
         "-t",
         help="Target campaign for promotions: brand, category, competitor",
     ),
+    negative_scope: str = typer.Option(
+        "discovery",
+        "--negative-scope",
+        help="Where to add loser negatives: discovery or managed",
+    ),
     output_json: bool = typer.Option(
         False, "--json", help="Output results as JSON (implies --dry-run)"
     ),
@@ -377,13 +405,13 @@ def optimize_cmd(
 
     \b
     Examples:
-        asa optimize --dry-run           # Preview changes
-        asa optimize --days 7            # Analyze last 7 days
-        asa optimize --cpa-threshold 3   # Stricter winner criteria
-        asa optimize --auto-approve      # Skip confirmation
-        asa optimize --json              # Output as JSON
-        asa optimize --min-impressions 10  # Only terms with 10+ impressions
-        asa optimize --exclude "test,demo" # Exclude specific terms
+        asa v5 optimize --dry-run           # Preview changes
+        asa v5 optimize --days 7            # Analyze last 7 days
+        asa v5 optimize --cpa-threshold 3   # Stricter winner criteria
+        asa v5 optimize --auto-approve      # Skip confirmation
+        asa v5 optimize --json              # Output as JSON
+        asa v5 optimize --min-impressions 10  # Only terms with 10+ impressions
+        asa v5 optimize --exclude "test,demo" # Exclude specific terms
     """
     if ctx.invoked_subcommand is not None:
         return
@@ -418,16 +446,36 @@ def optimize_cmd(
 
     target_type = target_type_map[target.lower()]
 
+    negative_scope = negative_scope.lower()
+    if negative_scope not in {"discovery", "managed"}:
+        if output_json:
+            print(json.dumps({"error": f"Invalid negative scope: {negative_scope}"}))
+        else:
+            console.print("[red]Invalid negative scope. Use discovery or managed.[/red]")
+        raise typer.Exit(1)
+
     client = SearchAdsClient(credentials)
     app_name = _resolve_app_name()
 
     if not output_json:
         with console.status("[bold blue]Finding campaigns..."):
-            campaigns_by_type, managed_campaigns = get_campaigns_indexed(client, app_name=app_name)
+            try:
+                campaigns_by_type, managed_campaigns = get_campaigns_indexed(
+                    client, app_name=app_name
+                )
+            except ValueError as error:
+                console.print(f"[red]{error}[/red]")
+                raise typer.Exit(1) from error
             discovery_campaign = campaigns_by_type.get(CampaignType.DISCOVERY)
             target_campaign = campaigns_by_type.get(target_type)
     else:
-        campaigns_by_type, managed_campaigns = get_campaigns_indexed(client, app_name=app_name)
+        try:
+            campaigns_by_type, managed_campaigns = get_campaigns_indexed(
+                client, app_name=app_name
+            )
+        except ValueError as error:
+            print(json.dumps({"error": str(error)}))
+            raise typer.Exit(1) from error
         discovery_campaign = campaigns_by_type.get(CampaignType.DISCOVERY)
         target_campaign = campaigns_by_type.get(target_type)
 
@@ -497,6 +545,7 @@ def optimize_cmd(
                 "min_impressions": min_impressions,
                 "exclude_terms": exclude_list,
                 "target_campaign": target_type.value,
+                "negative_scope": negative_scope,
             },
             "campaigns": {
                 "discovery": {
@@ -526,12 +575,12 @@ def optimize_cmd(
             ],
             "losers": [
                 {
-                    "term": l["term"],
-                    "spend": l["spend"],
-                    "impressions": l["impressions"],
-                    "taps": l["taps"],
+                    "term": loser["term"],
+                    "spend": loser["spend"],
+                    "impressions": loser["impressions"],
+                    "taps": loser["taps"],
                 }
-                for l in losers
+                for loser in losers
             ],
         }
         print(json.dumps(output_data, indent=2))
@@ -577,7 +626,12 @@ def optimize_cmd(
         )
 
     if losers:
-        neg_success, neg_failed = execute_negatives(client, losers, managed_campaigns)
+        negative_campaigns = (
+            [(discovery_campaign, CampaignType.DISCOVERY)]
+            if negative_scope == "discovery"
+            else managed_campaigns
+        )
+        neg_success, neg_failed = execute_negatives(client, losers, negative_campaigns)
 
     console.print("\n[bold green]Optimization complete![/bold green]")
 
@@ -592,4 +646,3 @@ def optimize_cmd(
 
     if failed_promo > 0 or neg_failed > 0:
         console.print(f"[yellow]Failures: {failed_promo} promotions, {neg_failed} campaign blocks[/yellow]")
-

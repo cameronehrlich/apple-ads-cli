@@ -8,7 +8,6 @@ from rich.panel import Panel
 from rich.prompt import Confirm
 from rich.table import Table
 
-from ..api import SearchAdsClient
 from ..config import (
     CAMPAIGN_STRUCTURE,
     CampaignType,
@@ -19,6 +18,7 @@ from ..config import (
     load_credentials,
     parse_campaign_name,
 )
+from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Campaign management commands")
 console = Console()
@@ -113,6 +113,7 @@ def list_campaigns(
     table.add_column("Type", style="green")
     table.add_column("Status")
     table.add_column("Daily Budget")
+    table.add_column("Lifetime")
     if show_bids:
         table.add_column("Ad Group Bids")
     else:
@@ -126,6 +127,21 @@ def list_campaigns(
         status = campaign.get("displayStatus", campaign.get("status", "UNKNOWN"))
         daily_budget = campaign.get("dailyBudgetAmount", {})
         budget_str = f"${daily_budget.get('amount', '?')} {daily_budget.get('currency', '')}"
+
+        # Lifetime budget — flag campaigns that silently stopped serving
+        # because they hit their lifetime cap. Apple is discontinuing
+        # lifetime budgets on 2026-06-16, so flag these everywhere.
+        lt = campaign.get("budgetAmount") or {}
+        lt_amt = lt.get("amount") if isinstance(lt, dict) else None
+        serving = campaign.get("servingStatus", "")
+        user_status = campaign.get("status", "")
+        if lt_amt is None:
+            lt_str = "[dim]—[/dim]"
+        elif user_status == "ENABLED" and serving != "RUNNING":
+            lt_str = f"[red]${lt_amt} CAPPED[/red]"
+        else:
+            lt_str = f"[yellow]${lt_amt}[/yellow]"
+
         countries = ", ".join(campaign.get("countriesOrRegions", []))
 
         status_style = "green" if status == "RUNNING" else "yellow" if status == "PAUSED" else "red"
@@ -138,6 +154,7 @@ def list_campaigns(
                 ctype_str,
                 f"[{status_style}]{status}[/{status_style}]",
                 budget_str,
+                lt_str,
                 bid_str[:50] + "..." if len(bid_str) > 50 else bid_str,
             )
         else:
@@ -147,6 +164,7 @@ def list_campaigns(
                 ctype_str,
                 f"[{status_style}]{status}[/{status_style}]",
                 budget_str,
+                lt_str,
                 countries[:20] + "..." if len(countries) > 20 else countries,
             )
 
@@ -157,8 +175,8 @@ def list_campaigns(
 @app.command("setup")
 def setup_campaigns(
     countries: str = typer.Option("US", "--countries", "-c", help="Comma-separated country codes"),
-    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget per campaign (USD)"),
-    bid: float = typer.Option(1.50, "--bid", help="Default keyword bid (USD)"),
+    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget per campaign (organization currency)"),
+    bid: float = typer.Option(1.50, "--bid", help="Default keyword bid (organization currency)"),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Preview without creating"),
 ):
     """Set up the 4-campaign structure (Brand, Category, Competitor, Discovery)."""
@@ -181,8 +199,8 @@ def setup_campaigns(
     console.print(Panel("[bold]Campaign Structure Setup[/bold]", expand=False))
     console.print(f"\nApp: [cyan]{app_config.app_name}[/cyan] (ID: {app_config.app_id})")
     console.print(f"Countries: [cyan]{', '.join(country_list)}[/cyan]")
-    console.print(f"Daily Budget: [cyan]${budget}[/cyan] per campaign")
-    console.print(f"Default Bid: [cyan]${bid}[/cyan]\n")
+    console.print(f"Daily Budget: [cyan]{budget}[/cyan] per campaign (organization currency)")
+    console.print(f"Default Bid: [cyan]{bid}[/cyan] (organization currency)\n")
 
     table = Table(title="Campaigns to Create", show_header=True)
     table.add_column("Type")
@@ -193,7 +211,7 @@ def setup_campaigns(
     for ctype, config in CAMPAIGN_STRUCTURE.items():
         campaign_name = get_campaign_name(ctype, app_name=app_name)
         ad_groups = ", ".join([ag.name for ag in config.ad_groups])
-        table.add_row(ctype.value.upper(), campaign_name, ad_groups, f"${budget}/day")
+        table.add_row(ctype.value.upper(), campaign_name, ad_groups, f"{budget}/day (org currency)")
 
     console.print(table)
 
@@ -304,7 +322,6 @@ def audit_campaigns(
 
     for ctype in CampaignType:
         count = len(managed_campaigns[ctype])
-        expected_ad_groups = CAMPAIGN_STRUCTURE[ctype].ad_groups
 
         if count == 0:
             status = "[red]MISSING[/red]"
@@ -343,7 +360,7 @@ def audit_campaigns(
         console.print("\n[bold red]Issues Found:[/bold red]")
         for issue in structure_issues:
             console.print(f"  [red]•[/red] {issue}")
-        console.print("\nRun [cyan]asa campaigns setup[/cyan] to create missing campaigns.")
+        console.print("\nRun [cyan]asa v5 campaigns setup[/cyan] to create missing campaigns.")
     else:
         console.print("\n[bold green]Campaign structure matches Apple's recommendations[/bold green]")
 
@@ -435,7 +452,7 @@ def enable_campaign(
 @app.command("create")
 def create_campaign(
     name: str = typer.Argument(..., help="Campaign name"),
-    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget (USD)"),
+    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget (organization currency)"),
     countries: str = typer.Option("US", "--countries", "-c", help="Comma-separated country codes"),
     status: str = typer.Option("ENABLED", "--status", "-s", help="Initial status (ENABLED or PAUSED)"),
 ):
@@ -458,9 +475,10 @@ def create_campaign(
         raise typer.Exit(1)
 
     client = SearchAdsClient(credentials)
+    currency = client.get_org_currency()
 
     console.print(f"\nCreating campaign: [cyan]{name}[/cyan]")
-    console.print(f"  Daily Budget: [cyan]${budget}[/cyan]")
+    console.print(f"  Daily Budget: [cyan]{budget} {currency}[/cyan]")
     console.print(f"  Countries: [cyan]{', '.join(country_list)}[/cyan]")
     console.print(f"  Status: [cyan]{status_upper}[/cyan]")
 
@@ -474,7 +492,7 @@ def create_campaign(
         )
 
     if campaign:
-        console.print(f"\n[green]Campaign created successfully![/green]")
+        console.print("\n[green]Campaign created successfully![/green]")
         console.print(f"  ID: [cyan]{campaign.get('id')}[/cyan]")
         console.print(f"  Name: [cyan]{campaign.get('name')}[/cyan]")
     else:
@@ -486,17 +504,29 @@ def create_campaign(
 def update_campaign(
     campaign_id: int = typer.Argument(..., help="Campaign ID to update"),
     name: Optional[str] = typer.Option(None, "--name", "-n", help="New campaign name"),
-    budget: Optional[float] = typer.Option(None, "--budget", "-b", help="New daily budget (USD)"),
+    budget: Optional[float] = typer.Option(None, "--budget", "-b", help="New daily budget (organization currency)"),
+    lifetime_budget: Optional[float] = typer.Option(
+        None, "--lifetime-budget", "-L",
+        help="New lifetime budget (organization currency). NOTE: Apple is discontinuing lifetime budgets on 2026-06-16; prefer --clear-lifetime.",
+    ),
+    clear_lifetime: bool = typer.Option(
+        False, "--clear-lifetime",
+        help="Remove the lifetime budget cap on the campaign (sets budgetAmount=null). Use this to unblock campaigns that silently stopped serving after hitting their lifetime cap.",
+    ),
     status: Optional[str] = typer.Option(None, "--status", "-s", help="New status (ENABLED or PAUSED)"),
 ):
-    """Update a campaign's name, budget, or status."""
+    """Update a campaign's name, budget, lifetime budget, or status."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
         raise typer.Exit(1)
 
-    if not any([name, budget, status]):
-        console.print("[red]No updates provided. Use --name, --budget, or --status.[/red]")
+    if not any([name, budget, lifetime_budget, clear_lifetime, status]):
+        console.print("[red]No updates provided. Use --name, --budget, --lifetime-budget, --clear-lifetime, or --status.[/red]")
+        raise typer.Exit(1)
+
+    if lifetime_budget is not None and clear_lifetime:
+        console.print("[red]Use either --lifetime-budget or --clear-lifetime, not both.[/red]")
         raise typer.Exit(1)
 
     client = SearchAdsClient(credentials)
@@ -515,11 +545,35 @@ def update_campaign(
         changes.append(f"Name: {campaign.get('name')} -> {name}")
 
     if budget:
-        current_budget = campaign.get("dailyBudgetAmount", {})
-        currency = current_budget.get("currency") or client.get_org_currency()
+        current_budget = campaign.get("dailyBudgetAmount") or {}
+        current_lifetime = campaign.get("budgetAmount") or {}
+        currency = (
+            current_budget.get("currency")
+            or current_lifetime.get("currency")
+            or client.get_org_currency()
+        )
         updates["dailyBudgetAmount"] = {"amount": str(budget), "currency": currency}
         old_budget = current_budget.get("amount", "?")
         changes.append(f"Daily Budget: {old_budget} {currency} -> {budget} {currency}")
+
+    if clear_lifetime:
+        updates["budgetAmount"] = None
+        old = campaign.get("budgetAmount") or {}
+        old_amt = old.get("amount") if isinstance(old, dict) else None
+        old_currency = old.get("currency", "") if isinstance(old, dict) else ""
+        changes.append(f"Lifetime Budget: {old_amt or '-'} {old_currency} -> cleared")
+
+    if lifetime_budget is not None:
+        current_lifetime = campaign.get("budgetAmount") or {}
+        current_daily = campaign.get("dailyBudgetAmount") or {}
+        currency = (
+            current_lifetime.get("currency")
+            or current_daily.get("currency")
+            or client.get_org_currency()
+        )
+        updates["budgetAmount"] = {"amount": str(lifetime_budget), "currency": currency}
+        old_amt = current_lifetime.get("amount", "-")
+        changes.append(f"Lifetime Budget: {old_amt} {currency} -> {lifetime_budget} {currency}")
 
     if status:
         status_upper = status.upper()
@@ -541,6 +595,81 @@ def update_campaign(
     else:
         console.print("[red]Failed to update campaign.[/red]")
         raise typer.Exit(1)
+
+
+@app.command("clone")
+def clone_campaign(
+    source_campaign_id: int = typer.Argument(..., help="Campaign ID to duplicate"),
+    new_name: Optional[str] = typer.Option(None, "--name", "-n",
+        help="Name for the clone (defaults to '<source> v2')"),
+    keep_lifetime: bool = typer.Option(False, "--keep-lifetime",
+        help="Copy the source's lifetime budget too. Default: drop it, since Apple is discontinuing lifetime budgets on 2026-06-16 and the most common reason to clone is to escape a stuck TOTAL_BUDGET_EXHAUSTED state."),
+    pause_source: bool = typer.Option(False, "--pause-source",
+        help="Pause the source campaign after a successful clone."),
+):
+    """Duplicate a campaign (with ad groups, keywords, and negatives).
+
+    Apple Ads Campaign Management API v5 has no native campaign-duplication endpoint, so
+    this reads the source and re-creates it. Useful to escape a stuck
+    TOTAL_BUDGET_EXHAUSTED state after clearing a lifetime budget —
+    Apple caches that flag even after the cap is gone, and only a fresh
+    campaign ID releases it.
+
+    The clone preserves: daily budget, countries, supply/channel,
+    billing event, ad-group structure (name, default bid, pricing
+    model, targeting dimensions), ACTIVE keywords + bids, and
+    campaign-level negatives.
+
+    Keywords that are PAUSED on the source are NOT copied (usually
+    intentional). Ad-group-level negatives are NOT copied in this pass
+    (campaign-level negatives are).
+    """
+    credentials = load_credentials()
+    if not credentials:
+        console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
+        raise typer.Exit(1)
+
+    client = SearchAdsClient(credentials)
+    console.print(f"[cyan]Cloning campaign {source_campaign_id}...[/cyan]")
+    with console.status("[bold blue]Reading source + creating clone..."):
+        result = client.clone_campaign(
+            source_campaign_id,
+            new_name=new_name,
+            drop_lifetime_budget=not keep_lifetime,
+            pause_source=pause_source,
+        )
+
+    if not result:
+        console.print("[red]Clone failed — no result returned.[/red]")
+        raise typer.Exit(1)
+
+    console.print(f"\n[green]✓ Created campaign id={result['new_id']}[/green] name=[cyan]{result['new_name']}[/cyan]")
+    total_kw = 0
+    total_attempted = 0
+    for ag in result["ad_groups"]:
+        console.print(
+            f"  Ad group [cyan]{ag['name']}[/cyan] (id={ag['new_id']}): "
+            f"{ag['keywords_copied']}/{ag['keywords_attempted']} keywords"
+        )
+        total_kw += ag["keywords_copied"]
+        total_attempted += ag["keywords_attempted"]
+        for err in ag["keyword_errors"][:3]:
+            console.print(f"    [yellow]! keyword error: {err}[/yellow]")
+    console.print(
+        f"  Negatives: {result['negatives']['copied']}/{result['negatives']['attempted']}"
+    )
+    if total_attempted and total_kw < total_attempted:
+        console.print(
+            f"[yellow]Note: {total_attempted - total_kw} keyword(s) failed to copy — review errors above.[/yellow]"
+        )
+    if result["source_paused"]:
+        console.print(f"  [dim]Source campaign {source_campaign_id} paused.[/dim]")
+    else:
+        console.print(
+            f"  [dim]Source campaign {source_campaign_id} unchanged. Pause it with "
+            f"'asa v5 campaigns update {source_campaign_id} --status PAUSED' "
+            "when you've verified the clone.[/dim]"
+        )
 
 
 @app.command("delete")
@@ -592,7 +721,7 @@ def delete_campaign(
             raise typer.Exit(1)
 
         campaign_name = campaign.get("name", "Unknown")
-        console.print(f"\n[bold red]WARNING: About to delete campaign:[/bold red]")
+        console.print("\n[bold red]WARNING: About to delete campaign:[/bold red]")
         console.print(f"  Name: {campaign_name}")
         console.print(f"  ID: {campaign_id}")
 

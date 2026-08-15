@@ -1,0 +1,111 @@
+<!-- Generated from the canonical SDK manifest and registered Typer trees. Do not edit by hand. -->
+
+# Apple Ads v1 command index
+
+SDK `apple-ads-platform` version `1.109.0`; source commit `742ba544433ba9a5bef0ab3603336dcf53ff9338`.
+
+`implemented` means registered and contract-tested locally; it does not mean live Apple acceptance.
+
+Every entry below is reconciled to the default public Typer registration. `implemented` proves local registration and contract coverage, not live Apple acceptance.
+
+| Resource | SDK method | Canonical command | Status | Reference |
+|---|---|---|---|---|
+| access | `get_advertiser_resources` | `asa access advertiser-resources` | `implemented` | [v1-accounts-and-access.md](v1-accounts-and-access.md) |
+| access | `get_me` | `asa access me` | `implemented` | [v1-accounts-and-access.md](v1-accounts-and-access.md) |
+| access | `get_user_acls` | `asa access acls` | `implemented` | [v1-accounts-and-access.md](v1-accounts-and-access.md) |
+| access | `orgs_id_get` | `asa access org` | `implemented` | [v1-accounts-and-access.md](v1-accounts-and-access.md) |
+| ad-accounts | `ad_accounts_id_get` | `asa ad-accounts get` | `implemented` | [v1-accounts-and-access.md](v1-accounts-and-access.md) |
+| ad-accounts | `ad_accounts_id_put` | `asa ad-accounts update` | `implemented` | [v1-accounts-and-access.md](v1-accounts-and-access.md) |
+| ad-accounts | `ad_accounts_post` | `asa ad-accounts create` | `implemented` | [v1-accounts-and-access.md](v1-accounts-and-access.md) |
+| ad-groups | `adgroups_id_delete` | `asa ad-groups delete` | `implemented` | [v1-ad-groups.md](v1-ad-groups.md) |
+| ad-groups | `adgroups_id_get` | `asa ad-groups get` | `implemented` | [v1-ad-groups.md](v1-ad-groups.md) |
+| ad-groups | `adgroups_id_put` | `asa ad-groups update` | `implemented` | [v1-ad-groups.md](v1-ad-groups.md) |
+| ad-groups | `adgroups_post` | `asa ad-groups create` | `implemented` | [v1-ad-groups.md](v1-ad-groups.md) |
+| ad-groups | `adgroups_query_post` | `asa ad-groups query` | `implemented` | [v1-ad-groups.md](v1-ad-groups.md) |
+| ads | `ads_id_delete` | `asa ads delete` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| ads | `ads_id_get` | `asa ads get` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| ads | `ads_id_put` | `asa ads update` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| ads | `ads_post` | `asa ads create` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| ads | `ads_query_post` | `asa ads query` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| apps | `eligibilities_apps_query_post` | `asa apps eligibilities` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| apps | `get_app_details_by_adam_id` | `asa apps get` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| apps | `query_app_locale_details` | `asa apps locale-details` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| apps | `query_supported_app_languages` | `asa apps supported-languages` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| apps | `search_apps` | `asa apps search` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| assets | `delete_asset` | `asa assets delete` | `implemented` | [v1-assets.md](v1-assets.md) |
+| assets | `get_asset` | `asa assets get` | `implemented` | [v1-assets.md](v1-assets.md) |
+| assets | `query_assets` | `asa assets query` | `implemented` | [v1-assets.md](v1-assets.md) |
+| assets | `upload_asset` | `asa assets upload` | `implemented` | [v1-assets.md](v1-assets.md) |
+| business-brands | `get_brand` | `asa business-brands get` | `implemented` | [v1-maps-brands-and-categories.md](v1-maps-brands-and-categories.md) |
+| business-brands | `query_brands` | `asa business-brands query` | `implemented` | [v1-maps-brands-and-categories.md](v1-maps-brands-and-categories.md) |
+| business-categories | `get_category` | `asa business-categories get` | `implemented` | [v1-maps-brands-and-categories.md](v1-maps-brands-and-categories.md) |
+| business-categories | `query_categories` | `asa business-categories query` | `implemented` | [v1-maps-brands-and-categories.md](v1-maps-brands-and-categories.md) |
+| campaigns | `campaigns_id_delete` | `asa campaigns delete` | `implemented` | [v1-campaigns.md](v1-campaigns.md) |
+| campaigns | `campaigns_id_get` | `asa campaigns get` | `implemented` | [v1-campaigns.md](v1-campaigns.md) |
+| campaigns | `campaigns_id_legacy_app_limited_status_reason_details_get` | `asa campaigns legacy-app-limited-status-reasons` | `implemented` | [v1-campaigns.md](v1-campaigns.md) |
+| campaigns | `campaigns_id_put` | `asa campaigns update` | `implemented` | [v1-campaigns.md](v1-campaigns.md) |
+| campaigns | `campaigns_post` | `asa campaigns create` | `implemented` | [v1-campaigns.md](v1-campaigns.md) |
+| campaigns | `campaigns_query_post` | `asa campaigns query` | `implemented` | [v1-campaigns.md](v1-campaigns.md) |
+| change-history | `get_change_details` | `asa change-history get` | `implemented` | [v1-change-history.md](v1-change-history.md) |
+| change-history | `query_audit_summary` | `asa change-history query` | `implemented` | [v1-change-history.md](v1-change-history.md) |
+| creatives | `creatives_id_delete` | `asa creatives delete` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| creatives | `creatives_id_get` | `asa creatives get` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| creatives | `creatives_id_put` | `asa creatives update` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| creatives | `creatives_post` | `asa creatives create` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| creatives | `creatives_query_post` | `asa creatives query` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| geos | `get_geos_by_ids` | `asa geos get-by-ids` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| geos | `search_geos` | `asa geos search` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| insights | `impression_share_query` | `asa insights impression-share` | `implemented` | [v1-insights.md](v1-insights.md) |
+| insights | `search_term_popularity_query` | `asa insights search-term-popularity` | `implemented` | [v1-insights.md](v1-insights.md) |
+| keywords | `keywords_bulk_create_post` | `asa keywords bulk-create` | `implemented` | [v1-keywords.md](v1-keywords.md) |
+| keywords | `keywords_bulk_update_post` | `asa keywords bulk-update` | `implemented` | [v1-keywords.md](v1-keywords.md) |
+| keywords | `keywords_id_delete` | `asa keywords delete` | `implemented` | [v1-keywords.md](v1-keywords.md) |
+| keywords | `keywords_id_get` | `asa keywords get` | `implemented` | [v1-keywords.md](v1-keywords.md) |
+| keywords | `keywords_id_put` | `asa keywords update` | `implemented` | [v1-keywords.md](v1-keywords.md) |
+| keywords | `keywords_post` | `asa keywords create` | `implemented` | [v1-keywords.md](v1-keywords.md) |
+| keywords | `keywords_query_post` | `asa keywords query` | `implemented` | [v1-keywords.md](v1-keywords.md) |
+| location-groups | `create_location_group` | `asa location-groups create` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| location-groups | `delete_location_group` | `asa location-groups delete` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| location-groups | `get_location_group` | `asa location-groups get` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| location-groups | `query_location_groups` | `asa location-groups query` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| location-groups | `update_location_group` | `asa location-groups update` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| locations | `get_location` | `asa locations get` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| locations | `query_locations` | `asa locations query` | `implemented` | [v1-maps-locations-and-geo.md](v1-maps-locations-and-geo.md) |
+| negative-keywords | `negative_keywords_bulk_create_post` | `asa negative-keywords bulk-create` | `implemented` | [v1-negative-keywords.md](v1-negative-keywords.md) |
+| negative-keywords | `negative_keywords_bulk_update_post` | `asa negative-keywords bulk-update` | `implemented` | [v1-negative-keywords.md](v1-negative-keywords.md) |
+| negative-keywords | `negative_keywords_id_delete` | `asa negative-keywords delete` | `implemented` | [v1-negative-keywords.md](v1-negative-keywords.md) |
+| negative-keywords | `negative_keywords_id_get` | `asa negative-keywords get` | `implemented` | [v1-negative-keywords.md](v1-negative-keywords.md) |
+| negative-keywords | `negative_keywords_id_put` | `asa negative-keywords update` | `implemented` | [v1-negative-keywords.md](v1-negative-keywords.md) |
+| negative-keywords | `negative_keywords_post` | `asa negative-keywords create` | `implemented` | [v1-negative-keywords.md](v1-negative-keywords.md) |
+| negative-keywords | `negative_keywords_query_post` | `asa negative-keywords query` | `implemented` | [v1-negative-keywords.md](v1-negative-keywords.md) |
+| product-pages | `get_product_page_by_id` | `asa product-pages get` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| product-pages | `query_product_page_locale_details` | `asa product-pages query-locales` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| product-pages | `query_product_pages` | `asa product-pages query` | `implemented` | [v1-apps-and-product-pages.md](v1-apps-and-product-pages.md) |
+| recommendations | `apply_daily_budget_recommendations` | `asa recommendations daily-budget-apply` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| recommendations | `apply_target_cpa_recommendations` | `asa recommendations target-cpa-apply` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| recommendations | `dismiss_daily_budget_recommendations` | `asa recommendations daily-budget-dismiss` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| recommendations | `dismiss_target_cpa_recommendations` | `asa recommendations target-cpa-dismiss` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| recommendations | `query_daily_budget_recommendations` | `asa recommendations daily-budget-query` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| recommendations | `query_target_cpa_recommendations` | `asa recommendations target-cpa-query` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| rejection-reasons | `query_rejection_reasons_by_business_brand` | `asa rejection-reasons query-business-brands` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| rejection-reasons | `rejection_reasons_apps_query_post` | `asa rejection-reasons query-apps` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| rejection-reasons | `rejection_reasons_apps_rejection_reason_id_get` | `asa rejection-reasons get-app` | `implemented` | [v1-ads-and-creatives.md](v1-ads-and-creatives.md) |
+| reports-apps | `apps_ad_group_reports` | `asa reports-apps ad-group` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-apps | `apps_ad_reports` | `asa reports-apps ad` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-apps | `apps_campaign_reports` | `asa reports-apps campaign` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-apps | `apps_keyword_reports` | `asa reports-apps keyword` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-apps | `apps_search_term_reports` | `asa reports-apps search-term` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-business-brands | `brands_ad_group_reports` | `asa reports-business-brands ad-group` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-business-brands | `brands_ad_reports` | `asa reports-business-brands ad` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-business-brands | `brands_campaign_reports` | `asa reports-business-brands campaign` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-business-brands | `brands_keyword_reports` | `asa reports-business-brands keyword` | `implemented` | [v1-reports.md](v1-reports.md) |
+| reports-business-brands | `brands_search_term_reports` | `asa reports-business-brands search-term` | `implemented` | [v1-reports.md](v1-reports.md) |
+| shared-budgets | `shared_budgets_id_delete` | `asa shared-budgets delete` | `implemented` | [v1-shared-budgets.md](v1-shared-budgets.md) |
+| shared-budgets | `shared_budgets_id_get` | `asa shared-budgets get` | `implemented` | [v1-shared-budgets.md](v1-shared-budgets.md) |
+| shared-budgets | `shared_budgets_id_put` | `asa shared-budgets update` | `implemented` | [v1-shared-budgets.md](v1-shared-budgets.md) |
+| shared-budgets | `shared_budgets_post` | `asa shared-budgets create` | `implemented` | [v1-shared-budgets.md](v1-shared-budgets.md) |
+| shared-budgets | `shared_budgets_query_post` | `asa shared-budgets query` | `implemented` | [v1-shared-budgets.md](v1-shared-budgets.md) |
+| suggestions | `query_category_suggestions` | `asa suggestions categories` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| suggestions | `query_keyword_suggestions` | `asa suggestions keywords` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| suggestions | `query_phrase_suggestions` | `asa suggestions phrases` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |
+| suggestions | `query_target_cpa_suggestion` | `asa suggestions target-cpa` | `implemented` | [v1-recommendations-and-suggestions.md](v1-recommendations-and-suggestions.md) |

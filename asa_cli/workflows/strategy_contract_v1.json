@@ -1,0 +1,88 @@
+{
+  "contractVersion": 1,
+  "checkedOn": "2026-08-14",
+  "sources": [
+    {
+      "title": "Structure campaigns for optimal performance",
+      "url": "https://ads.apple.com/app-store/help/campaigns/0056-structure-campaigns",
+      "supports": [
+        "manual-search-results",
+        "brand-category-competitor-discovery themes",
+        "campaign or ad-group theme grouping"
+      ]
+    },
+    {
+      "title": "Maximize conversions",
+      "url": "https://ads.apple.com/app-store/best-practices/maximize-conversions",
+      "supports": [
+        "maximize-conversions",
+        "Search Match automation",
+        "five-conversions-per-day budget capacity",
+        "two-week learning period"
+      ]
+    },
+    {
+      "title": "Ad placements",
+      "url": "https://ads.apple.com/app-store/best-practices/ad-placements",
+      "supports": [
+        "placement-specific strategy",
+        "non-search-or-unsupported"
+      ]
+    }
+  ],
+  "detectionPrecedence": [
+    "MAPS supply source or a non-search placement",
+    "APPSTORE search-results placement with MAX_CONVERSIONS",
+    "APPSTORE search-results placement with MANUAL_CPT",
+    "bid-strategy or campaign-name hints retained as evidence without establishing strategy",
+    "non-search-or-unsupported when evidence is missing, mixed, or conflicting"
+  ],
+  "modes": {
+    "manual-search-results": {
+      "applicability": "App Store search-results campaigns using manual CPT bidding",
+      "placement": "APPSTORE_SEARCH_RESULTS",
+      "bidStrategyTypes": ["MANUAL_CPT"],
+      "invariants": [
+        "theme grouping may be campaigns or ad groups",
+        "budgets remain unapproved planning values",
+        "campaign names do not establish strategy alone"
+      ],
+      "checks": [
+        "brand-category-competitor-discovery coverage",
+        "exact-match isolation",
+        "Search Match discovery use",
+        "negative-keyword overlap control"
+      ],
+      "grouping": ["separate-campaigns", "themed-ad-groups"]
+    },
+    "maximize-conversions": {
+      "applicability": "Eligible post-launch App Store search-results campaigns using MAX_CONVERSIONS",
+      "placement": "APPSTORE_SEARCH_RESULTS",
+      "bidStrategyTypes": ["MAX_CONVERSIONS"],
+      "invariants": [
+        "target CPA retains source and approval state",
+        "daily budget is checked against approximate five-conversion capacity",
+        "learning guidance is at least two weeks"
+      ],
+      "checks": [
+        "eligibility",
+        "target CPA provenance",
+        "daily budget supports approximately five conversions",
+        "two-week learning period",
+        "Search Match automation"
+      ],
+      "forbiddenAssumption": "Separate discovery ad groups are not required by this strategy."
+    },
+    "non-search-or-unsupported": {
+      "applicability": "Non-search placements, MAPS supply, mixed strategies, or insufficient evidence",
+      "placements": ["SEARCH_TAB", "TODAY_TAB", "PRODUCT_PAGES", "MAPS", "UNKNOWN"],
+      "checks": ["placement applicability"],
+      "forbiddenAssumption": "Search-results keyword structure checks do not apply automatically."
+    }
+  },
+  "nonApplicable": [
+    "Never apply manual theme failures to Maximize Conversions.",
+    "Never apply App Store search-results keyword checks to Search tab, Today tab, product pages, or MAPS.",
+    "Never convert a campaign-name hint into high-confidence strategy detection."
+  ]
+}
