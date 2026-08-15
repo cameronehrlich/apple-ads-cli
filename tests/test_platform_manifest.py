@@ -10,6 +10,8 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from pydantic import BaseModel
+
 from asa_cli.platform.generate_manifest import MANIFEST_PATH, SCHEMA_PATH, generate
 from asa_cli.platform.manifest_discovery import (
     EXPECTED_CANONICAL_METHOD_COUNT,
@@ -18,6 +20,7 @@ from asa_cli.platform.manifest_discovery import (
     SDK_DISTRIBUTION,
     SDK_GIT_COMMIT,
     SDK_VERSION,
+    _container,
     canonical_sdk_methods,
     discover_manifest,
 )
@@ -44,6 +47,16 @@ def _canonical_sha256(value) -> str:
 def _import_qualified(name: str):
     module_name, attribute = name.rsplit(".", 1)
     return getattr(importlib.import_module(module_name), attribute)
+
+
+class _ExampleBody(BaseModel):
+    value: str
+
+
+def test_body_container_detection_is_stable_for_modern_union_annotations():
+    assert _container(_ExampleBody | None) == "model"
+    assert _container(list[_ExampleBody] | None) == "list"
+    assert _container(str | None) == "primitive"
 
 
 def test_manifest_covers_the_exact_canonical_sdk_surface():

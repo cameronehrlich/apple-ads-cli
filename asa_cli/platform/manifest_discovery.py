@@ -15,7 +15,6 @@ import inspect
 import json
 from collections.abc import Iterable
 from pathlib import Path
-from types import UnionType
 from typing import Any, get_args, get_origin
 
 from apple_ads_platform.api.apple_ads_api import AppleAdsApi
@@ -244,9 +243,12 @@ def _container(annotation: Any) -> str:
     origin = get_origin(annotation)
     if origin in (list, tuple, set):
         return "list"
-    if origin in (UnionType,):
-        return "primitive"
-    if _model_types(annotation):
+    if inspect.isclass(annotation) and issubclass(annotation, BaseModel):
+        return "model"
+    nested_containers = {_container(argument) for argument in get_args(annotation)}
+    if "list" in nested_containers:
+        return "list"
+    if "model" in nested_containers:
         return "model"
     return "primitive"
 
