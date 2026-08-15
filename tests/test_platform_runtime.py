@@ -1,14 +1,17 @@
 """Contract tests for the shared Apple Ads Platform SDK runtime."""
 
+import json
 from datetime import date
+from types import SimpleNamespace
 from uuid import UUID
 
 import pytest
-from pydantic import BaseModel
+from pydantic import BaseModel, ValidationError
 
 from asa_cli.config import Credentials
 from asa_cli.platform.client import (
     PlatformConfigurationError,
+    _deserialize_with_live_response_compatibility,
     build_platform_api,
     context_header,
     resolve_ad_account_id,
@@ -159,6 +162,177 @@ def test_serialize_response_flattens_generated_sdk_additional_properties():
         "result": [],
         "futureField": "future-value",
     }
+
+
+@pytest.mark.parametrize(
+    ("response_type", "payload"),
+    [
+        (
+            "AppsKeywordReportResponse",
+            {
+                "result": {
+                    "rows": [
+                        {
+                            "metadata": {
+                                "id": 123,
+                                "text": "long screenshot",
+                                "status": "ENABLED",
+                            }
+                        }
+                    ]
+                }
+            },
+        ),
+        (
+            "AppsSearchTermReportResponse",
+            {
+                "result": {
+                    "rows": [
+                        {
+                            "metadata": {
+                                "searchTermText": "long screenshot",
+                                "keyword": {
+                                    "id": 123,
+                                    "text": "long screenshot",
+                                    "status": "ENABLED",
+                                },
+                            }
+                        }
+                    ]
+                }
+            },
+        ),
+        (
+            "ImpressionShareQueryResponse",
+            {
+                "result": {
+                    "rows": [
+                        {
+                            "promotedObjectId": 554594252,
+                            "searchTerm": "long screenshot",
+                        }
+                    ]
+                }
+            },
+        ),
+    ],
+)
+def test_confirmed_live_sdk_response_mismatches_are_preserved(response_type, payload):
+    from apple_ads_platform.api_client import ApiClient
+
+    response = SimpleNamespace(
+        data=json.dumps(payload).encode(),
+        status=200,
+        headers={"content-type": "application/json"},
+    )
+    original = ApiClient().response_deserialize
+
+    result = _deserialize_with_live_response_compatibility(
+        original,
+        response_data=response,
+        response_types_map={"200": response_type},
+    )
+
+    assert result.data == payload
+
+
+def test_build_platform_api_installs_compatibility_and_malformed_json_fails_closed(
+    monkeypatch,
+):
+    from apple_ads_platform.api_client import ApiClient
+
+    api = SimpleNamespace(api_client=ApiClient())
+
+    class FakeBuilder:
+        def build(self):
+            return api
+
+    monkeypatch.setattr(
+        "apple_ads_platform.builder.AppleAdsClientBuilder.from_private_key_path",
+        lambda *_args: FakeBuilder(),
+    )
+
+    built = build_platform_api(credentials())
+    payload = {
+        "result": {
+            "rows": [
+                {
+                    "metadata": {
+                        "id": 123,
+                        "text": "long screenshot",
+                        "status": "ENABLED",
+                    }
+                }
+            ]
+        }
+    }
+    valid_response = SimpleNamespace(
+        data=json.dumps(payload).encode(),
+        status=200,
+        headers={"content-type": "application/json"},
+    )
+    result = built.api_client.response_deserialize(
+        response_data=valid_response,
+        response_types_map={"200": "AppsKeywordReportResponse"},
+    )
+
+    assert result.data == payload
+
+    malformed_response = SimpleNamespace(
+        data=b"{not-json",
+        status=200,
+        headers={"content-type": "application/json"},
+    )
+    with pytest.raises(json.JSONDecodeError):
+        built.api_client.response_deserialize(
+            response_data=malformed_response,
+            response_types_map={"200": "AppsKeywordReportResponse"},
+        )
+
+    unsupported_payload = {
+        "result": {
+            "rows": [
+                {
+                    "metadata": {
+                        "id": 123,
+                        "text": "long screenshot",
+                        "status": "FUTURE_VALUE",
+                    }
+                }
+            ]
+        }
+    }
+    unsupported_response = SimpleNamespace(
+        data=json.dumps(unsupported_payload).encode(),
+        status=200,
+        headers={"content-type": "application/json"},
+    )
+    with pytest.raises(ValidationError):
+        built.api_client.response_deserialize(
+            response_data=unsupported_response,
+            response_types_map={"200": "AppsKeywordReportResponse"},
+        )
+
+
+def test_unrelated_sdk_validation_error_is_not_bypassed():
+    response = SimpleNamespace(
+        data=b'{"result":{}}',
+        status=200,
+        headers={"content-type": "application/json"},
+    )
+
+    def invalid_response(**_kwargs):
+        class ExpectedInteger(BaseModel):
+            count: int
+
+        ExpectedInteger.model_validate({"count": "not-an-integer"})
+
+    with pytest.raises(ValidationError):
+        _deserialize_with_live_response_compatibility(
+            invalid_response,
+            response_data=response,
+            response_types_map={"200": "AppsKeywordReportResponse"},
+        )
 
 
 def test_sdk_error_is_normalized_with_structured_body():
