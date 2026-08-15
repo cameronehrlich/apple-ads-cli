@@ -72,6 +72,7 @@ def help_command() -> None:
 [bold]Opinionated workflows[/bold]
     [cyan]asa workflows campaigns audit[/cyan]
     [cyan]asa workflows campaigns plan-four-structure[/cyan]
+    [cyan]asa workflows campaigns plan-maximize-conversions[/cyan]
 
 [bold]Legacy Campaign Management API v5[/bold]
   The previous implementation remains explicit and unchanged:

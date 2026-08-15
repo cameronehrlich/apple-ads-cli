@@ -19,7 +19,7 @@ CREDENTIALS_FILE = CONFIG_DIR / "credentials.json"
 
 
 class CampaignType(str, Enum):
-    """Campaign types following Apple's 4-campaign structure."""
+    """Manual App Store search-results keyword themes."""
 
     BRAND = "brand"
     CATEGORY = "category"
@@ -59,7 +59,7 @@ class CampaignConfig(BaseModel):
     recommended_budget: float = 50.0
 
 
-# Apple's recommended 4-campaign structure
+# Manual search-results themes; physical campaign grouping is caller-selected.
 CAMPAIGN_STRUCTURE: dict[CampaignType, CampaignConfig] = {
     CampaignType.BRAND: CampaignConfig(
         name_suffix="Brand",

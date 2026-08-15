@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "asa-cli"
-version = "1.0.0"
+version = "1.1.0"
 description = "Complete CLI wrapper for Apple's official Apple Ads Platform SDK, with safe mutations and v5 compatibility"
 readme = "README.md"
 requires-python = ">=3.12"
@@ -55,6 +55,7 @@ include = ["asa_cli*"]
 
 [tool.setuptools.package-data]
 "asa_cli.platform" = ["manifest/*.json"]
+"asa_cli.workflows" = ["strategy_contract_v1.json"]
 
 [tool.black]
 line-length = 100

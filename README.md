@@ -37,13 +37,11 @@ python3.12 -m pip install -e '.[dev]'
 asa version
 ```
 
-Once versioned releases begin, automation should install an exact tag rather than following `main`:
+Automation should install the exact 1.1.0 tag rather than following `main`:
 
 ```bash
-uv tool install 'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.0.0'
+uv tool install 'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.1.0'
 ```
-
-Do not use that example until the corresponding GitHub release exists.
 
 ## Configure
 
@@ -202,12 +200,27 @@ The complete inventory and all 35 request-model schemas are in the [generated co
 Only behavior that remains useful above the official SDK is ported into `asa workflows`.
 
 ```bash
-# Complete, paginated, read-only structure audit
-asa workflows campaigns audit --ad-account AD_ACCOUNT_ID
+# Complete, paginated, read-only strategy audit
+asa workflows campaigns audit --strategy auto --ad-account AD_ACCOUNT_ID
 
-# Local four-campaign plan; never sends a request
-asa workflows campaigns plan-four-structure --daily-budget 25
+# Manual App Store search-results themes; never sends a request
+asa workflows campaigns plan-four-structure \
+  --grouping themed-ad-groups \
+  --daily-budget 100
+
+# Maximize Conversions plan; optional Apple reads, never a mutation
+asa workflows campaigns plan-maximize-conversions \
+  --adam-id APP_ADAM_ID \
+  --countries US,GB \
+  --target-cpa 12 \
+  --daily-budget 60
 ```
+
+The audit detects `manual-search-results`, `maximize-conversions`, or `non-search-or-unsupported` from placement, supply-source, and bid-strategy evidence before considering campaign names. It never applies one strategy's health failures to another strategy. Optional `--strategy manual|maximize-conversions` overrides fail closed when they conflict with reliable API evidence.
+
+Brand, Category, Competitor, and Discovery are manual search-results themes, not a universal account requirement. The manual planner supports separate campaigns or themed ad groups, keeps every budget unapproved, and documents exact-match, Search Match, and negative-overlap intent. The Maximize Conversions planner instead preserves target-CPA provenance, eligibility, an approximate five-conversions-per-day budget-capacity check, and a two-week learning guard. Both emit `dryRun=true` and `mutationAvailable=false`.
+
+Search tab, Today tab, product pages, and Apple Maps require placement-specific plans. They are intentionally outside these search-results planners; see the [multi-placement decision](references/placement-strategy-decision.md).
 
 Four-campaign setup, cloning, keyword promotion/routing, search-term optimization, custom reports, and CPP experiments remain available under `asa v5` until deliberately ported or retired.
 
@@ -228,6 +241,9 @@ This repository is also a Codex skill. [SKILL.md](SKILL.md) is a compact router 
 python scripts/lookup_command.py 'search term popularity'
 python scripts/lookup_command.py --sdk-method impression_share_query
 python scripts/lookup_command.py --resource recommendations
+python scripts/lookup_command.py 'audit campaign strategy'
+python scripts/lookup_command.py 'manual search results plan'
+python scripts/lookup_command.py 'maximize conversions plan'
 ```
 
 Generated references cover every v1, v5, and workflow command with exact flags, request shapes, and mutation gates. Do not edit them by hand.
@@ -250,7 +266,12 @@ See [CONTRIBUTING.md](CONTRIBUTING.md) for endpoint and regression-test guidance
 
 ## Releases and compatibility
 
-The CLI uses semantic versions and bare tags such as `1.0.0`. GitHub Releases will contain the wheel, source distribution, generated release notes, and SHA-256 checksums.
+The CLI uses semantic versions and bare tags such as `1.1.0`. GitHub Releases contain the wheel, source distribution, generated release notes, and SHA-256 checksums.
+
+| Release | Public contract |
+|---|---|
+| `1.0.0` | Immutable legacy Campaign Management API v5 baseline from the former `main` code line |
+| `1.1.0` | Backward-compatible Platform API v1 default, explicit `asa v5` fallback, generated skill, and strategy-aware workflows |
 
 CLI and SDK versions are intentionally independent:
 

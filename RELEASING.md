@@ -8,6 +8,8 @@ PyPI publishing is intentionally out of scope until package ownership and GitHub
 
 Use [Semantic Versioning](https://semver.org/) with bare tags such as `1.0.0`, matching the release-tag style used by the Rork App Store Connect CLI.
 
+Release history begins with `1.0.0`, the immutable legacy v5 baseline cut from the former `main` commit. `1.1.0` is the backward-compatible Platform API v1 migration. Never retarget either tag.
+
 - **Major:** incompatible command, configuration, output, or automation changes; removal of the v5 compatibility surface.
 - **Minor:** backward-compatible official-SDK coverage, commands, workflows, or output fields.
 - **Patch:** backward-compatible fixes, safety hardening, and documentation corrections worth distributing.
@@ -27,7 +29,7 @@ uv run ruff check .
 uv run pytest -q
 uv run python -m asa_cli.platform.generate_manifest --check
 uv run python scripts/generate_skill_references.py --check
-uv run python scripts/check_release.py --version 1.0.0
+uv run python scripts/check_release.py --version 1.1.0
 uv build
 git diff --check
 ```
@@ -40,8 +42,8 @@ git diff --check
 Create an annotated tag on the accepted `main` commit and push only that tag:
 
 ```bash
-git tag -a 1.0.0 -m 'Apple Ads CLI 1.0.0'
-git push origin 1.0.0
+git tag -a 1.1.0 -m 'Apple Ads CLI 1.1.0'
+git push origin 1.1.0
 ```
 
 Tag pushes matching `X.Y.Z` trigger `.github/workflows/release.yml`. The workflow:
@@ -62,9 +64,9 @@ If a run fails after creating its draft, inspect that draft and the workflow log
 ## After publishing
 
 ```bash
-gh release view 1.0.0 --repo cameronehrlich/apple-search-ads-cli
+gh release view 1.1.0 --repo cameronehrlich/apple-search-ads-cli
 uv tool install --force \
-  'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.0.0'
+  'git+https://github.com/cameronehrlich/apple-search-ads-cli.git@1.1.0'
 asa version
 asa config test
 ```

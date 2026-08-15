@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -18,6 +19,12 @@ from _command_catalog import (
     search_entries,
 )
 from _runtime_catalog import search_runtime_commands, v5_commands, workflow_commands
+
+
+def _contains_all_query_tokens(searchable_text: str, query: str) -> bool:
+    tokens = re.findall(r"[a-z0-9]+", query.lower().replace("-", " ").replace("_", " "))
+    corpus = searchable_text.lower().replace("-", " ").replace("_", " ")
+    return bool(tokens) and all(token in corpus for token in tokens)
 
 
 def parse_args() -> argparse.Namespace:
@@ -86,6 +93,21 @@ def main() -> int:
             runtime_matches.extend(workflow_matches)
             if not runtime_reference:
                 runtime_reference = "references/workflow-command-index.md"
+
+    if args.query:
+        full_v1 = [
+            entry
+            for entry in v1_matches
+            if _contains_all_query_tokens(entry.searchable_text, args.query)
+        ]
+        full_runtime = [
+            command
+            for command in runtime_matches
+            if _contains_all_query_tokens(command.searchable_text, args.query)
+        ]
+        if full_v1 or full_runtime:
+            v1_matches = full_v1
+            runtime_matches = full_runtime
 
     if not v1_matches and not runtime_matches:
         print("No registered operation matched. Do not guess command syntax.", file=sys.stderr)

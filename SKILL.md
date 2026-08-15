@@ -1,6 +1,6 @@
 ---
 name: apple-search-ads-cli
-description: Use the ASA CLI for Apple Ads Platform API v1 and legacy Apple Search Ads API v5. Trigger when Codex needs exact CLI syntax for campaigns, ad groups, ads, creatives, keywords, negatives, budgets, accounts, apps, Apple Maps brands or locations, reports, impression share, search-term popularity, recommendations, suggestions, change history, v5 migration or fallback, or this repository's campaign-structure and optimization workflows. Also use when mapping an Apple SDK endpoint to its CLI wrapper or safely executing Apple Ads mutations.
+description: Use the ASA CLI for Apple Ads Platform API v1 and legacy Apple Search Ads API v5. Trigger when Codex needs exact CLI syntax for campaigns, ad groups, ads, creatives, keywords, negatives, budgets, accounts, apps, Apple Maps brands or locations, reports, impression share, search-term popularity, recommendations, suggestions, change history, v5 migration or fallback, or this repository's strategy audit, manual search-results, Maximize Conversions, campaign-structure, and optimization workflows. Also use when mapping an Apple SDK endpoint to its CLI wrapper or safely executing Apple Ads mutations.
 ---
 
 # Apple Ads CLI
@@ -31,6 +31,13 @@ Work from the repository root. If `uv` is not on `PATH` in Cameron's environment
 - Use `asa v5 ...` only when the user explicitly requests v5 or the required v1 operation is not implemented and the generated migration reference identifies a supported fallback.
 - Use `asa workflows ...` for higher-level local logic. Read [opinionated-workflows.md](references/opinionated-workflows.md) and the generated [workflow-command-index.md](references/workflow-command-index.md) first.
 - Do not count workflows or v5 compatibility commands as v1 SDK endpoint coverage.
+
+## Select a strategy workflow
+
+- Use `asa workflows campaigns audit --strategy auto` for read-only strategy classification and applicable checks. It distinguishes `manual-search-results`, `maximize-conversions`, and `non-search-or-unsupported` from API evidence and skips cross-strategy failures.
+- Use `asa workflows campaigns plan-four-structure` only for manual App Store search-results themes. Brand, Category, Competitor, and Discovery may be separate campaigns or themed ad groups; they are not universal requirements.
+- Use `asa workflows campaigns plan-maximize-conversions` for a no-write target-CPA plan with eligibility, source/confidence, approximate five-conversions-per-day budget capacity, Search Match automation, and the two-week learning guard.
+- Treat Search tab, Today tab, product pages, and Apple Maps as placement-specific. Read [placement-strategy-decision.md](references/placement-strategy-decision.md); do not route them through either search-results planner.
 
 Temporary preview namespaces do not redefine the canonical interface. If an entry documents both a preview path and an eventual canonical path, use only the path marked implemented by the manifest.
 
