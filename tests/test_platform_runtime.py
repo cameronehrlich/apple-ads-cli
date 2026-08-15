@@ -335,6 +335,125 @@ def test_unrelated_sdk_validation_error_is_not_bypassed():
         )
 
 
+@pytest.mark.parametrize(
+    ("response_type", "payload"),
+    [
+        (
+            "ImpressionShareQueryResponse",
+            {
+                "result": {
+                    "rows": [
+                        {
+                            "promotedObjectId": True,
+                            "searchTerm": "long screenshot",
+                        }
+                    ]
+                }
+            },
+        ),
+        (
+            "ImpressionShareQueryResponse",
+            {
+                "result": {
+                    "rows": [
+                        {
+                            "promotedObjectId": 554594252.0,
+                            "searchTerm": "long screenshot",
+                        }
+                    ]
+                }
+            },
+        ),
+        (
+            "AppsKeywordReportResponse",
+            {
+                "result": {
+                    "rows": [
+                        {
+                            "metadata": {
+                                "id": 123,
+                                "text": "long screenshot",
+                                "status": "ACTIVE",
+                                "matchType": "ENABLED",
+                            }
+                        }
+                    ]
+                }
+            },
+        ),
+        (
+            "BrandsKeywordReportResponse",
+            {
+                "result": {
+                    "rows": [
+                        {
+                            "metadata": {
+                                "id": 123,
+                                "text": "local business",
+                                "status": "ENABLED",
+                                "matchType": "PHRASE",
+                            }
+                        }
+                    ]
+                }
+            },
+        ),
+    ],
+)
+def test_live_compatibility_near_misses_fail_closed(response_type, payload):
+    from apple_ads_platform.api_client import ApiClient
+
+    response = SimpleNamespace(
+        data=json.dumps(payload).encode(),
+        status=200,
+        headers={"content-type": "application/json"},
+    )
+
+    with pytest.raises(ValidationError):
+        _deserialize_with_live_response_compatibility(
+            ApiClient().response_deserialize,
+            response_data=response,
+            response_types_map={"200": response_type},
+        )
+
+
+def test_known_mismatch_does_not_hide_later_unrelated_row_error():
+    from apple_ads_platform.api_client import ApiClient
+
+    payload = {
+        "result": {
+            "rows": [
+                {
+                    "metadata": {
+                        "id": 123,
+                        "text": "long screenshot",
+                        "status": "ENABLED",
+                    }
+                },
+                {
+                    "metadata": {
+                        "id": "not-an-integer",
+                        "text": "full page screenshot",
+                        "status": "ENABLED",
+                    }
+                },
+            ]
+        }
+    }
+    response = SimpleNamespace(
+        data=json.dumps(payload).encode(),
+        status=200,
+        headers={"content-type": "application/json"},
+    )
+
+    with pytest.raises(ValidationError, match="not-an-integer"):
+        _deserialize_with_live_response_compatibility(
+            ApiClient().response_deserialize,
+            response_data=response,
+            response_types_map={"200": "AppsKeywordReportResponse"},
+        )
+
+
 def test_sdk_error_is_normalized_with_structured_body():
     class SDKFailureError(Exception):
         status = 400

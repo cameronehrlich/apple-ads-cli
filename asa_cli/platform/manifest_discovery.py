@@ -14,6 +14,7 @@ import importlib.metadata
 import inspect
 import json
 from collections.abc import Iterable
+from enum import Enum
 from pathlib import Path
 from typing import Any, get_args, get_origin
 
@@ -26,7 +27,7 @@ SDK_REPOSITORY = "https://github.com/apple/apple-ads-platform-api-python"
 SDK_RELEASE_URL = f"{SDK_REPOSITORY}/releases/tag/v{SDK_VERSION}"
 SDK_GIT_COMMIT = "742ba544433ba9a5bef0ab3603336dcf53ff9338"
 SDK_API_CLASS = "apple_ads_platform.api.apple_ads_api.AppleAdsApi"
-MANIFEST_SCHEMA_VERSION = 1
+MANIFEST_SCHEMA_VERSION = 2
 MANIFEST_GENERATED_AT = "2026-08-14"
 EXPECTED_CANONICAL_METHOD_COUNT = 99
 
@@ -239,6 +240,20 @@ def _model_types(annotation: Any) -> list[type[BaseModel]]:
     return models
 
 
+def _model_closure(model_types: Iterable[type[BaseModel]]) -> set[type[BaseModel]]:
+    """Return every generated model reachable from the supplied root models."""
+    discovered: set[type[BaseModel]] = set()
+    pending = list(model_types)
+    while pending:
+        model = pending.pop()
+        if model in discovered:
+            continue
+        discovered.add(model)
+        for field in model.model_fields.values():
+            pending.extend(_model_types(field.annotation))
+    return discovered
+
+
 def _container(annotation: Any) -> str:
     origin = get_origin(annotation)
     if origin in (list, tuple, set):
@@ -329,6 +344,71 @@ def _request_model_manifest(model_types: Iterable[type[BaseModel]]) -> dict[str,
     return manifest
 
 
+def _annotation_contains(annotation: Any, predicate: Any) -> bool:
+    if predicate(annotation):
+        return True
+    return any(_annotation_contains(argument, predicate) for argument in get_args(annotation))
+
+
+def _response_field_audit(model: type[BaseModel]) -> dict[str, Any]:
+    """Summarize strict and validator-backed response fields for drift review."""
+    strict_fields = []
+    identifier_fields = []
+    enum_fields = []
+    for name, field in model.model_fields.items():
+        wire_name = field.alias or name
+        if _annotation_contains(
+            field.annotation,
+            lambda value: value.__class__.__name__ == "Strict"
+            and getattr(value, "strict", None) is True,
+        ) or any(
+            item.__class__.__name__ == "Strict"
+            and getattr(item, "strict", None) is True
+            for item in field.metadata
+        ):
+            strict_fields.append(wire_name)
+        if wire_name.casefold().endswith(("id", "ids")):
+            identifier_fields.append(wire_name)
+        if _annotation_contains(
+            field.annotation,
+            lambda value: inspect.isclass(value) and issubclass(value, Enum),
+        ):
+            enum_fields.append(wire_name)
+
+    custom_validator_fields = set()
+    decorators = getattr(model, "__pydantic_decorators__", None)
+    if decorators is not None:
+        for validator in decorators.field_validators.values():
+            for name in validator.info.fields:
+                field = model.model_fields[name]
+                custom_validator_fields.add(field.alias or name)
+
+    return {
+        "field_count": len(model.model_fields),
+        "strict_fields": sorted(strict_fields),
+        "identifier_fields": sorted(identifier_fields),
+        "enum_fields": sorted(enum_fields),
+        "custom_validator_fields": sorted(custom_validator_fields),
+    }
+
+
+def _response_model_manifest(model_types: Iterable[type[BaseModel]]) -> dict[str, Any]:
+    models = tuple(model_types)
+    manifest = {}
+    for model in sorted(models, key=lambda item: f"{item.__module__}.{item.__qualname__}"):
+        name = f"{model.__module__}.{model.__qualname__}"
+        source_path_value = inspect.getsourcefile(model)
+        if source_path_value is None:
+            raise RuntimeError(f"Unable to locate source for {name}")
+        schema = model.model_json_schema(by_alias=True)
+        manifest[name] = {
+            "schema_sha256": _json_sha256(schema),
+            "source_sha256": _sha256(Path(source_path_value).resolve()),
+            "field_audit": _response_field_audit(model),
+        }
+    return manifest
+
+
 def discover_manifest() -> dict[str, Any]:
     """Build the complete deterministic SDK manifest."""
 
@@ -343,6 +423,7 @@ def discover_manifest() -> dict[str, Any]:
     sdk_methods = canonical_sdk_methods()
     operations = []
     request_models: list[type[BaseModel]] = []
+    response_models: list[type[BaseModel]] = []
 
     for method_name in sorted(sdk_methods):
         method_node = ast_methods[method_name]
@@ -393,6 +474,14 @@ def discover_manifest() -> dict[str, Any]:
             if context_record["required"]
             else "optional"
         )
+        resolved_return_annotation = resolved_signature.return_annotation
+        return_models = _model_types(resolved_return_annotation)
+        if len(return_models) != 1:
+            raise RuntimeError(
+                f"Expected one response model for {method_name}, found {len(return_models)}"
+            )
+        response_model = return_models[0]
+        response_models.append(response_model)
         return_annotation = (
             ast.unparse(method_node.returns) if method_node.returns is not None else "Any"
         )
@@ -412,6 +501,9 @@ def discover_manifest() -> dict[str, Any]:
                 "body_parameters": body_parameters,
                 "multipart_parameters": multipart_parameters,
                 "return_annotation": return_annotation,
+                "response_model": (
+                    f"{response_model.__module__}.{response_model.__qualname__}"
+                ),
                 "mutation": _is_mutation(http_method, resource_path),
                 "pagination": _pagination(method_name, body_parameters),
                 "special_handling": _special_handling(method_name),
@@ -440,16 +532,24 @@ def discover_manifest() -> dict[str, Any]:
         },
         "operations": operations,
         "request_models": _request_model_manifest(request_models),
+        "response_models": _response_model_manifest(_model_closure(response_models)),
     }
 
 
 MANIFEST_SCHEMA: dict[str, Any] = {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
-    "$id": "https://github.com/cameronehrlich/apple-search-ads-cli/schemas/apple-ads-platform-manifest-v1.json",
+    "$id": "https://github.com/cameronehrlich/apple-search-ads-cli/schemas/apple-ads-platform-manifest-v2.json",
     "title": "Apple Ads Platform SDK manifest",
     "type": "object",
     "additionalProperties": False,
-    "required": ["schema_version", "generated_at", "sdk", "operations", "request_models"],
+    "required": [
+        "schema_version",
+        "generated_at",
+        "sdk",
+        "operations",
+        "request_models",
+        "response_models",
+    ],
     "properties": {
         "schema_version": {"const": MANIFEST_SCHEMA_VERSION},
         "generated_at": {"type": "string", "format": "date"},
@@ -490,6 +590,10 @@ MANIFEST_SCHEMA: dict[str, Any] = {
         "request_models": {
             "type": "object",
             "additionalProperties": {"$ref": "#/$defs/request_model"},
+        },
+        "response_models": {
+            "type": "object",
+            "additionalProperties": {"$ref": "#/$defs/response_model"},
         },
     },
     "$defs": {
@@ -564,6 +668,7 @@ MANIFEST_SCHEMA: dict[str, Any] = {
                 "body_parameters",
                 "multipart_parameters",
                 "return_annotation",
+                "response_model",
                 "mutation",
                 "pagination",
                 "special_handling",
@@ -596,6 +701,7 @@ MANIFEST_SCHEMA: dict[str, Any] = {
                     "items": {"$ref": "#/$defs/located_parameter"},
                 },
                 "return_annotation": {"type": "string"},
+                "response_model": {"type": "string"},
                 "mutation": {"type": "boolean"},
                 "pagination": {"type": ["string", "null"]},
                 "special_handling": {"type": "array", "items": {"type": "string"}},
@@ -611,6 +717,53 @@ MANIFEST_SCHEMA: dict[str, Any] = {
                 "schema": {"type": "object"},
                 "schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
                 "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+            },
+        },
+        "response_model": {
+            "type": "object",
+            "additionalProperties": False,
+            "required": [
+                "schema_sha256",
+                "source_sha256",
+                "field_audit",
+            ],
+            "properties": {
+                "schema_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "source_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+                "field_audit": {
+                    "type": "object",
+                    "additionalProperties": False,
+                    "required": [
+                        "field_count",
+                        "strict_fields",
+                        "identifier_fields",
+                        "enum_fields",
+                        "custom_validator_fields",
+                    ],
+                    "properties": {
+                        "field_count": {"type": "integer", "minimum": 0},
+                        "strict_fields": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "uniqueItems": True,
+                        },
+                        "identifier_fields": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "uniqueItems": True,
+                        },
+                        "enum_fields": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "uniqueItems": True,
+                        },
+                        "custom_validator_fields": {
+                            "type": "array",
+                            "items": {"type": "string"},
+                            "uniqueItems": True,
+                        },
+                    },
+                },
             },
         },
     },
