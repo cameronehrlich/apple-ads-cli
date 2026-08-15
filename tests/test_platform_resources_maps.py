@@ -1,5 +1,6 @@
 """Coverage and CLI contracts for Maps and asset Platform API resources."""
 
+from click import unstyle
 from typer.testing import CliRunner
 
 from asa_cli.platform.resources import (
@@ -37,10 +38,11 @@ def test_search_geos_exposes_required_supply_source_and_enum_filter():
     result = runner.invoke(geos.app, ["search", "--help"])
 
     assert result.exit_code == 0
-    assert "--supply-source" in result.stdout
-    assert "required" in result.stdout.lower()
-    assert "--entity" in result.stdout
-    assert "--ad-account" in result.stdout
+    help_text = unstyle(result.stdout)
+    assert "--supply-source" in help_text
+    assert "required" in help_text.lower()
+    assert "--entity" in help_text
+    assert "--ad-account" in help_text
 
 
 def test_asset_upload_has_explicit_multipart_parameters_and_safety_gate(
@@ -72,10 +74,11 @@ def test_asset_upload_has_explicit_multipart_parameters_and_safety_gate(
     )
 
     assert help_result.exit_code == 0
-    assert "--file" in help_result.stdout
-    assert "--promoted-object-id" in help_result.stdout
-    assert "--promoted-object-type" in help_result.stdout
-    assert "--confirm" in help_result.stdout
+    help_text = unstyle(help_result.stdout)
+    assert "--file" in help_text
+    assert "--promoted-object-id" in help_text
+    assert "--promoted-object-type" in help_text
+    assert "--confirm" in help_text
     assert preview.exit_code == 0
     assert '"sdk_method": "upload_asset"' in preview.stdout
     assert "Mutation not sent" in preview.stderr
@@ -99,8 +102,9 @@ def test_asset_upload_rejects_missing_file_before_preview():
     )
 
     assert result.exit_code == 2
-    assert "Invalid value for '--file'" in result.stderr
-    assert "/definitely/missing/brand.png" in result.stderr
+    stderr = unstyle(result.stderr)
+    assert "Invalid value for '--file'" in stderr
+    assert "/definitely/missing/brand.png" in stderr
 
 
 def test_asset_upload_rejects_unrecognized_file_content(tmp_path):

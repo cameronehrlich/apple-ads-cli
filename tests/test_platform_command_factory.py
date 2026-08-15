@@ -3,6 +3,7 @@
 from types import SimpleNamespace
 
 import typer
+from click import unstyle
 from typer.testing import CliRunner
 
 from asa_cli.platform.command_factory import (
@@ -46,8 +47,9 @@ def test_read_command_exposes_exact_options_and_dispatches_once(monkeypatch):
 
     help_result = runner.invoke(app, ["get", "--help"])
     assert help_result.exit_code == 0
-    assert "--id" in help_result.stdout
-    assert "--ad-account" in help_result.stdout
+    help_text = unstyle(help_result.stdout)
+    assert "--id" in help_text
+    assert "--ad-account" in help_text
 
     result = runner.invoke(app, ["get", "--id", "42", "--ad-account", "123"])
 

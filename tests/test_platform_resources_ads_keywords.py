@@ -3,6 +3,7 @@
 from types import ModuleType
 
 import pytest
+from click import unstyle
 from typer.testing import CliRunner
 
 from asa_cli.platform.manifest_specs import load_manifest, specs_from_manifest
@@ -130,11 +131,13 @@ def test_shared_budget_context_options_match_manifest():
     create_help = runner.invoke(shared_budgets.app, ["create", "--help"])
 
     assert get_help.exit_code == 0
-    assert "--ad-account" in get_help.stdout
+    get_help_text = unstyle(get_help.stdout)
+    create_help_text = unstyle(create_help.stdout)
+    assert "--ad-account" in get_help_text
     assert create_help.exit_code == 0
-    assert "--ad-account" not in create_help.stdout
-    assert "--file" in create_help.stdout
-    assert "--confirm" in create_help.stdout
+    assert "--ad-account" not in create_help_text
+    assert "--file" in create_help_text
+    assert "--confirm" in create_help_text
 
 
 def test_manifest_adapter_rejects_duplicate_or_wrong_family_methods():

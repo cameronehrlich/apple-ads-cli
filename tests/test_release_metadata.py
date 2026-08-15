@@ -5,6 +5,7 @@ import tomllib
 from importlib.metadata import version
 from pathlib import Path
 
+from click import unstyle
 from typer.testing import CliRunner
 
 from asa_cli import __version__
@@ -25,7 +26,7 @@ def test_version_reports_cli_sdk_and_python_versions():
     result = CliRunner().invoke(app, ["version"])
 
     assert result.exit_code == 0
-    assert result.stdout == (
+    assert unstyle(result.stdout) == (
         f"asa 1.1.0 (apple-ads-platform 1.109.0, Python {platform.python_version()})\n"
     )
 

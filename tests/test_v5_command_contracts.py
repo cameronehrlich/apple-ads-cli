@@ -3,6 +3,7 @@
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
+from click import unstyle
 from typer.testing import CliRunner
 
 from asa_cli.commands import campaigns, config, keywords, optimize, reports
@@ -158,7 +159,7 @@ def test_negative_keyword_dry_run_does_not_mutate():
     )
 
     assert result.exit_code == 0, result.output
-    assert "Campaigns: 1" in result.output
+    assert "Campaigns: 1" in unstyle(result.output)
     assert_no_keyword_mutations(client)
 
 
