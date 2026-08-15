@@ -360,7 +360,7 @@ def audit_campaigns(
         console.print("\n[bold red]Issues Found:[/bold red]")
         for issue in structure_issues:
             console.print(f"  [red]•[/red] {issue}")
-        console.print("\nRun [cyan]asa campaigns setup[/cyan] to create missing campaigns.")
+        console.print("\nRun [cyan]asa v5 campaigns setup[/cyan] to create missing campaigns.")
     else:
         console.print("\n[bold green]Campaign structure matches Apple's recommendations[/bold green]")
 
@@ -652,7 +652,8 @@ def clone_campaign(
     else:
         console.print(
             f"  [dim]Source campaign {source_campaign_id} unchanged. Pause it with "
-            f"'asa campaigns update {source_campaign_id} --status PAUSED' when you've verified the clone.[/dim]"
+            f"'asa v5 campaigns update {source_campaign_id} --status PAUSED' "
+            "when you've verified the clone.[/dim]"
         )
 
 

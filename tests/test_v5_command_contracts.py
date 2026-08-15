@@ -1,10 +1,11 @@
 """Focused CLI contracts for the frozen v5 campaign and keyword workflows."""
 
+from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from typer.testing import CliRunner
 
-from asa_cli.commands import campaigns, keywords
+from asa_cli.commands import campaigns, config, keywords, optimize, reports
 from asa_cli.config import AppConfig
 
 runner = CliRunner()
@@ -70,6 +71,7 @@ def test_campaign_audit_reads_without_mutating():
 
     assert result.exit_code == 0, result.output
     assert "Missing category campaign" in result.output
+    assert "asa v5 campaigns setup" in result.output
     client.pause_campaign.assert_not_called()
     client.enable_campaign.assert_not_called()
     client.create_campaign.assert_not_called()
@@ -129,6 +131,25 @@ def test_keyword_add_dry_run_preserves_routing_without_mutation():
     assert "Add as EXACT to Category" in result.output
     assert "Add as BROAD to Discovery" in result.output
     assert_no_keyword_mutations(client)
+
+
+def test_legacy_runtime_guidance_uses_the_v5_namespace():
+    source_modules = (campaigns, config, keywords, optimize, reports)
+    stale_paths = (
+        "asa campaigns setup",
+        "asa campaigns update",
+        "asa keywords promote",
+        "asa keywords add-negatives",
+        "asa reports custom-get",
+        "asa optimize",
+    )
+
+    for module in source_modules:
+        source = module.__file__
+        assert source is not None
+        contents = Path(source).read_text(encoding="utf-8")
+        for stale_path in stale_paths:
+            assert stale_path not in contents
 
 
 def test_negative_keyword_dry_run_does_not_mutate():

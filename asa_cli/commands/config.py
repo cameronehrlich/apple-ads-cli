@@ -78,8 +78,10 @@ def setup_config(
 
     console.print("\n[bold green]Configuration complete![/bold green]")
     console.print("\nNext steps:")
-    console.print("  1. Run [cyan]asa campaigns audit[/cyan] to check existing campaigns")
-    console.print("  2. Run [cyan]asa campaigns setup[/cyan] to create the 4-campaign structure")
+    console.print("  1. Run [cyan]asa v5 campaigns audit[/cyan] to check existing campaigns")
+    console.print(
+        "  2. Run [cyan]asa v5 campaigns setup[/cyan] to create the 4-campaign structure"
+    )
 
 
 @app.command("show")
