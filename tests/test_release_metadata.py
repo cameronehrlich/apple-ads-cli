@@ -10,7 +10,7 @@ from typer.testing import CliRunner
 
 from asa_cli import __version__
 from asa_cli.main import app
-from scripts.check_release import CANONICAL_REPOSITORY, validate
+from scripts.check_release import validate
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -42,14 +42,15 @@ def test_cli_framework_version_is_pinned_to_the_verified_command_tree():
 
 def test_public_metadata_uses_the_canonical_repository_without_renaming_the_cli():
     project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))["project"]
+    canonical_repository = "https://github.com/cameronehrlich/apple-ads-cli"
 
     assert project["name"] == "asa-cli"
     assert project["scripts"] == {"asa": "asa_cli.main:app"}
     assert project["urls"] == {
-        "Homepage": CANONICAL_REPOSITORY,
-        "Documentation": f"{CANONICAL_REPOSITORY}#readme",
-        "Issues": f"{CANONICAL_REPOSITORY}/issues",
-        "Releases": f"{CANONICAL_REPOSITORY}/releases",
+        "Homepage": canonical_repository,
+        "Documentation": f"{canonical_repository}#readme",
+        "Issues": f"{canonical_repository}/issues",
+        "Releases": f"{canonical_repository}/releases",
     }
 
     skill = (ROOT / "SKILL.md").read_text(encoding="utf-8")
