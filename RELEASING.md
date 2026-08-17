@@ -29,7 +29,7 @@ uv run ruff check .
 uv run pytest -q
 uv run python -m asa_cli.platform.generate_manifest --check
 uv run python scripts/generate_skill_references.py --check
-uv run python scripts/check_release.py --version 1.1.1
+uv run python scripts/check_release.py --version 1.1.2
 uv build
 git diff --check
 ```
@@ -42,8 +42,8 @@ git diff --check
 Create an annotated tag on the accepted `main` commit and push only that tag:
 
 ```bash
-git tag -a 1.1.1 -m 'Apple Ads CLI 1.1.1'
-git push origin 1.1.1
+git tag -a 1.1.2 -m 'Apple Ads CLI 1.1.2'
+git push origin 1.1.2
 ```
 
 Tag pushes matching `X.Y.Z` trigger `.github/workflows/release.yml`. The workflow:
@@ -64,9 +64,9 @@ If a run fails after creating its draft, inspect that draft and the workflow log
 ## After publishing
 
 ```bash
-gh release view 1.1.1 --repo cameronehrlich/apple-ads-cli
+gh release view 1.1.2 --repo cameronehrlich/apple-ads-cli
 uv tool install --force \
-  'git+https://github.com/cameronehrlich/apple-ads-cli.git@1.1.1'
+  'git+https://github.com/cameronehrlich/apple-ads-cli.git@1.1.2'
 asa version
 asa config test
 ```
