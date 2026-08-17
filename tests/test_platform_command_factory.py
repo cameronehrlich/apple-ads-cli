@@ -235,7 +235,7 @@ def test_manifest_mutations_require_a_request_file():
     result = runner.invoke(campaigns_app, ["create", "--ad-account", "123"])
 
     assert result.exit_code == 2
-    assert "--file" in result.stderr
+    assert "--file" in unstyle(result.stderr)
 
 
 def test_preview_rejects_body_account_that_differs_from_context(tmp_path):
