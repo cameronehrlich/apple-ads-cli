@@ -39,10 +39,10 @@ python3.12 -m pip install -e '.[dev]'
 asa version
 ```
 
-Automation should install the exact 1.1.1 tag rather than following `main`:
+Automation should install the exact 1.1.2 tag rather than following `main`:
 
 ```bash
-uv tool install 'git+https://github.com/cameronehrlich/apple-ads-cli.git@1.1.1'
+uv tool install 'git+https://github.com/cameronehrlich/apple-ads-cli.git@1.1.2'
 ```
 
 ## Configure
@@ -296,10 +296,11 @@ The CLI uses semantic versions and bare tags such as `1.1.0`. GitHub Releases co
 | `1.0.0` | Immutable legacy Campaign Management API v5 baseline from the former `main` code line |
 | `1.1.0` | Backward-compatible Platform API v1 default, explicit `asa v5` fallback, generated skill, and strategy-aware workflows |
 | `1.1.1` | Response-model drift inventory and fail-closed validation hardening for confirmed live SDK mismatches |
+| `1.1.2` | Apple Ads CLI repository branding and organization-currency-safe legacy v5 campaign, ad group, keyword, and budget writes |
 
 CLI and SDK versions are intentionally independent:
 
-- `asa 1.1.1` describes this project’s command and behavior contract.
+- `asa 1.1.2` describes this project’s command and behavior contract.
 - `apple-ads-platform 1.109.0` identifies the exact Apple SDK contract it wraps.
 
 Automation should pin a CLI release, run `asa config test`, and perform a safe read before depending on an endpoint. See [RELEASING.md](RELEASING.md) for the release process and versioning policy.
