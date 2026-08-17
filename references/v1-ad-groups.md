@@ -32,7 +32,7 @@ SDK `apple-ads-platform` version `1.109.0`; source commit `742ba544433ba9a5bef0a
 
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
-| option | `--file` | no | `path` | — | — | JSON request file; use '-' to read from stdin |
+| option | `--file` | yes | `path` | — | — | JSON request file; use '-' to read from stdin |
 | option | `--ad-account` | no | `text` | — | `ASA_AD_ACCOUNT_ID` | Apple Ads Platform ad account ID |
 | option | `--dry-run` | no | `boolean` | `False` | — | Validate and print the SDK call without sending it |
 | option | `--confirm` | no | `boolean` | `False` | — | Confirm this Apple Ads mutation |
@@ -44,6 +44,7 @@ AdGroupCreate
 
 - Schema SHA-256: `500c4160d61a9f6890099428aada8f6bd5c5e5ae2ae27e30a3ac1c9a87de785b`
 - Source SHA-256: `9e6d0374ad9b9a596e92e43aff0146832f58e47a14120aac8df4a81720a9b076`
+- CLI override: Live request contract: Apple requires startTime even though SDK 1.109.0 marks it optional.
 
 | Field | Required | Type | Default | Description |
 |---|---|---|---|---|
@@ -65,7 +66,8 @@ Required-field body skeleton (replace every placeholder and add optional fields 
 {
   "campaignId": 0,
   "name": "<string>",
-  "pricingModel": "<one of: CPA | CPM | CPT | unknown_default_open_api>"
+  "pricingModel": "<one of: CPA | CPM | CPT | unknown_default_open_api>",
+  "startTime": "<ISO-8601 date-time>"
 }
 ```
 
@@ -328,7 +330,7 @@ QuerySortOrder
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
 | option | `--id` | yes | `text` | — | — | id parameter |
-| option | `--file` | no | `path` | — | — | JSON request file; use '-' to read from stdin |
+| option | `--file` | yes | `path` | — | — | JSON request file; use '-' to read from stdin |
 | option | `--ad-account` | no | `text` | — | `ASA_AD_ACCOUNT_ID` | Apple Ads Platform ad account ID |
 | option | `--dry-run` | no | `boolean` | `False` | — | Validate and print the SDK call without sending it |
 | option | `--confirm` | no | `boolean` | `False` | — | Confirm this Apple Ads mutation |
@@ -340,6 +342,7 @@ AdGroupUpdate
 
 - Schema SHA-256: `57a3bce2364b2d23f6e30106b33edbd836efda0ee14f0b26cd34bd69907486ec`
 - Source SHA-256: `4ff8464bfd690d4d0487745b7132483a4616b9a4b4a0360f17bf7cf1d22e67fc`
+- CLI override: Serialization contract: omitted fields, including nested targeting fields, are not sent. Include only intended changes and treat any explicit null shown in the preview as intentional.
 
 | Field | Required | Type | Default | Description |
 |---|---|---|---|---|
@@ -356,140 +359,7 @@ AdGroupUpdate
 Required-field body skeleton (replace every placeholder and add optional fields only as needed):
 
 ```json
-{
-  "automatedKeywordsOptIn": false,
-  "automatedKeywordsRequired": false,
-  "bidStrategy": {
-    "bid": {
-      "amount": "<string>"
-    },
-    "bidStrategyGoal": "<one of: IMPRESSION | INSTALL | TAP | unknown_default_open_api>",
-    "bidStrategyType": "<one of: MANUAL_CPT | MAX_CONVERSIONS | MANUAL_CPM | MAX_ENGAGEMENTS | unknown_default_open_api>"
-  },
-  "cpaCap": {
-    "value": {
-      "amount": "<string>"
-    }
-  },
-  "endTime": "<string>",
-  "name": "<string>",
-  "startTime": "<string>",
-  "status": "<one of: ENABLED | PAUSED | unknown_default_open_api>",
-  "targeting": {
-    "adminArea": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "appCategory": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "appDownloader": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "country": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "daypart": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "deviceClass": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "gender": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "locality": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "locationGroup": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "maxAge": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "minAge": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "postalCode": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "radius": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "travelIntent": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    }
-  }
-}
+{}
 ```
 
 #### Referenced structures

@@ -7,7 +7,16 @@ import argparse
 import sys
 from pathlib import Path
 
-from _command_catalog import DEFAULT_MANIFEST, REFERENCES_DIR, load_manifest, render_reference_files
+REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
+if str(REPOSITORY_ROOT) not in sys.path:
+    sys.path.insert(0, str(REPOSITORY_ROOT))
+
+from _command_catalog import (  # noqa: E402
+    DEFAULT_MANIFEST,
+    REFERENCES_DIR,
+    load_manifest,
+    render_reference_files,
+)
 
 
 def parse_args() -> argparse.Namespace:

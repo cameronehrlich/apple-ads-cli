@@ -67,6 +67,8 @@ Read [command-index.md](references/command-index.md) only for broad inventory qu
 ## Execute safely
 
 - Begin with read-only preflight and exact account selection.
+- For report comparisons, align inclusive dates and time zones, inspect pagination and `coverage`, and use `source_totals` rather than filtered or limited row totals.
+- For v1 mutation JSON, include only intended fields; campaign search-results targeting requires APPSTORE plus APPSTORE_SEARCH_RESULTS, and ad-group creation requires `startTime`.
 - Show the user the exact targets and proposed values before a mutation unless that exact action was already authorized.
 - Use the command's documented preview or confirmation gate. Never invent `--apply`, `--yes`, or other flags.
 - After a mutation, read back the affected resource by ID and compare the intended fields. A successful request without matching readback is unverified.

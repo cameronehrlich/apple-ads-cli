@@ -23,8 +23,9 @@ from ..reporting import (
     normalize_performance_row,
     parse_impression_share_csv,
     performance_totals,
+    performance_totals_from_metrics,
 )
-from ..v5.api import SearchAdsClient
+from ..v5.api import REPORTING_TIME_ZONE, SearchAdsClient
 
 app = typer.Typer(help="Reporting and analytics commands")
 console = Console()
@@ -43,6 +44,67 @@ def _status(message: str, *, json_output: bool):
 
 def _print_json(payload: dict) -> None:
     typer.echo(json.dumps(payload, indent=2, sort_keys=True, allow_nan=False))
+
+
+def _apple_source_totals(rows: list[dict]) -> tuple[dict, str]:
+    grand_totals = getattr(rows, "grand_totals", None)
+    if isinstance(grand_totals, dict):
+        return performance_totals_from_metrics(grand_totals), "apple_grand_totals"
+    if not rows:
+        return performance_totals([]), "empty_api_rows"
+    normalized = [
+        normalize_performance_row(row, kind="campaign")
+        for row in rows
+    ]
+    return performance_totals(normalized), "summed_api_rows"
+
+
+def _combine_totals(parts: list[dict]) -> dict:
+    return performance_totals(parts)
+
+
+def _combined_source_totals_kind(kinds: set[str]) -> str:
+    if "apple_grand_totals" in kinds and kinds <= {
+        "apple_grand_totals",
+        "empty_api_rows",
+    }:
+        return "apple_grand_totals"
+    return "summed_api_rows"
+
+
+def _coverage(
+    *,
+    source_rows: int,
+    filtered_rows: int,
+    returned_rows: int,
+    source_totals_kind: str,
+    pages: int = 1,
+    api_pages_complete: bool = True,
+    selection_complete: Optional[bool] = None,
+    filters: Optional[dict] = None,
+    limit: Optional[int] = None,
+    extra: Optional[dict] = None,
+) -> dict:
+    payload = {
+        "api_pages_complete": api_pages_complete,
+        "api_pages": pages,
+        "source_rows": source_rows,
+        "filtered_rows": filtered_rows,
+        "returned_rows": returned_rows,
+        "selection_complete": (
+            returned_rows == source_rows
+            if selection_complete is None
+            else selection_complete
+        ),
+        "truncated": returned_rows < filtered_rows,
+        "filters": filters or {},
+        "limit": limit,
+        "totals_scope": "returned_rows",
+        "source_totals_scope": source_totals_kind,
+    }
+    if extra:
+        payload.update(extra)
+    return payload
 
 
 def format_currency(amount: float, currency: str = "USD") -> str:
@@ -92,7 +154,7 @@ def report_summary(
     ),
     json_output: bool = typer.Option(False, "--json", help="Emit stable machine-readable JSON"),
 ):
-    """Show campaign performance over exact completed calendar dates."""
+    """Show ORTZ campaign performance over exact completed calendar dates."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
@@ -133,7 +195,18 @@ def report_summary(
         if json_output:
             _print_json(
                 machine_report(
-                    "summary", window, [], totals=performance_totals([]), time_zone="UTC"
+                    "summary",
+                    window,
+                    [],
+                    totals=performance_totals([]),
+                    source_totals=performance_totals([]),
+                    coverage=_coverage(
+                        source_rows=0,
+                        filtered_rows=0,
+                        returned_rows=0,
+                        source_totals_kind="summed_api_rows",
+                    ),
+                    time_zone=REPORTING_TIME_ZONE,
                 )
             )
         else:
@@ -159,6 +232,10 @@ def report_summary(
     }
 
     machine_rows = []
+    source_total_parts = []
+    source_rows = 0
+    source_pages = 0
+    source_total_kinds = set()
     for campaign, ctype_label in campaign_list:
         campaign_id = campaign.get("id")
         campaign_name = campaign.get("name", "Unknown")
@@ -167,6 +244,11 @@ def report_summary(
             f"[bold blue]Fetching {campaign_name} report...", json_output=json_output
         ):
             report_data = client.get_campaign_report(campaign_id, start, end, granularity="DAILY")
+        source_part, source_kind = _apple_source_totals(report_data)
+        source_total_parts.append(source_part)
+        source_total_kinds.add(source_kind)
+        source_rows += len(report_data)
+        source_pages += int(getattr(report_data, "page_count", 1))
 
         # Aggregate metrics
         impressions = 0
@@ -253,7 +335,15 @@ def report_summary(
                 window,
                 machine_rows,
                 totals=performance_totals(machine_rows),
-                time_zone="UTC",
+                source_totals=_combine_totals(source_total_parts),
+                coverage=_coverage(
+                    source_rows=source_rows,
+                    filtered_rows=len(machine_rows),
+                    returned_rows=len(machine_rows),
+                    source_totals_kind=_combined_source_totals_kind(source_total_kinds),
+                    pages=source_pages,
+                ),
+                time_zone=REPORTING_TIME_ZONE,
             )
         )
     else:
@@ -281,7 +371,7 @@ def report_keywords(
     ),
     json_output: bool = typer.Option(False, "--json", help="Emit stable machine-readable JSON"),
 ):
-    """Show keyword performance over exact completed calendar dates."""
+    """Show ORTZ keyword performance with explicit source coverage."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
@@ -330,6 +420,10 @@ def report_keywords(
         raise typer.BadParameter("Machine output requires --campaign or --all")
 
     keywords: list[dict] = []
+    api_report_rows = 0
+    source_pages = 0
+    source_total_parts = []
+    source_total_kinds = set()
     for campaign in campaigns:
         cid = campaign.get("id")
         with _status(
@@ -337,6 +431,11 @@ def report_keywords(
             json_output=json_output,
         ):
             report_data = client.get_keyword_report(cid, start, end)
+        source_part, source_kind = _apple_source_totals(report_data)
+        source_total_parts.append(source_part)
+        source_total_kinds.add(source_kind)
+        api_report_rows += len(report_data)
+        source_pages += int(getattr(report_data, "page_count", 1))
 
         report_by_id = {
             row.get("metadata", {}).get("keywordId"): row
@@ -377,7 +476,9 @@ def report_keywords(
                 for row in report_data
             )
 
+    source_row_count = len(keywords)
     keywords = [row for row in keywords if row["impressions"] >= min_impressions]
+    filtered_row_count = len(keywords)
 
     # Sort
     sort_key = {
@@ -408,8 +509,26 @@ def report_keywords(
                 window,
                 keywords,
                 totals=performance_totals(keywords),
+                source_totals=_combine_totals(source_total_parts),
+                coverage=_coverage(
+                    source_rows=source_row_count,
+                    filtered_rows=filtered_row_count,
+                    returned_rows=len(keywords),
+                    source_totals_kind=_combined_source_totals_kind(source_total_kinds),
+                    pages=source_pages,
+                    filters={"min_impressions": min_impressions},
+                    limit=None if include_zero or limit <= 0 else limit,
+                    extra={
+                        "api_report_rows": api_report_rows,
+                        "source_kind": (
+                            "targeting_keyword_inventory"
+                            if include_zero
+                            else "performance_rows"
+                        ),
+                    },
+                ),
                 inventory_complete=include_zero and min_impressions == 0,
-                time_zone="UTC",
+                time_zone=REPORTING_TIME_ZONE,
             )
         )
         return
@@ -722,12 +841,14 @@ def report_impression_share(
         raise typer.Exit(1)
 
     rows: list[dict] = []
+    source_row_count = 0
     if state == "COMPLETED":
         download_uri = report.get("downloadUri")
         if not download_uri:
             console.print("[red]Completed report did not include a download URI.[/red]")
             raise typer.Exit(1)
         rows = parse_impression_share_csv(client.download_custom_report(download_uri))
+        source_row_count = len(rows)
         if limit > 0:
             rows = rows[:limit]
 
@@ -735,7 +856,26 @@ def report_impression_share(
         "impression_share",
         window,
         rows,
-        time_zone="ORTZ",
+        coverage=_coverage(
+            source_rows=source_row_count,
+            filtered_rows=source_row_count,
+            returned_rows=len(rows),
+            source_totals_kind="not_applicable",
+            api_pages_complete=state == "COMPLETED",
+            selection_complete=(
+                state == "COMPLETED" and len(rows) == source_row_count
+            ),
+            limit=limit if limit > 0 else None,
+            extra={
+                "report_complete": state == "COMPLETED",
+                "source_kind": (
+                    "downloaded_apple_csv"
+                    if state == "COMPLETED"
+                    else "unavailable_pending_report"
+                ),
+            },
+        ),
+        time_zone=REPORTING_TIME_ZONE,
         extra={
             "report": {
                 "id": report.get("id"),
@@ -795,13 +935,15 @@ def report_search_terms(
     end_date: Optional[str] = typer.Option(
         None, "--end", "--end-date", help="Inclusive complete end date (YYYY-MM-DD)"
     ),
-    min_impressions: int = typer.Option(10, "--min-impressions", help="Minimum impressions filter"),
+    min_impressions: int = typer.Option(
+        10, "--min-impressions", min=0, help="Minimum impressions filter"
+    ),
     show_winners: bool = typer.Option(False, "--winners", "-w", help="Show potential keywords to promote"),
     show_negatives: bool = typer.Option(False, "--negatives", "-n", help="Show potential negative keywords"),
-    limit: int = typer.Option(50, "--limit", "-l", help="Max terms to show"),
+    limit: int = typer.Option(50, "--limit", "-l", min=1, help="Max terms to show"),
     json_output: bool = typer.Option(False, "--json", help="Emit stable machine-readable JSON"),
 ):
-    """Show search terms over exact completed calendar dates."""
+    """Show ORTZ search terms with explicit filtering and coverage metadata."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
@@ -867,11 +1009,35 @@ def report_search_terms(
     with _status("[bold blue]Fetching search terms report...", json_output=json_output):
         report_data = client.get_search_terms_report(campaign_id, start, end)
 
+    source_totals, source_totals_kind = _apple_source_totals(report_data)
+    source_pages = int(getattr(report_data, "page_count", 1))
+    source_row_count = len(report_data)
+    filter_name = "winners" if show_winners else "negatives" if show_negatives else "all"
+
     if not report_data:
         if json_output:
             _print_json(
                 machine_report(
-                    "search_terms", window, [], totals=performance_totals([])
+                    "search_terms",
+                    window,
+                    [],
+                    totals=performance_totals([]),
+                    source_totals=source_totals,
+                    coverage=_coverage(
+                        source_rows=0,
+                        filtered_rows=0,
+                        returned_rows=0,
+                        source_totals_kind=source_totals_kind,
+                        pages=source_pages,
+                        filters={"min_impressions": min_impressions, "mode": filter_name},
+                        limit=limit,
+                        extra={
+                            "apple_search_term_minimum_impressions": 10,
+                            "low_volume_terms_may_be_aggregated_as_other": True,
+                        },
+                    ),
+                    time_zone=REPORTING_TIME_ZONE,
+                    extra={"filter": filter_name},
                 )
             )
         else:
@@ -888,18 +1054,20 @@ def report_search_terms(
         # Filter to terms with installs and reasonable CPA
         winners = [t for t in terms if t["installs"] >= 1]
         winners.sort(key=lambda x: x["cpa"] if x["cpa"] is not None else 999999)
-        terms = winners[:limit]
+        terms = winners
         title = "Potential Keywords to Promote"
     elif show_negatives:
         # Filter to terms with spend but no installs
         losers = [t for t in terms if t["installs"] == 0 and t["spend"] > 0]
         losers.sort(key=lambda x: -x["spend"])
-        terms = losers[:limit]
+        terms = losers
         title = "Potential Negative Keywords"
     else:
         terms.sort(key=lambda x: -x["spend"])
-        terms = terms[:limit]
         title = "Search Terms"
+
+    filtered_row_count = len(terms)
+    terms = terms[:limit]
 
     if json_output:
         terms.sort(
@@ -916,13 +1084,26 @@ def report_search_terms(
                 window,
                 terms,
                 totals=performance_totals(terms),
-                time_zone="ORTZ",
+                source_totals=source_totals,
+                coverage=_coverage(
+                    source_rows=source_row_count,
+                    filtered_rows=filtered_row_count,
+                    returned_rows=len(terms),
+                    source_totals_kind=source_totals_kind,
+                    pages=source_pages,
+                    filters={
+                        "min_impressions": min_impressions,
+                        "mode": filter_name,
+                    },
+                    limit=limit,
+                    extra={
+                        "apple_search_term_minimum_impressions": 10,
+                        "low_volume_terms_may_be_aggregated_as_other": True,
+                    },
+                ),
+                time_zone=REPORTING_TIME_ZONE,
                 extra={
-                    "filter": "winners"
-                    if show_winners
-                    else "negatives"
-                    if show_negatives
-                    else "all"
+                    "filter": filter_name
                 },
             )
         )
@@ -1179,7 +1360,7 @@ def report_ads(
     all_campaigns: bool = typer.Option(False, "--all", "-a", help="Show ad report for all campaigns"),
     json_output: bool = typer.Option(False, "--json", help="Emit stable machine-readable JSON"),
 ):
-    """Show ad performance over exact completed calendar dates."""
+    """Show ORTZ ad performance over exact completed calendar dates."""
     credentials = load_credentials()
     if not credentials:
         console.print("[red]No credentials configured. Run 'asa config setup' first.[/red]")
@@ -1251,6 +1432,10 @@ def report_ads(
         )
 
     machine_rows = []
+    source_total_parts = []
+    source_total_kinds = set()
+    source_rows = 0
+    source_pages = 0
     for campaign in campaigns_to_report:
         cid = campaign.get("id")
         cname = campaign.get("name", "Unknown")
@@ -1260,6 +1445,11 @@ def report_ads(
             f"[bold blue]Fetching {cname} ad report...", json_output=json_output
         ):
             report_data = client.get_ad_report(cid, start, end)
+        source_part, source_kind = _apple_source_totals(report_data)
+        source_total_parts.append(source_part)
+        source_total_kinds.add(source_kind)
+        source_rows += len(report_data)
+        source_pages += int(getattr(report_data, "page_count", 1))
 
         if not report_data:
             if not json_output:
@@ -1332,7 +1522,15 @@ def report_ads(
                 window,
                 machine_rows,
                 totals=performance_totals(machine_rows),
-                time_zone="UTC",
+                source_totals=_combine_totals(source_total_parts),
+                coverage=_coverage(
+                    source_rows=source_rows,
+                    filtered_rows=len(machine_rows),
+                    returned_rows=len(machine_rows),
+                    source_totals_kind=_combined_source_totals_kind(source_total_kinds),
+                    pages=source_pages,
+                ),
+                time_zone=REPORTING_TIME_ZONE,
             )
         )
 

@@ -231,6 +231,13 @@ def test_real_sdk_campaign_body_hydrates_during_safe_preview(tmp_path):
     assert "Mutation not sent" in result.stderr
 
 
+def test_manifest_mutations_require_a_request_file():
+    result = runner.invoke(campaigns_app, ["create", "--ad-account", "123"])
+
+    assert result.exit_code == 2
+    assert "--file" in result.stderr
+
+
 def test_preview_rejects_body_account_that_differs_from_context(tmp_path):
     request_file = tmp_path / "campaign.json"
     request_file.write_text(

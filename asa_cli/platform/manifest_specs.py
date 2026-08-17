@@ -150,6 +150,15 @@ def specs_from_manifest(
             operation["context"],
         )
         command_name = command_names[method_name]
+        mutation = _mutation_kind(operation)
+        body = _body_spec(operation["body_parameters"])
+        if body is not None and mutation != "read" and not body.required:
+            body = BodySpec(
+                parameter=body.parameter,
+                model=body.model,
+                required=True,
+                many=body.many,
+            )
         specs.append(
             CommandSpec(
                 name=command_name,
@@ -157,8 +166,8 @@ def specs_from_manifest(
                 help=f"{command_name.replace('-', ' ').capitalize()} {resource_family.replace('-', ' ')}.",
                 context=context,
                 parameters=parameters,
-                body=_body_spec(operation["body_parameters"]),
-                mutation=_mutation_kind(operation),
+                body=body,
+                mutation=mutation,
             )
         )
     return tuple(specs)

@@ -16,10 +16,58 @@ console = Console()
 TOKEN_URL = "https://appleid.apple.com/auth/oauth2/token"
 API_BASE_URL = "https://api.searchads.apple.com/api/v5"
 REQUEST_TIMEOUT = (10, 30)
+REPORTING_TIME_ZONE = "ORTZ"
+REPORT_PAGE_SIZE = 1000
+
+
+def _complete_report_range(
+    start_date: Optional[datetime],
+    end_date: Optional[datetime],
+    *,
+    days: int = 30,
+    now: Optional[datetime] = None,
+) -> tuple[datetime, datetime]:
+    """Resolve default report dates to an inclusive completed-day window."""
+    reference = now or datetime.now()
+    default_end = (reference - timedelta(days=1)).replace(
+        hour=0, minute=0, second=0, microsecond=0
+    )
+    end = end_date or default_end
+    start = start_date or (end - timedelta(days=days - 1))
+    return start, end
 
 
 class SearchAdsAPIError(RuntimeError):
     """Raised when an Apple Ads request fails without returning valid data."""
+
+
+class ReportRows(list[dict[str, Any]]):
+    """Report rows with additive completeness and Apple-total metadata.
+
+    This remains a ``list`` for compatibility with existing v5 callers while
+    allowing reporting commands to distinguish complete API results from a
+    filtered or truncated display selection.
+    """
+
+    def __init__(
+        self,
+        rows: list[dict[str, Any]],
+        *,
+        grand_totals: Optional[dict[str, Any]] = None,
+        page_count: int = 1,
+        total_results: Optional[int] = None,
+        start_date: Optional[str] = None,
+        end_date: Optional[str] = None,
+        time_zone: Optional[str] = None,
+    ) -> None:
+        super().__init__(rows)
+        self.grand_totals = grand_totals
+        self.page_count = page_count
+        self.total_results = len(rows) if total_results is None else total_results
+        self.api_pages_complete = True
+        self.start_date = start_date
+        self.end_date = end_date
+        self.time_zone = time_zone
 
 
 class SearchAdsClient:
@@ -223,6 +271,159 @@ class SearchAdsClient:
             offset = fetched
 
         return all_results
+
+    def _get_all_report_rows(
+        self,
+        endpoint: str,
+        report_request: dict[str, Any],
+    ) -> ReportRows:
+        """Fetch every page of a v5 reporting endpoint or fail closed.
+
+        Report pagination lives in the request selector and the response's
+        top-level ``pagination`` object. Apple caps report pages at 1,000 rows.
+        """
+        rows: list[dict[str, Any]] = []
+        request_data = {
+            **report_request,
+            "selector": {
+                **report_request.get("selector", {}),
+                "pagination": {
+                    **report_request.get("selector", {}).get("pagination", {}),
+                    "offset": 0,
+                    "limit": REPORT_PAGE_SIZE,
+                },
+            },
+        }
+        offset = 0
+        page_count = 0
+        total_results: Optional[int] = None
+        grand_totals: Optional[dict[str, Any]] = None
+
+        while True:
+            page_request = {
+                **request_data,
+                "selector": {
+                    **request_data["selector"],
+                    "pagination": {
+                        **request_data["selector"]["pagination"],
+                        "offset": offset,
+                    },
+                },
+            }
+            response = self._request("POST", endpoint, data=page_request)
+            page_count += 1
+
+            reporting = (
+                response.get("data", {}).get("reportingDataResponse", {})
+                if isinstance(response, dict)
+                else {}
+            )
+            page_rows = reporting.get("row", [])
+            if not isinstance(page_rows, list):
+                raise SearchAdsAPIError(
+                    f"Apple Ads returned invalid reporting rows for {endpoint}"
+                )
+            rows.extend(page_rows)
+
+            if grand_totals is None:
+                raw_grand_totals = reporting.get("grandTotals")
+                if isinstance(raw_grand_totals, dict):
+                    raw_metrics = raw_grand_totals.get("total")
+                    if isinstance(raw_metrics, dict):
+                        grand_totals = raw_metrics
+
+            pagination = response.get("pagination") if isinstance(response, dict) else None
+            if not isinstance(pagination, dict):
+                if len(page_rows) >= REPORT_PAGE_SIZE:
+                    raise SearchAdsAPIError(
+                        f"Apple Ads omitted pagination for a full report page at {endpoint}; "
+                        "coverage cannot be verified"
+                    )
+                total_results = len(rows)
+                break
+
+            required_pagination_fields = {"totalResults", "startIndex", "itemsPerPage"}
+            if not required_pagination_fields.issubset(pagination):
+                raise SearchAdsAPIError(
+                    f"Apple Ads returned incomplete report pagination for {endpoint}; "
+                    "coverage cannot be verified"
+                )
+
+            try:
+                page_total_results = int(pagination["totalResults"])
+                start_index = int(pagination["startIndex"])
+                items_per_page = int(pagination["itemsPerPage"])
+            except (TypeError, ValueError) as exc:
+                raise SearchAdsAPIError(
+                    f"Apple Ads returned invalid report pagination for {endpoint}"
+                ) from exc
+
+            if page_total_results < 0 or start_index != offset:
+                raise SearchAdsAPIError(
+                    f"Apple Ads returned inconsistent report pagination for {endpoint}"
+                )
+            if total_results is None:
+                total_results = page_total_results
+            elif page_total_results != total_results:
+                raise SearchAdsAPIError(
+                    f"Apple Ads changed report totalResults while paging {endpoint}"
+                )
+
+            next_offset = start_index + items_per_page
+            if next_offset >= total_results or not page_rows:
+                break
+            if next_offset <= offset:
+                raise SearchAdsAPIError(
+                    f"Apple Ads report pagination did not advance for {endpoint}"
+                )
+            offset = next_offset
+
+        if total_results is not None and len(rows) != total_results:
+            raise SearchAdsAPIError(
+                f"Apple Ads report returned {len(rows)} of {total_results} rows for {endpoint}"
+            )
+        return ReportRows(
+            rows,
+            grand_totals=grand_totals,
+            page_count=page_count,
+            total_results=total_results,
+            start_date=report_request.get("startTime"),
+            end_date=report_request.get("endTime"),
+            time_zone=report_request.get("timeZone"),
+        )
+
+    @staticmethod
+    def _report_request(
+        start: datetime,
+        end: datetime,
+        *,
+        order_field: str,
+        time_zone: str = REPORTING_TIME_ZONE,
+        return_records_with_no_metrics: bool,
+        granularity: str = "DAILY",
+    ) -> dict[str, Any]:
+        """Build one consistent, comparable v5 report request."""
+        normalized_time_zone = time_zone.upper()
+        if normalized_time_zone not in {"ORTZ", "UTC"}:
+            raise ValueError("Report time zone must be ORTZ or UTC")
+
+        request: dict[str, Any] = {
+            "startTime": start.strftime("%Y-%m-%d"),
+            "endTime": end.strftime("%Y-%m-%d"),
+            "selector": {
+                "orderBy": [{"field": order_field, "sortOrder": "DESCENDING"}],
+                "pagination": {"offset": 0, "limit": REPORT_PAGE_SIZE},
+            },
+            "timeZone": normalized_time_zone,
+            "returnRecordsWithNoMetrics": return_records_with_no_metrics,
+            "returnRowTotals": True,
+            "returnGrandTotals": True,
+        }
+        if granularity != "DAILY":
+            request["granularity"] = granularity
+            request["returnRowTotals"] = False
+            request["returnGrandTotals"] = False
+        return request
 
     @property
     def org_id(self) -> int:
@@ -1030,40 +1231,33 @@ class SearchAdsClient:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         granularity: str = "DAILY",
+        time_zone: str = REPORTING_TIME_ZONE,
     ) -> list[dict[str, Any]]:
         """Get campaign performance report.
 
         Uses the org-level endpoint /reports/campaigns.
         If campaign_id is provided, filters results to that campaign.
         """
-        end = end_date or datetime.now()
-        start = start_date or (end - timedelta(days=30))
+        start, end = _complete_report_range(start_date, end_date)
 
         try:
-            report_request = {
-                "startTime": start.strftime("%Y-%m-%d"),
-                "endTime": end.strftime("%Y-%m-%d"),
-                "selector": {
-                    "orderBy": [{"field": "localSpend", "sortOrder": "DESCENDING"}],
-                    "pagination": {"offset": 0, "limit": 1000},
-                },
-                "timeZone": "UTC",
-                "returnRecordsWithNoMetrics": True,
-                "returnRowTotals": True,
-                "returnGrandTotals": True,
-            }
-            if granularity != "DAILY":
-                report_request["granularity"] = granularity
-
-            # Use org-level endpoint
-            response = self._request("POST", "/reports/campaigns", data=report_request)
-            rows = response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
-
-            # Filter by campaign_id if provided
-            if campaign_id and rows:
-                rows = [r for r in rows if r.get("metadata", {}).get("campaignId") == campaign_id]
-
-            return rows
+            report_request = self._report_request(
+                start,
+                end,
+                order_field="localSpend",
+                time_zone=time_zone,
+                return_records_with_no_metrics=True,
+                granularity=granularity,
+            )
+            if campaign_id is not None:
+                report_request["selector"]["conditions"] = [
+                    {
+                        "field": "campaignId",
+                        "operator": "EQUALS",
+                        "values": [str(campaign_id)],
+                    }
+                ]
+            return self._get_all_report_rows("/reports/campaigns", report_request)
         except Exception as e:
             raise SearchAdsAPIError(f"Failed to fetch campaign report: {e}") from e
 
@@ -1072,30 +1266,22 @@ class SearchAdsClient:
         campaign_id: int,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
+        time_zone: str = REPORTING_TIME_ZONE,
     ) -> list[dict[str, Any]]:
         """Get keyword performance report."""
-        end = end_date or datetime.now()
-        start = start_date or (end - timedelta(days=30))
+        start, end = _complete_report_range(start_date, end_date)
 
         try:
-            report_request = {
-                "startTime": start.strftime("%Y-%m-%d"),
-                "endTime": end.strftime("%Y-%m-%d"),
-                "selector": {
-                    "orderBy": [{"field": "localSpend", "sortOrder": "DESCENDING"}],
-                    "pagination": {"offset": 0, "limit": 1000},
-                },
-                "timeZone": "UTC",
-                "returnRecordsWithNoMetrics": False,
-                "returnRowTotals": True,
-            }
-
-            response = self._request(
-                "POST",
-                f"/reports/campaigns/{campaign_id}/keywords",
-                data=report_request,
+            report_request = self._report_request(
+                start,
+                end,
+                order_field="localSpend",
+                time_zone=time_zone,
+                return_records_with_no_metrics=False,
             )
-            return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
+            return self._get_all_report_rows(
+                f"/reports/campaigns/{campaign_id}/keywords", report_request
+            )
         except Exception as e:
             raise SearchAdsAPIError(
                 f"Failed to fetch keyword report for campaign {campaign_id}: {e}"
@@ -1106,30 +1292,22 @@ class SearchAdsClient:
         campaign_id: int,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
+        time_zone: str = REPORTING_TIME_ZONE,
     ) -> list[dict[str, Any]]:
         """Get ad group performance report."""
-        end = end_date or datetime.now()
-        start = start_date or (end - timedelta(days=30))
+        start, end = _complete_report_range(start_date, end_date)
 
         try:
-            report_request = {
-                "startTime": start.strftime("%Y-%m-%d"),
-                "endTime": end.strftime("%Y-%m-%d"),
-                "selector": {
-                    "orderBy": [{"field": "localSpend", "sortOrder": "DESCENDING"}],
-                    "pagination": {"offset": 0, "limit": 1000},
-                },
-                "timeZone": "UTC",
-                "returnRecordsWithNoMetrics": True,
-                "returnRowTotals": True,
-            }
-
-            response = self._request(
-                "POST",
-                f"/reports/campaigns/{campaign_id}/adgroups",
-                data=report_request,
+            report_request = self._report_request(
+                start,
+                end,
+                order_field="localSpend",
+                time_zone=time_zone,
+                return_records_with_no_metrics=True,
             )
-            return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
+            return self._get_all_report_rows(
+                f"/reports/campaigns/{campaign_id}/adgroups", report_request
+            )
         except Exception as exc:
             raise SearchAdsAPIError(
                 f"Failed to fetch ad group report for campaign {campaign_id}: {exc}"
@@ -1147,28 +1325,18 @@ class SearchAdsClient:
         - returnRecordsWithNoMetrics=false
         - timeZone="ORTZ" (Organization Relative Time Zone)
         """
-        end = end_date or datetime.now()
-        start = start_date or (end - timedelta(days=30))
+        start, end = _complete_report_range(start_date, end_date)
 
         try:
-            report_request = {
-                "startTime": start.strftime("%Y-%m-%d"),
-                "endTime": end.strftime("%Y-%m-%d"),
-                "selector": {
-                    "orderBy": [{"field": "localSpend", "sortOrder": "DESCENDING"}],
-                    "pagination": {"offset": 0, "limit": 1000},
-                },
-                "timeZone": "ORTZ",  # Required for search terms
-                "returnRecordsWithNoMetrics": False,  # Required for search terms
-                "returnRowTotals": True,
-            }
-
-            response = self._request(
-                "POST",
-                f"/reports/campaigns/{campaign_id}/searchterms",
-                data=report_request,
+            report_request = self._report_request(
+                start,
+                end,
+                order_field="localSpend",
+                return_records_with_no_metrics=False,
             )
-            return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
+            return self._get_all_report_rows(
+                f"/reports/campaigns/{campaign_id}/searchterms", report_request
+            )
         except Exception as e:
             raise SearchAdsAPIError(
                 f"Failed to fetch search terms report for campaign {campaign_id}: {e}"
@@ -1394,17 +1562,34 @@ class SearchAdsClient:
 
         # Fetch campaign reports for spend data
         report_rows = self.get_campaign_report()
-        spend_by_campaign: dict[int, float] = {}
+        spend_by_campaign: dict[int, tuple[float, Optional[str]]] = {}
         for row in report_rows:
             cid = row.get("metadata", {}).get("campaignId")
             totals = row.get("total", {})
-            spend = float(totals.get("localSpend", {}).get("amount", 0))
+            spend_data = totals.get("localSpend", {})
+            spend = float(spend_data.get("amount", 0))
+            spend_currency = spend_data.get("currency")
             if cid:
-                spend_by_campaign[cid] = spend
+                spend_by_campaign[cid] = (spend, spend_currency)
+
+        report_window = {
+            "startDate": getattr(report_rows, "start_date", None),
+            "endDate": getattr(report_rows, "end_date", None),
+            "timeZone": getattr(report_rows, "time_zone", REPORTING_TIME_ZONE),
+            "complete": True,
+            "apiPagesComplete": bool(
+                getattr(report_rows, "api_pages_complete", True)
+            ),
+        }
 
         results: list[dict[str, Any]] = []
         for campaign in campaigns:
             cid = campaign.get("id")
+            campaign_currency = (
+                (campaign.get("dailyBudgetAmount") or {}).get("currency")
+                or (campaign.get("budgetAmount") or {}).get("currency")
+            )
+            spend, spend_currency = spend_by_campaign.get(cid, (0.0, None))
             results.append({
                 "id": cid,
                 "name": campaign.get("name", ""),
@@ -1413,7 +1598,9 @@ class SearchAdsClient:
                 "status": campaign.get("status", "UNKNOWN"),
                 "displayStatus": campaign.get("displayStatus", "UNKNOWN"),
                 "servingStatus": campaign.get("servingStatus", "UNKNOWN"),
-                "totalSpend": spend_by_campaign.get(cid, 0.0),
+                "totalSpend": spend,
+                "totalSpendCurrency": spend_currency or campaign_currency,
+                "reportWindow": report_window,
             })
 
         return results
@@ -1950,22 +2137,78 @@ class SearchAdsClient:
                 f"Failed to fetch custom report {report_id}: {exc}"
             ) from exc
 
-    def get_all_custom_reports(self, limit: int = 50) -> list[dict[str, Any]]:
+    def get_all_custom_reports(self, limit: Optional[int] = None) -> list[dict[str, Any]]:
         """Get all custom reports.
 
         Args:
-            limit: Maximum reports to return (max 50)
+            limit: Optional maximum total reports to return. Apple caps each
+                request page at 50.
 
         Returns:
             List of custom report objects
         """
         try:
-            params = {"limit": min(limit, 50), "offset": 0}
-            response = self._request("GET", "/custom-reports", params=params)
-            data = response.get("data") if isinstance(response, dict) else None
-            if not isinstance(data, list):
-                raise SearchAdsAPIError("Apple Ads returned invalid custom report data")
-            return data
+            if limit is not None and limit < 1:
+                raise ValueError("Custom report limit must be at least 1")
+            reports: list[dict[str, Any]] = []
+            offset = 0
+            total_results: Optional[int] = None
+
+            while True:
+                page_size = min(50, limit - len(reports)) if limit is not None else 50
+                params = {"limit": page_size, "offset": offset}
+                response = self._request("GET", "/custom-reports", params=params)
+                data = response.get("data") if isinstance(response, dict) else None
+                if not isinstance(data, list):
+                    raise SearchAdsAPIError("Apple Ads returned invalid custom report data")
+                reports.extend(data)
+
+                if limit is not None and len(reports) >= limit:
+                    return reports[:limit]
+                pagination = response.get("pagination")
+                if not isinstance(pagination, dict):
+                    if len(data) >= page_size:
+                        raise SearchAdsAPIError(
+                            "Apple Ads omitted pagination for a full custom-report page"
+                        )
+                    return reports
+
+                required_pagination_fields = {"totalResults", "startIndex", "itemsPerPage"}
+                if not required_pagination_fields.issubset(pagination):
+                    raise SearchAdsAPIError(
+                        "Apple Ads returned incomplete custom-report pagination; "
+                        "coverage cannot be verified"
+                    )
+
+                try:
+                    page_total_results = int(pagination["totalResults"])
+                    start_index = int(pagination["startIndex"])
+                    items_per_page = int(pagination["itemsPerPage"])
+                except (TypeError, ValueError) as exc:
+                    raise SearchAdsAPIError(
+                        "Apple Ads returned invalid custom-report pagination"
+                    ) from exc
+                if page_total_results < 0 or start_index != offset:
+                    raise SearchAdsAPIError(
+                        "Apple Ads returned inconsistent custom-report pagination"
+                    )
+                if total_results is None:
+                    total_results = page_total_results
+                elif page_total_results != total_results:
+                    raise SearchAdsAPIError(
+                        "Apple Ads changed custom-report totalResults while paging"
+                    )
+                next_offset = start_index + items_per_page
+                if next_offset >= total_results or not data:
+                    if len(reports) != total_results:
+                        raise SearchAdsAPIError(
+                            f"Apple Ads returned {len(reports)} of {total_results} "
+                            "custom reports"
+                        )
+                    return reports
+                if next_offset <= offset:
+                    raise SearchAdsAPIError("Custom-report pagination did not advance")
+                offset = next_offset
         except SearchAdsAPIError:
             raise
         except Exception as exc:
@@ -1992,6 +2235,7 @@ class SearchAdsClient:
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
         granularity: str = "DAILY",
+        time_zone: str = REPORTING_TIME_ZONE,
     ) -> list[dict[str, Any]]:
         """Get ad-level performance report.
 
@@ -2006,30 +2250,20 @@ class SearchAdsClient:
         Returns:
             List of report rows
         """
-        end = end_date or datetime.now()
-        start = start_date or (end - timedelta(days=30))
+        start, end = _complete_report_range(start_date, end_date)
 
         try:
-            report_request = {
-                "startTime": start.strftime("%Y-%m-%d"),
-                "endTime": end.strftime("%Y-%m-%d"),
-                "selector": {
-                    "orderBy": [{"field": "impressions", "sortOrder": "DESCENDING"}],
-                    "pagination": {"offset": 0, "limit": 1000},
-                },
-                "timeZone": "UTC",
-                "returnRecordsWithNoMetrics": False,
-                "returnRowTotals": True,
-            }
-            if granularity != "DAILY":
-                report_request["granularity"] = granularity
-
-            response = self._request(
-                "POST",
-                f"/reports/campaigns/{campaign_id}/ads",
-                data=report_request,
+            report_request = self._report_request(
+                start,
+                end,
+                order_field="impressions",
+                time_zone=time_zone,
+                return_records_with_no_metrics=False,
+                granularity=granularity,
             )
-            return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
+            return self._get_all_report_rows(
+                f"/reports/campaigns/{campaign_id}/ads", report_request
+            )
         except Exception as exc:
             raise SearchAdsAPIError(
                 f"Failed to fetch ad report for campaign {campaign_id}: {exc}"
@@ -2045,6 +2279,7 @@ class SearchAdsClient:
         ad_group_id: int,
         start_date: Optional[datetime] = None,
         end_date: Optional[datetime] = None,
+        time_zone: str = REPORTING_TIME_ZONE,
     ) -> list[dict[str, Any]]:
         """Get keyword performance report within a specific ad group.
 
@@ -2060,28 +2295,20 @@ class SearchAdsClient:
         Returns:
             List of report rows (with insights containing bid recommendations)
         """
-        end = end_date or datetime.now()
-        start = start_date or (end - timedelta(days=30))
+        start, end = _complete_report_range(start_date, end_date)
 
         try:
-            report_request = {
-                "startTime": start.strftime("%Y-%m-%d"),
-                "endTime": end.strftime("%Y-%m-%d"),
-                "selector": {
-                    "orderBy": [{"field": "impressions", "sortOrder": "DESCENDING"}],
-                    "pagination": {"offset": 0, "limit": 1000},
-                },
-                "timeZone": "UTC",
-                "returnRecordsWithNoMetrics": False,
-                "returnRowTotals": True,
-            }
-
-            response = self._request(
-                "POST",
-                f"/reports/campaigns/{campaign_id}/adgroups/{ad_group_id}/keywords",
-                data=report_request,
+            report_request = self._report_request(
+                start,
+                end,
+                order_field="impressions",
+                time_zone=time_zone,
+                return_records_with_no_metrics=False,
             )
-            return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
+            return self._get_all_report_rows(
+                f"/reports/campaigns/{campaign_id}/adgroups/{ad_group_id}/keywords",
+                report_request,
+            )
         except Exception as e:
             raise SearchAdsAPIError(
                 f"Failed to fetch keyword report for campaign {campaign_id} "
@@ -2112,28 +2339,19 @@ class SearchAdsClient:
         Returns:
             List of search term report rows
         """
-        end = end_date or datetime.now()
-        start = start_date or (end - timedelta(days=30))
+        start, end = _complete_report_range(start_date, end_date)
 
         try:
-            report_request = {
-                "startTime": start.strftime("%Y-%m-%d"),
-                "endTime": end.strftime("%Y-%m-%d"),
-                "selector": {
-                    "orderBy": [{"field": "impressions", "sortOrder": "DESCENDING"}],
-                    "pagination": {"offset": 0, "limit": 1000},
-                },
-                "timeZone": "ORTZ",
-                "returnRecordsWithNoMetrics": False,
-                "returnRowTotals": True,
-            }
-
-            response = self._request(
-                "POST",
-                f"/reports/campaigns/{campaign_id}/adgroups/{ad_group_id}/searchterms",
-                data=report_request,
+            report_request = self._report_request(
+                start,
+                end,
+                order_field="impressions",
+                return_records_with_no_metrics=False,
             )
-            return response.get("data", {}).get("reportingDataResponse", {}).get("row", [])
+            return self._get_all_report_rows(
+                f"/reports/campaigns/{campaign_id}/adgroups/{ad_group_id}/searchterms",
+                report_request,
+            )
         except Exception as exc:
             raise SearchAdsAPIError(
                 f"Failed to fetch search terms for campaign {campaign_id} "

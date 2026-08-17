@@ -39,6 +39,84 @@ class PlatformAPIError(RuntimeError):
         self.body = body
 
 
+def _mapping_values(value: Any, key: str) -> list[str] | None:
+    """Return a targeting string list when its shape is valid enough to inspect."""
+    if not isinstance(value, Mapping):
+        return None
+    items = value.get(key)
+    if not isinstance(items, list) or not all(isinstance(item, str) for item in items):
+        return None
+    return items
+
+
+def _validate_live_request_contract(model_name: str, payload: Mapping[str, Any]) -> None:
+    """Apply narrow server-confirmed requirements missing from SDK 1.109.0."""
+    if model_name == "AdGroupCreate" and not payload.get("startTime"):
+        raise PlatformAPIError(
+            "Invalid AdGroupCreate request: startTime is required by Apple"
+        )
+
+    if model_name != "CampaignCreate":
+        return
+
+    targeting = payload.get("targeting")
+    if not isinstance(targeting, Mapping):
+        return
+    placement = targeting.get("supplyPlacement")
+    placement_values = _mapping_values(placement, "include")
+    if not placement_values:
+        return
+
+    if set(placement_values) & {"SEARCH_RESULTS", "APP_STORE_SEARCH_RESULTS"}:
+        raise PlatformAPIError(
+            "Invalid CampaignCreate request: use APPSTORE_SEARCH_RESULTS for "
+            "targeting.supplyPlacement.include, not SEARCH_RESULTS"
+        )
+
+    source_values = _mapping_values(targeting.get("supplySource"), "include")
+    if not source_values:
+        raise PlatformAPIError(
+            "Invalid CampaignCreate request: targeting.supplySource.include is required "
+            "when supplyPlacement is set"
+        )
+    if "APPSTORE_SEARCH_RESULTS" in placement_values and "APPSTORE" not in source_values:
+        raise PlatformAPIError(
+            "Invalid CampaignCreate request: APPSTORE_SEARCH_RESULTS requires "
+            "targeting.supplySource.include to contain APPSTORE"
+        )
+
+
+def _restore_supplied_fields(model: Any, payload: Any) -> None:
+    """Undo generated ``from_dict`` marking omitted fields as explicitly supplied.
+
+    Apple SDK 1.109.0 constructs request models by passing every optional field
+    to Pydantic, including absent fields as ``None``. Its wire serializer then
+    emits several of those values as explicit JSON nulls. Restore the field-set
+    information recursively from the caller's original JSON so ``to_dict``
+    omits absent values while preserving the caller's supplied-field intent
+    and SDK additional properties.
+    """
+    if isinstance(model, BaseModel) and isinstance(payload, Mapping):
+        supplied: set[str] = set()
+        for field_name, field_info in type(model).model_fields.items():
+            if field_name == "additional_properties":
+                continue
+            alias = field_info.alias or field_name
+            if alias in payload:
+                raw_value = payload[alias]
+            elif field_name in payload:
+                raw_value = payload[field_name]
+            else:
+                continue
+            supplied.add(field_name)
+            _restore_supplied_fields(getattr(model, field_name, None), raw_value)
+        object.__setattr__(model, "__pydantic_fields_set__", supplied)
+        return
+    if isinstance(model, (list, tuple)) and isinstance(payload, list):
+        for child, raw_value in zip(model, payload, strict=False):
+            _restore_supplied_fields(child, raw_value)
+
+
 def read_json_payload(path: str | Path) -> Any:
     """Read a JSON request from a file, or stdin when path is ``-``."""
     if str(path) == "-":
@@ -72,11 +150,15 @@ def hydrate_model(model_name: str, payload: Any, *, many: bool = False) -> Any:
     def build(item: Any) -> Any:
         if not isinstance(item, Mapping):
             raise PlatformAPIError(f"{model_name} input must be a JSON object")
+        _validate_live_request_contract(model_name, item)
         try:
             from_dict = getattr(model_type, "from_dict", None)
             if callable(from_dict):
-                return from_dict(dict(item))
-            return model_type.model_validate(item)
+                model = from_dict(dict(item))
+            else:
+                model = model_type.model_validate(item)
+            _restore_supplied_fields(model, item)
+            return model
         except Exception as exc:
             raise PlatformAPIError(f"Invalid {model_name} request: {exc}") from exc
 
