@@ -25,5 +25,11 @@ COMMAND_SPECS = specs_from_manifest(
     command_names=COMMAND_NAMES,
 )
 
-app = typer.Typer(help="Business-brand report commands backed by Apple's official SDK.")
+app = typer.Typer(
+    help=(
+        "Business-brand report commands backed by Apple's official SDK. Each call "
+        "returns one requested page; inspect response pagination before assuming "
+        "coverage."
+    )
+)
 register_commands(app, COMMAND_SPECS)

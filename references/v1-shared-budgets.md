@@ -32,7 +32,7 @@ SDK `apple-ads-platform` version `1.109.0`; source commit `742ba544433ba9a5bef0a
 
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
-| option | `--file` | no | `path` | — | — | JSON request file; use '-' to read from stdin |
+| option | `--file` | yes | `path` | — | — | JSON request file; use '-' to read from stdin |
 | option | `--dry-run` | no | `boolean` | `False` | — | Validate and print the SDK call without sending it |
 | option | `--confirm` | no | `boolean` | `False` | — | Confirm this Apple Ads mutation |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
@@ -267,7 +267,7 @@ QuerySortOrder
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
 | option | `--id` | yes | `text` | — | — | id parameter |
-| option | `--file` | no | `path` | — | — | JSON request file; use '-' to read from stdin |
+| option | `--file` | yes | `path` | — | — | JSON request file; use '-' to read from stdin |
 | option | `--dry-run` | no | `boolean` | `False` | — | Validate and print the SDK call without sending it |
 | option | `--confirm` | no | `boolean` | `False` | — | Confirm this Apple Ads mutation |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |

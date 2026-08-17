@@ -14,6 +14,11 @@ app = typer.Typer(help="Budget management commands")
 console = Console()
 
 
+def _format_money(amount: object, currency: str) -> str:
+    value = str(amount)
+    return f"${value}" if currency == "USD" else f"{value} {currency}".strip()
+
+
 def _resolve_app_name() -> Optional[str]:
     """Get the app_name for campaign scoping (None if single-app)."""
     if not is_multi_app():
@@ -60,7 +65,7 @@ def list_budget_orders():
             str(bo.get("id", "")),
             bo.get("name", ""),
             str(bo.get("orderNumber", "")),
-            f"${amount} {currency}",
+            _format_money(amount, currency),
             bo.get("startDate", ""),
             bo.get("endDate", ""),
             f"[{status_style}]{status}[/{status_style}]",
@@ -96,7 +101,7 @@ def get_budget_order(
     console.print(Panel(f"[bold]Budget Order: {bo.get('name', '')}[/bold]", expand=False))
     console.print(f"  ID:           [cyan]{bo.get('id', '')}[/cyan]")
     console.print(f"  Order Number: [cyan]{bo.get('orderNumber', '')}[/cyan]")
-    console.print(f"  Budget:       [cyan]${amount} {currency}[/cyan]")
+    console.print(f"  Budget:       [cyan]{_format_money(amount, currency)}[/cyan]")
     console.print(f"  Start Date:   [cyan]{bo.get('startDate', '')}[/cyan]")
     console.print(f"  End Date:     [cyan]{bo.get('endDate', '')}[/cyan]")
     console.print(f"  Status:       [cyan]{bo.get('status', '')}[/cyan]")
@@ -119,6 +124,14 @@ def budget_status():
     if not statuses:
         console.print("[yellow]No campaigns found.[/yellow]")
         return
+
+    report_window = statuses[0].get("reportWindow") or {}
+    if report_window.get("startDate") and report_window.get("endDate"):
+        console.print(
+            f"[dim]Spend window: {report_window['startDate']} to "
+            f"{report_window['endDate']} • {report_window.get('timeZone', 'ORTZ')} • "
+            "complete[/dim]\n"
+        )
 
     # Filter to current app if multi-app
     if app_name:
@@ -148,15 +161,24 @@ def budget_status():
         daily = entry.get("dailyBudgetAmount") or {}
         daily_amount = daily.get("amount", "-")
         daily_currency = daily.get("currency", "")
-        daily_str = f"${daily_amount} {daily_currency}".strip() if daily_amount != "-" else "[dim]-[/dim]"
+        daily_str = (
+            _format_money(daily_amount, daily_currency)
+            if daily_amount != "-"
+            else "[dim]-[/dim]"
+        )
 
         lifetime = entry.get("budgetAmount") or {}
         lifetime_amount = lifetime.get("amount", "-")
         lifetime_currency = lifetime.get("currency", "")
-        lifetime_str = f"${lifetime_amount} {lifetime_currency}".strip() if lifetime_amount != "-" else "[dim]-[/dim]"
+        lifetime_str = (
+            _format_money(lifetime_amount, lifetime_currency)
+            if lifetime_amount != "-"
+            else "[dim]-[/dim]"
+        )
 
         total_spend = entry.get("totalSpend", 0.0)
-        spend_str = f"${total_spend:,.2f}"
+        spend_currency = entry.get("totalSpendCurrency") or daily_currency or lifetime_currency
+        spend_str = _format_money(f"{total_spend:,.2f}", spend_currency)
 
         status = entry.get("status", "UNKNOWN")
         display_status = entry.get("displayStatus", "UNKNOWN")

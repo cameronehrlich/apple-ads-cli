@@ -16,7 +16,13 @@ from asa_cli.platform.client import (
     context_header,
     resolve_ad_account_id,
 )
-from asa_cli.platform.runtime import PlatformAPIError, invoke, read_json_payload, serialize_response
+from asa_cli.platform.runtime import (
+    PlatformAPIError,
+    hydrate_model,
+    invoke,
+    read_json_payload,
+    serialize_response,
+)
 
 
 def credentials(ad_account_id="123456"):
@@ -162,6 +168,115 @@ def test_serialize_response_flattens_generated_sdk_additional_properties():
         "result": [],
         "futureField": "future-value",
     }
+
+
+def test_campaign_create_requires_supply_source_for_search_results():
+    payload = {
+        "adAccountId": 123,
+        "name": "Launch",
+        "billingEvent": "TAPS",
+        "promotedObjectType": "APPSTORE_APP",
+        "promotedObjectId": "987654321",
+        "dailyBudget": {"value": {"amount": "25.00", "currency": "USD"}},
+        "targeting": {
+            "supplyPlacement": {"include": ["APPSTORE_SEARCH_RESULTS"]}
+        },
+    }
+
+    with pytest.raises(PlatformAPIError, match="supplySource.include is required"):
+        hydrate_model("CampaignCreate", payload)
+
+
+def test_campaign_create_rejects_non_wire_search_results_alias():
+    payload = {
+        "adAccountId": 123,
+        "name": "Launch",
+        "billingEvent": "TAPS",
+        "promotedObjectType": "APPSTORE_APP",
+        "promotedObjectId": "987654321",
+        "dailyBudget": {"value": {"amount": "25.00", "currency": "USD"}},
+        "targeting": {
+            "supplySource": {"include": ["APPSTORE"]},
+            "supplyPlacement": {"include": ["SEARCH_RESULTS"]},
+        },
+    }
+
+    with pytest.raises(PlatformAPIError, match="use APPSTORE_SEARCH_RESULTS"):
+        hydrate_model("CampaignCreate", payload)
+
+
+def test_ad_group_create_requires_start_time():
+    with pytest.raises(PlatformAPIError, match="startTime is required"):
+        hydrate_model(
+            "AdGroupCreate",
+            {"name": "Exact", "campaignId": 456, "pricingModel": "CPT"},
+        )
+
+
+def test_request_hydration_omits_absent_nested_and_top_level_nulls_on_wire():
+    from apple_ads_platform.api_client import ApiClient
+
+    campaign = hydrate_model(
+        "CampaignCreate",
+        {
+            "adAccountId": 123,
+            "name": "Launch",
+            "billingEvent": "TAPS",
+            "promotedObjectType": "APPSTORE_APP",
+            "promotedObjectId": "987654321",
+            "dailyBudget": {"value": {"amount": "25.00", "currency": "USD"}},
+            "targeting": {
+                "supplySource": {"include": ["APPSTORE"]},
+                "supplyPlacement": {"include": ["APPSTORE_SEARCH_RESULTS"]},
+            },
+        },
+    )
+    campaign_wire = ApiClient().sanitize_for_serialization(campaign)
+
+    assert campaign_wire["targeting"] == {
+        "supplySource": {"include": ["APPSTORE"]},
+        "supplyPlacement": {"include": ["APPSTORE_SEARCH_RESULTS"]},
+    }
+    assert "endTime" not in campaign_wire
+    assert "sharedBudgets" not in campaign_wire
+    assert "countryOrRegion" not in campaign_wire["targeting"]
+
+    ad_group = hydrate_model(
+        "AdGroupCreate",
+        {
+            "name": "Exact",
+            "campaignId": 456,
+            "startTime": "2026-08-18T00:00:00Z",
+            "pricingModel": "CPT",
+            "targeting": {"country": {"include": ["US"]}},
+        },
+    )
+    ad_group_wire = ApiClient().sanitize_for_serialization(ad_group)
+
+    assert ad_group_wire["targeting"] == {"country": {"include": ["US"]}}
+    assert "appCategory" not in ad_group_wire["targeting"]
+    assert "automatedKeywordsOptIn" not in ad_group_wire
+
+
+@pytest.mark.parametrize(
+    ("model_name", "payload", "expected"),
+    [
+        ("CampaignUpdate", {"name": "Renamed"}, {"name": "Renamed"}),
+        (
+            "AdGroupUpdate",
+            {"targeting": {"country": {"include": ["US"]}}},
+            {"targeting": {"country": {"include": ["US"]}}},
+        ),
+        ("CampaignUpdate", {"endTime": None}, {"endTime": None}),
+        ("CampaignUpdate", {"futureField": "future"}, {"futureField": "future"}),
+    ],
+)
+def test_update_hydration_omits_only_unsupplied_fields(model_name, payload, expected):
+    from apple_ads_platform.api_client import ApiClient
+
+    model = hydrate_model(model_name, payload)
+
+    assert ApiClient().sanitize_for_serialization(model) == expected
 
 
 @pytest.mark.parametrize(

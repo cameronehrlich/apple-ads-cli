@@ -63,3 +63,10 @@ def test_every_mutation_has_preview_and_confirmation_options():
             else:
                 assert "dry_run" in parameters
                 assert "confirm" in parameters
+
+
+def test_every_mutation_body_is_required_by_the_cli():
+    for _name, module, _help in PLATFORM_RESOURCES:
+        for spec in module.COMMAND_SPECS:
+            if spec.mutation != "read" and spec.body is not None:
+                assert spec.body.required is True, spec.sdk_method

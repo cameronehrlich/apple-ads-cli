@@ -82,6 +82,8 @@ def machine_report(
     rows: list[dict[str, Any]],
     *,
     totals: Optional[dict[str, Any]] = None,
+    source_totals: Optional[dict[str, Any]] = None,
+    coverage: Optional[dict[str, Any]] = None,
     inventory_complete: Optional[bool] = None,
     time_zone: str = "UTC",
     extra: Optional[dict[str, Any]] = None,
@@ -95,6 +97,10 @@ def machine_report(
     }
     if totals is not None:
         payload["totals"] = totals
+    if source_totals is not None:
+        payload["source_totals"] = source_totals
+    if coverage is not None:
+        payload["coverage"] = coverage
     if inventory_complete is not None:
         payload["inventory_complete"] = inventory_complete
     if extra:
@@ -200,12 +206,12 @@ def normalize_performance_row(
     return normalized
 
 
-def performance_totals(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
-    materialized = list(rows)
-    impressions = sum(int(row.get("impressions") or 0) for row in materialized)
-    taps = sum(int(row.get("taps") or 0) for row in materialized)
-    installs = sum(int(row.get("installs") or 0) for row in materialized)
-    spend = sum(float(row.get("spend") or 0) for row in materialized)
+def performance_totals_from_metrics(metrics: dict[str, Any]) -> dict[str, Any]:
+    """Normalize one Apple metrics object into the stable totals contract."""
+    impressions = int(metrics.get("impressions") or 0)
+    taps = int(metrics.get("taps") or 0)
+    installs = int(metrics.get("totalInstalls") or metrics.get("tapInstalls") or 0)
+    spend = _money(metrics.get("localSpend")) or 0.0
     return {
         "impressions": impressions,
         "taps": taps,
@@ -216,6 +222,20 @@ def performance_totals(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
         "ttr": taps / impressions if impressions else None,
         "conversion_rate": installs / taps if taps else None,
     }
+
+
+def performance_totals(rows: Iterable[dict[str, Any]]) -> dict[str, Any]:
+    materialized = list(rows)
+    return performance_totals_from_metrics(
+        {
+            "impressions": sum(int(row.get("impressions") or 0) for row in materialized),
+            "taps": sum(int(row.get("taps") or 0) for row in materialized),
+            "totalInstalls": sum(int(row.get("installs") or 0) for row in materialized),
+            "localSpend": {
+                "amount": sum(float(row.get("spend") or 0) for row in materialized)
+            },
+        }
+    )
 
 
 def _header_key(value: str) -> str:

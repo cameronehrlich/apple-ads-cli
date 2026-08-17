@@ -1,6 +1,7 @@
 """Command-level safety tests for campaign optimization."""
 
 import json
+from datetime import date
 from unittest.mock import patch
 
 import pytest
@@ -8,6 +9,7 @@ from typer.testing import CliRunner
 
 from asa_cli.commands import optimize
 from asa_cli.config import CampaignType
+from asa_cli.reporting import CompleteDateWindow
 
 runner = CliRunner()
 
@@ -34,6 +36,7 @@ class FakeClient:
     def __init__(self, _credentials):
         self.mutations: list[tuple[str, int, list[str]]] = []
         self.rows = [report_row("winner", 3, 1.20), report_row("waste", 0, 2.00)]
+        self.report_window = None
 
     def get_campaigns(self):
         return [
@@ -43,7 +46,11 @@ class FakeClient:
             campaign(4, "StitchIt - Discovery"),
         ]
 
+    def get_org_currency(self):
+        return "USD"
+
     def get_search_terms_report(self, _campaign_id, _start, _end):
+        self.report_window = (_start, _end)
         return self.rows
 
     def get_ad_groups(self, campaign_id):
@@ -113,7 +120,14 @@ def test_json_never_calls_mutation_methods_and_is_valid_json():
 
     assert result.exit_code == 0, result.output
     assert fake.mutations == []
-    assert json.loads(result.output)["settings"]["negative_scope"] == "discovery"
+    payload = json.loads(result.output)
+    assert payload["settings"]["negative_scope"] == "discovery"
+    assert payload["settings"]["currency"] == "USD"
+    assert payload["window"]["time_zone"] == "ORTZ"
+    assert payload["window"]["complete"] is True
+    assert payload["coverage"]["api_pages_complete"] is True
+    assert payload["coverage"]["action_candidates_are_filtered"] is True
+    assert payload["source_totals"]["spend"] == pytest.approx(3.2)
 
 
 def test_default_negative_scope_only_mutates_discovery():
@@ -156,3 +170,22 @@ def test_duplicate_campaign_error_prevents_command_mutations():
 
 def test_discovery_scope_uses_campaign_type_contract():
     assert CampaignType.DISCOVERY.value == "discovery"
+
+
+def test_analysis_uses_exact_completed_window_instead_of_partial_today():
+    client = FakeClient(object())
+    window = CompleteDateWindow(start=date(2026, 8, 10), end=date(2026, 8, 16))
+
+    analysis = optimize.analyze_search_terms(
+        client,
+        campaign_id=4,
+        days=7,
+        cpa_threshold=5,
+        min_installs=2,
+        min_spend=1,
+        window=window,
+    )
+
+    assert client.report_window[0].strftime("%Y-%m-%d") == "2026-08-10"
+    assert client.report_window[1].strftime("%Y-%m-%d") == "2026-08-16"
+    assert analysis.window == window
