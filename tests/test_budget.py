@@ -1,5 +1,6 @@
 """Tests for budget management features."""
 
+from datetime import date
 from unittest.mock import patch
 
 import pytest
@@ -331,6 +332,15 @@ class TestCampaignBudgetStatus:
         assert results[0]["totalSpend"] == 250.50
         assert results[0]["dailyBudgetAmount"]["amount"] == "50"
         assert results[1]["totalSpend"] == 800.75
+        assert results[0]["totalSpendCurrency"] == "USD"
+        window = results[0]["reportWindow"]
+        assert window["timeZone"] == "ORTZ"
+        assert window["complete"] is True
+        assert window["apiPagesComplete"] is True
+        assert (
+            date.fromisoformat(window["endDate"])
+            - date.fromisoformat(window["startDate"])
+        ).days == 29
 
     def test_campaign_budget_status_no_campaigns(self, mock_client):
         """Test campaign budget status with no campaigns."""

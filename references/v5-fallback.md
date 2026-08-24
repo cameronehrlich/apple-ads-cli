@@ -900,10 +900,10 @@ Automated campaign optimization
 
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
-| option | `--days`, `-d` | no | `integer` | `14` | — | Days to analyze |
-| option | `--cpa-threshold`, `-c` | no | `float` | `5.0` | — | Max CPA for winners (USD) |
+| option | `--days`, `-d` | no | `integer range` | `14` | — | Completed calendar days to analyze |
+| option | `--cpa-threshold`, `-c` | no | `float` | `5.0` | — | Max CPA for winners (organization currency) |
 | option | `--min-installs`, `-i` | no | `integer` | `2` | — | Min installs to promote |
-| option | `--min-spend`, `-s` | no | `float` | `1.0` | — | Min spend to consider blocking (USD) |
+| option | `--min-spend`, `-s` | no | `float` | `1.0` | — | Min spend to consider blocking (organization currency) |
 | option | `--min-impressions` | no | `integer` | `0` | — | Min impressions to consider a term |
 | option | `--exclude`, `-e` | no | `text` | — | — | Comma-separated terms to exclude from analysis |
 | option | `--dry-run`, `-n` | no | `boolean` | `False` | — | Preview changes without applying |
@@ -932,7 +932,7 @@ Show ad group performance report.
 
 ## `asa v5 reports ads`
 
-Show ad performance over exact completed calendar dates.
+Show ORTZ ad performance over exact completed calendar dates.
 
 - Usage: `Usage: asa v5 reports ads [OPTIONS]`
 
@@ -1037,7 +1037,7 @@ Fetch Apple's true async impression-share report and download its CSV.
 
 ## `asa v5 reports keywords`
 
-Show keyword performance over exact completed calendar dates.
+Show ORTZ keyword performance with explicit source coverage.
 
 - Usage: `Usage: asa v5 reports keywords [OPTIONS]`
 
@@ -1059,7 +1059,7 @@ Show keyword performance over exact completed calendar dates.
 
 ## `asa v5 reports search-terms`
 
-Show search terms over exact completed calendar dates.
+Show ORTZ search terms with explicit filtering and coverage metadata.
 
 - Usage: `Usage: asa v5 reports search-terms [OPTIONS]`
 
@@ -1071,16 +1071,16 @@ Show search terms over exact completed calendar dates.
 | option | `--days`, `-d` | no | `integer` | `14` | — | Number of days |
 | option | `--start`, `--start-date` | no | `text` | — | — | Inclusive start date (YYYY-MM-DD) |
 | option | `--end`, `--end-date` | no | `text` | — | — | Inclusive complete end date (YYYY-MM-DD) |
-| option | `--min-impressions` | no | `integer` | `10` | — | Minimum impressions filter |
+| option | `--min-impressions` | no | `integer range` | `10` | — | Minimum impressions filter |
 | option | `--winners`, `-w` | no | `boolean` | `False` | — | Show potential keywords to promote |
 | option | `--negatives`, `-n` | no | `boolean` | `False` | — | Show potential negative keywords |
-| option | `--limit`, `-l` | no | `integer` | `50` | — | Max terms to show |
+| option | `--limit`, `-l` | no | `integer range` | `50` | — | Max terms to show |
 | option | `--json` | no | `boolean` | `False` | — | Emit stable machine-readable JSON |
 | option | `--help` | no | `boolean` | `False` | — | Show this message and exit. |
 
 ## `asa v5 reports summary`
 
-Show campaign performance over exact completed calendar dates.
+Show ORTZ campaign performance over exact completed calendar dates.
 
 - Usage: `Usage: asa v5 reports summary [OPTIONS]`
 

@@ -19,5 +19,10 @@ COMMAND_SPECS = specs_from_manifest(
     command_names=COMMAND_NAMES,
 )
 
-app = typer.Typer(help="Impression-share and search-popularity commands.")
+app = typer.Typer(
+    help=(
+        "UTC-period impression-share and search-popularity commands; do not compare "
+        "their boundaries directly with ORTZ performance reports."
+    )
+)
 register_commands(app, COMMAND_SPECS)

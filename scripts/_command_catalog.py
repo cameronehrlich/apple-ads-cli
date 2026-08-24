@@ -32,6 +32,28 @@ GENERATED_NOTICE = (
     "Do not edit by hand. -->"
 )
 
+LIVE_REQUEST_GUIDANCE = {
+    "apple_ads_platform.models.campaign_create.CampaignCreate": (
+        "Live request contract: when supplyPlacement is set, supplySource is also "
+        "required. App Store search-results campaigns use supplySource APPSTORE and "
+        "supplyPlacement APPSTORE_SEARCH_RESULTS; SEARCH_RESULTS is not a valid "
+        "CampaignCreate placement value."
+    ),
+    "apple_ads_platform.models.ad_group_create.AdGroupCreate": (
+        "Live request contract: Apple requires startTime even though SDK 1.109.0 "
+        "marks it optional."
+    ),
+    "apple_ads_platform.models.campaign_update.CampaignUpdate": (
+        "Serialization contract: omitted fields are not sent. Include only intended "
+        "changes and treat any explicit null shown in the preview as intentional."
+    ),
+    "apple_ads_platform.models.ad_group_update.AdGroupUpdate": (
+        "Serialization contract: omitted fields, including nested targeting fields, "
+        "are not sent. Include only intended changes and treat any explicit null shown "
+        "in the preview as intentional."
+    ),
+}
+
 REFERENCE_GROUPS: tuple[tuple[str, str, tuple[str, ...]], ...] = (
     (
         "v1-recommendations-and-suggestions.md",
@@ -551,10 +573,24 @@ def render_request_model(
         "",
         f"- Schema SHA-256: `{record.get('schema_sha256', 'unknown')}`",
         f"- Source SHA-256: `{record.get('source_sha256', 'unknown')}`",
-        "",
-        *_render_field_table(schema),
     ]
+    guidance = LIVE_REQUEST_GUIDANCE.get(model)
+    if guidance:
+        lines.extend((f"- CLI override: {guidance}",))
+    lines.extend(("", *_render_field_table(schema)))
     skeleton = _schema_skeleton(schema, schema)
+    if model == "apple_ads_platform.models.campaign_create.CampaignCreate":
+        skeleton["targeting"] = {
+            "supplyPlacement": {"include": ["APPSTORE_SEARCH_RESULTS"]},
+            "supplySource": {"include": ["APPSTORE"]},
+        }
+    elif model == "apple_ads_platform.models.ad_group_create.AdGroupCreate":
+        skeleton["startTime"] = "<ISO-8601 date-time>"
+    elif model in {
+        "apple_ads_platform.models.campaign_update.CampaignUpdate",
+        "apple_ads_platform.models.ad_group_update.AdGroupUpdate",
+    }:
+        skeleton = {}
     if container == "list":
         skeleton = [skeleton]
     lines.extend(

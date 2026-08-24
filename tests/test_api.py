@@ -1,12 +1,31 @@
 """Tests for API client module."""
 
+from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
 import requests
 
 from asa_cli.config import AppConfig, Credentials, MatchType
-from asa_cli.v5.api import REQUEST_TIMEOUT, SearchAdsAPIError, SearchAdsClient
+from asa_cli.v5.api import (
+    REPORTING_TIME_ZONE,
+    REQUEST_TIMEOUT,
+    ReportRows,
+    SearchAdsAPIError,
+    SearchAdsClient,
+    _complete_report_range,
+)
+
+
+def test_default_v5_report_range_is_30_inclusive_completed_dates():
+    start, end = _complete_report_range(
+        None,
+        None,
+        now=datetime(2026, 8, 17, 15, 30),
+    )
+
+    assert start.isoformat() == "2026-07-18T00:00:00"
+    assert end.isoformat() == "2026-08-16T00:00:00"
 
 
 def test_v5_org_context_requires_explicit_legacy_org_id():
@@ -146,6 +165,118 @@ class TestPagination:
             results = mock_client.get_keywords(123, 456, include_deleted=True)
 
         assert len(results) == 2
+
+    def test_report_pagination_fetches_every_page_and_retains_grand_totals(
+        self, mock_client
+    ):
+        page1 = {
+            "data": {
+                "reportingDataResponse": {
+                    "row": [{"metadata": {"keywordId": 1}}],
+                    "grandTotals": {
+                        "total": {
+                            "impressions": 3,
+                            "localSpend": {"amount": "1.25"},
+                        }
+                    },
+                }
+            },
+            "pagination": {"totalResults": 2, "startIndex": 0, "itemsPerPage": 1},
+        }
+        page2 = {
+            "data": {
+                "reportingDataResponse": {
+                    "row": [{"metadata": {"keywordId": 2}}],
+                    "grandTotals": {
+                        "total": {
+                            "impressions": 3,
+                            "localSpend": {"amount": "1.25"},
+                        }
+                    },
+                }
+            },
+            "pagination": {"totalResults": 2, "startIndex": 1, "itemsPerPage": 1},
+        }
+
+        with patch.object(mock_client, "_request", side_effect=[page1, page2]) as request:
+            results = mock_client.get_keyword_report(123)
+
+        assert isinstance(results, ReportRows)
+        assert [row["metadata"]["keywordId"] for row in results] == [1, 2]
+        assert results.api_pages_complete is True
+        assert results.page_count == 2
+        assert results.total_results == 2
+        assert results.grand_totals["localSpend"]["amount"] == "1.25"
+        assert results.time_zone == REPORTING_TIME_ZONE
+        assert results.start_date is not None
+        assert results.end_date is not None
+        assert request.call_args_list[0].kwargs["data"]["selector"]["pagination"][
+            "offset"
+        ] == 0
+        assert request.call_args_list[1].kwargs["data"]["selector"]["pagination"][
+            "offset"
+        ] == 1
+
+    @pytest.mark.parametrize(
+        ("method_name", "arguments"),
+        [
+            ("get_campaign_report", (123,)),
+            ("get_keyword_report", (123,)),
+            ("get_ad_group_report", (123,)),
+            ("get_search_terms_report", (123,)),
+            ("get_ad_report", (123,)),
+            ("get_keyword_adgroup_report", (123, 456)),
+            ("get_search_terms_adgroup_report", (123, 456)),
+        ],
+    )
+    def test_all_v5_performance_reports_use_comparable_ortz_by_default(
+        self, mock_client, method_name, arguments
+    ):
+        response = {
+            "data": {"reportingDataResponse": {"row": []}},
+            "pagination": {"totalResults": 0, "startIndex": 0, "itemsPerPage": 0},
+        }
+
+        with patch.object(mock_client, "_request", return_value=response) as request:
+            getattr(mock_client, method_name)(*arguments)
+
+        assert request.call_args.kwargs["data"]["timeZone"] == REPORTING_TIME_ZONE
+
+    def test_non_daily_reports_disable_incompatible_row_and_grand_totals(self, mock_client):
+        response = {
+            "data": {"reportingDataResponse": {"row": []}},
+            "pagination": {"totalResults": 0, "startIndex": 0, "itemsPerPage": 0},
+        }
+
+        with patch.object(mock_client, "_request", return_value=response) as request:
+            mock_client.get_campaign_report(123, granularity="WEEKLY")
+
+        body = request.call_args.kwargs["data"]
+        assert body["granularity"] == "WEEKLY"
+        assert body["returnRowTotals"] is False
+        assert body["returnGrandTotals"] is False
+
+    def test_report_pagination_fails_closed_when_metadata_is_incomplete(self, mock_client):
+        response = {
+            "data": {"reportingDataResponse": {"row": [{"metadata": {}}]}},
+            "pagination": {"totalResults": 2},
+        }
+
+        with patch.object(mock_client, "_request", return_value=response):
+            with pytest.raises(SearchAdsAPIError, match="incomplete report pagination"):
+                mock_client.get_campaign_report(123)
+
+    def test_report_pagination_fails_closed_when_page_offset_is_inconsistent(
+        self, mock_client
+    ):
+        response = {
+            "data": {"reportingDataResponse": {"row": [{"metadata": {}}]}},
+            "pagination": {"totalResults": 1, "startIndex": 1, "itemsPerPage": 1},
+        }
+
+        with patch.object(mock_client, "_request", return_value=response):
+            with pytest.raises(SearchAdsAPIError, match="inconsistent report pagination"):
+                mock_client.get_campaign_report(123)
 
 
 class TestRequestFailures:

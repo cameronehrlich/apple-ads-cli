@@ -1,7 +1,6 @@
 """Automated campaign optimization commands."""
 
 import json
-from datetime import datetime, timedelta
 from typing import Optional
 
 import typer
@@ -18,15 +17,22 @@ from ..config import (
     is_multi_app,
     load_credentials,
 )
-from ..v5.api import SearchAdsClient
+from ..reporting import (
+    CompleteDateWindow,
+    complete_date_window,
+    normalize_performance_row,
+    performance_totals,
+    performance_totals_from_metrics,
+)
+from ..v5.api import REPORTING_TIME_ZONE, SearchAdsClient
 
 app = typer.Typer(help="Automated campaign optimization")
 console = Console()
 
 
-def format_currency(amount: float) -> str:
+def format_currency(amount: float, currency: str) -> str:
     """Format currency for display."""
-    return f"${amount:,.2f}"
+    return f"${amount:,.2f}" if currency == "USD" else f"{amount:,.2f} {currency}"
 
 
 def _resolve_app_name() -> Optional[str]:
@@ -78,6 +84,9 @@ class AnalysisResult:
         self.total_terms: int = 0
         self.skipped_no_text: int = 0
         self.skipped_no_activity: int = 0
+        self.window: Optional[CompleteDateWindow] = None
+        self.source_totals: dict = performance_totals([])
+        self.coverage: dict = {}
 
 
 def analyze_search_terms(
@@ -89,6 +98,8 @@ def analyze_search_terms(
     min_spend: float,
     min_impressions: int = 0,
     exclude_terms: Optional[list[str]] = None,
+    *,
+    window: Optional[CompleteDateWindow] = None,
 ) -> AnalysisResult:
     """Analyze search terms and categorize into winners and losers.
 
@@ -101,13 +112,23 @@ def analyze_search_terms(
         min_impressions: Minimum impressions required to consider a term (default 0)
         exclude_terms: List of terms to exclude from analysis (case-insensitive)
     """
-    end = datetime.now()
-    start = end - timedelta(days=days)
+    resolved_window = window or complete_date_window(days)
+    start, end = resolved_window.as_datetimes()
 
     report_data = client.get_search_terms_report(campaign_id, start, end)
 
     result = AnalysisResult()
     result.total_terms = len(report_data)
+    result.window = resolved_window
+    grand_totals = getattr(report_data, "grand_totals", None)
+    if isinstance(grand_totals, dict):
+        result.source_totals = performance_totals_from_metrics(grand_totals)
+        source_totals_scope = "apple_grand_totals"
+    else:
+        result.source_totals = performance_totals(
+            normalize_performance_row(row, kind="search_term") for row in report_data
+        )
+        source_totals_scope = "summed_api_rows"
 
     # Normalize exclude terms for case-insensitive matching
     exclude_set = {t.lower() for t in (exclude_terms or [])}
@@ -156,6 +177,23 @@ def analyze_search_terms(
 
     result.winners.sort(key=lambda x: x["cpa"])
     result.losers.sort(key=lambda x: -x["spend"])
+    result.coverage = {
+        "api_pages_complete": bool(getattr(report_data, "api_pages_complete", True)),
+        "api_pages": int(getattr(report_data, "page_count", 1)),
+        "source_rows": len(report_data),
+        "source_totals_scope": source_totals_scope,
+        "action_candidates_are_filtered": True,
+        "returned_action_candidates": len(result.winners) + len(result.losers),
+        "apple_search_term_minimum_impressions": 10,
+        "low_volume_terms_may_be_aggregated_as_other": True,
+        "filters": {
+            "min_impressions": min_impressions,
+            "excluded_terms": sorted(exclude_set),
+            "winner_min_installs": min_installs,
+            "winner_max_cpa": cpa_threshold,
+            "loser_min_spend": min_spend,
+        },
+    }
 
     return result
 
@@ -165,12 +203,15 @@ def display_optimization_summary(
     losers: list[dict],
     discovery_campaign: dict,
     target_campaign: dict,
-    days: int,
+    window: CompleteDateWindow,
+    currency: str,
 ) -> None:
     """Display the optimization summary with rich tables."""
     console.print(
         Panel(
-            f"[bold]ASA Optimization Report[/bold]\nLast {days} days",
+            f"[bold]ASA Optimization Report[/bold]\n"
+            f"{window.start.isoformat()} to {window.end.isoformat()} • "
+            f"{REPORTING_TIME_ZONE}",
             expand=False,
             border_style="cyan",
         )
@@ -191,8 +232,8 @@ def display_optimization_summary(
             table.add_row(
                 w["term"][:35],
                 str(w["installs"]),
-                format_currency(w["spend"]),
-                format_currency(w["cpa"]),
+                format_currency(w["spend"], currency),
+                format_currency(w["cpa"], currency),
             )
 
         if len(winners) > 20:
@@ -214,7 +255,7 @@ def display_optimization_summary(
             table.add_row(
                 loser["term"][:35],
                 str(loser["installs"]),
-                format_currency(loser["spend"]),
+                format_currency(loser["spend"], currency),
                 str(loser["impressions"]),
             )
 
@@ -357,15 +398,20 @@ def execute_negatives(
 @app.callback(invoke_without_command=True)
 def optimize_cmd(
     ctx: typer.Context,
-    days: int = typer.Option(14, "--days", "-d", help="Days to analyze"),
+    days: int = typer.Option(
+        14, "--days", "-d", min=1, help="Completed calendar days to analyze"
+    ),
     cpa_threshold: float = typer.Option(
-        5.00, "--cpa-threshold", "-c", help="Max CPA for winners (USD)"
+        5.00, "--cpa-threshold", "-c", help="Max CPA for winners (organization currency)"
     ),
     min_installs: int = typer.Option(
         2, "--min-installs", "-i", help="Min installs to promote"
     ),
     min_spend: float = typer.Option(
-        1.00, "--min-spend", "-s", help="Min spend to consider blocking (USD)"
+        1.00,
+        "--min-spend",
+        "-s",
+        help="Min spend to consider blocking (organization currency)",
     ),
     min_impressions: int = typer.Option(
         0, "--min-impressions", help="Min impressions to consider a term"
@@ -455,6 +501,7 @@ def optimize_cmd(
         raise typer.Exit(1)
 
     client = SearchAdsClient(credentials)
+    currency = client.get_org_currency()
     app_name = _resolve_app_name()
 
     if not output_json:
@@ -498,8 +545,9 @@ def optimize_cmd(
     if not output_json:
         settings_text = (
             f"[bold]Optimization Settings[/bold]\n"
-            f"Days: {days} | CPA Threshold: {format_currency(cpa_threshold)} | "
-            f"Min Installs: {min_installs} | Min Spend: {format_currency(min_spend)}"
+            f"Days: {days} | CPA Threshold: {format_currency(cpa_threshold, currency)} | "
+            f"Min Installs: {min_installs} | "
+            f"Min Spend: {format_currency(min_spend, currency)}"
         )
         if min_impressions > 0:
             settings_text += f" | Min Impressions: {min_impressions}"
@@ -537,8 +585,12 @@ def optimize_cmd(
     # JSON output mode
     if output_json:
         output_data = {
+            "window": analysis.window.as_dict(time_zone=REPORTING_TIME_ZONE),
+            "source_totals": analysis.source_totals,
+            "coverage": analysis.coverage,
             "settings": {
                 "days": days,
+                "currency": currency,
                 "cpa_threshold": cpa_threshold,
                 "min_installs": min_installs,
                 "min_spend": min_spend,
@@ -587,7 +639,12 @@ def optimize_cmd(
         return
 
     display_optimization_summary(
-        winners, losers, discovery_campaign, target_campaign, days
+        winners,
+        losers,
+        discovery_campaign,
+        target_campaign,
+        analysis.window,
+        currency,
     )
 
     analyzed_count = analysis.total_terms - analysis.skipped_no_text - analysis.skipped_no_activity

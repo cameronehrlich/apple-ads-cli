@@ -630,7 +630,7 @@ class TestEdgeCases:
             assert data["granularity"] == "WEEKLY"
 
     def test_get_all_custom_reports_default_limit(self, mock_client):
-        """Test that default limit is 50."""
+        """Test that each custom-report page uses Apple's maximum page size."""
         mock_response = {"data": []}
 
         with patch.object(mock_client, "_request", return_value=mock_response) as mock_req:
@@ -639,3 +639,46 @@ class TestEdgeCases:
             params = mock_req.call_args.kwargs.get("params") or mock_req.call_args[1].get("params")
             assert params["limit"] == 50
             assert params["offset"] == 0
+
+    def test_get_all_custom_reports_follows_response_pagination(self, mock_client):
+        page1 = {
+            "data": [{"id": index} for index in range(50)],
+            "pagination": {"totalResults": 51, "startIndex": 0, "itemsPerPage": 50},
+        }
+        page2 = {
+            "data": [{"id": 50}],
+            "pagination": {"totalResults": 51, "startIndex": 50, "itemsPerPage": 1},
+        }
+
+        with patch.object(mock_client, "_request", side_effect=[page1, page2]) as request:
+            reports = mock_client.get_all_custom_reports()
+
+        assert len(reports) == 51
+        assert request.call_args_list[0].kwargs["params"] == {"limit": 50, "offset": 0}
+        assert request.call_args_list[1].kwargs["params"] == {"limit": 50, "offset": 50}
+
+    def test_get_all_custom_reports_fails_closed_on_incomplete_pagination(self, mock_client):
+        response = {
+            "data": [{"id": index} for index in range(50)],
+            "pagination": {"totalResults": 51},
+        }
+
+        with patch.object(mock_client, "_request", return_value=response):
+            with pytest.raises(SearchAdsAPIError, match="incomplete custom-report pagination"):
+                mock_client.get_all_custom_reports()
+
+    def test_get_all_custom_reports_fails_closed_when_rows_end_before_total(
+        self, mock_client
+    ):
+        page1 = {
+            "data": [{"id": index} for index in range(50)],
+            "pagination": {"totalResults": 51, "startIndex": 0, "itemsPerPage": 50},
+        }
+        page2 = {
+            "data": [],
+            "pagination": {"totalResults": 51, "startIndex": 50, "itemsPerPage": 0},
+        }
+
+        with patch.object(mock_client, "_request", side_effect=[page1, page2]):
+            with pytest.raises(SearchAdsAPIError, match="50 of 51 custom reports"):
+                mock_client.get_all_custom_reports()

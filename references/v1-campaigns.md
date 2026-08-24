@@ -33,7 +33,7 @@ SDK `apple-ads-platform` version `1.109.0`; source commit `742ba544433ba9a5bef0a
 
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
-| option | `--file` | no | `path` | — | — | JSON request file; use '-' to read from stdin |
+| option | `--file` | yes | `path` | — | — | JSON request file; use '-' to read from stdin |
 | option | `--ad-account` | no | `text` | — | `ASA_AD_ACCOUNT_ID` | Apple Ads Platform ad account ID |
 | option | `--dry-run` | no | `boolean` | `False` | — | Validate and print the SDK call without sending it |
 | option | `--confirm` | no | `boolean` | `False` | — | Confirm this Apple Ads mutation |
@@ -45,6 +45,7 @@ CampaignCreate
 
 - Schema SHA-256: `e1b563f0e8a44685a350543ebef9fe1254c6b164daee479191ddee4c4aaf2812`
 - Source SHA-256: `810b2ffaaf0f57c7491662396e2c84e9df62c00349a14dd35f917ac36a3bbd49`
+- CLI override: Live request contract: when supplyPlacement is set, supplySource is also required. App Store search-results campaigns use supplySource APPSTORE and supplyPlacement APPSTORE_SEARCH_RESULTS; SEARCH_RESULTS is not a valid CampaignCreate placement value.
 
 | Field | Required | Type | Default | Description |
 |---|---|---|---|---|
@@ -78,28 +79,14 @@ Required-field body skeleton (replace every placeholder and add optional fields 
   "promotedObjectId": "<string>",
   "promotedObjectType": "<one of: APPSTORE_APP | BUSINESS_BRAND | unknown_default_open_api>",
   "targeting": {
-    "countryOrRegion": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
     "supplyPlacement": {
-      "exclude": [
-        "<string>"
-      ],
       "include": [
-        "<string>"
+        "APPSTORE_SEARCH_RESULTS"
       ]
     },
     "supplySource": {
-      "exclude": [
-        "<string>"
-      ],
       "include": [
-        "<string>"
+        "APPSTORE"
       ]
     }
   }
@@ -426,7 +413,7 @@ QuerySortOrder
 | Kind | Name or flags | Required | Type | Default | Environment | Help |
 |---|---|---|---|---|---|---|
 | option | `--id` | yes | `text` | — | — | id parameter |
-| option | `--file` | no | `path` | — | — | JSON request file; use '-' to read from stdin |
+| option | `--file` | yes | `path` | — | — | JSON request file; use '-' to read from stdin |
 | option | `--ad-account` | no | `text` | — | `ASA_AD_ACCOUNT_ID` | Apple Ads Platform ad account ID |
 | option | `--dry-run` | no | `boolean` | `False` | — | Validate and print the SDK call without sending it |
 | option | `--confirm` | no | `boolean` | `False` | — | Confirm this Apple Ads mutation |
@@ -438,6 +425,7 @@ CampaignUpdate
 
 - Schema SHA-256: `91608a246292e0272db99e4f0aa0ae1b77f5b12bfeec45a6e5d0993d4784f060`
 - Source SHA-256: `6625181515ccd819d5048ff1586c5782d3a3ff36c93cf52c9df4cf869b825cac`
+- CLI override: Serialization contract: omitted fields are not sent. Include only intended changes and treat any explicit null shown in the preview as intentional.
 
 | Field | Required | Type | Default | Description |
 |---|---|---|---|---|
@@ -455,68 +443,7 @@ CampaignUpdate
 Required-field body skeleton (replace every placeholder and add optional fields only as needed):
 
 ```json
-{
-  "bidStrategy": {
-    "bid": {
-      "amount": "<string>"
-    },
-    "bidStrategyGoal": "<one of: IMPRESSION | INSTALL | TAP | unknown_default_open_api>",
-    "bidStrategyType": "<one of: MANUAL_CPT | MAX_CONVERSIONS | MANUAL_CPM | MAX_ENGAGEMENTS | unknown_default_open_api>"
-  },
-  "dailyBudget": {
-    "value": {
-      "amount": "<string>"
-    }
-  },
-  "endTime": "<string>",
-  "invoiceDetail": {
-    "billingEmail": "<string>",
-    "clientName": "<string>",
-    "orderNumber": "<string>",
-    "primaryBuyerEmail": "<string>",
-    "primaryBuyerName": "<string>"
-  },
-  "name": "<string>",
-  "regulationResponses": [
-    {
-      "regulationType": "<one of: CAC | CAMPAIGN_SAPIN_LAW | ORG_SAPIN_LAW | unknown_default_open_api>",
-      "responseValue": "<one of: AGENT | FALSE | FRENCH_BUSINESS | NOT_AGENT | NOT_ANSWERED | NOT_FRENCH_BUSINESS | TRUE | unknown_default_open_api>"
-    }
-  ],
-  "sharedBudgets": [
-    {
-      "budgetId": 0
-    }
-  ],
-  "startTime": "<string>",
-  "status": "<one of: ENABLED | PAUSED | unknown_default_open_api>",
-  "targeting": {
-    "countryOrRegion": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "supplyPlacement": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    },
-    "supplySource": {
-      "exclude": [
-        "<string>"
-      ],
-      "include": [
-        "<string>"
-      ]
-    }
-  }
-}
+{}
 ```
 
 #### Referenced structures

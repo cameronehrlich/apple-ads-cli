@@ -100,6 +100,8 @@ asa reports-apps search-term --file report.json
 ```
 
 Body-based methods accept JSON through `--file`; use `--file -` for standard input.
+Platform API report and insight commands return exactly one requested Apple page;
+automation must inspect `pagination` and advance `offset` through `totalCount`.
 
 ```bash
 printf '{"pagination":{"pageSize":100}}' \
@@ -177,7 +179,14 @@ asa campaigns create --file campaign.json --dry-run
 asa campaigns create --file campaign.json --confirm
 ```
 
-The preview includes the resolved context and exact ad-account ID. A conflicting `adAccountId` in the request body fails before SDK invocation. Asset uploads require an existing, readable PNG, JPEG, or HEIC file.
+The preview includes the resolved context and exact ad-account ID. A conflicting
+`adAccountId` in the request body fails before SDK invocation. Mutation request
+bodies require `--file`. Omitted request fields stay omitted on the preview and
+wire; treat any explicit null that appears in the preview as intentional. For
+App Store search-results campaign creation, pair `supplySource: APPSTORE` with
+`supplyPlacement: APPSTORE_SEARCH_RESULTS`; `SEARCH_RESULTS` is not a valid
+create value. Ad-group creation requires `startTime`. Asset uploads require an
+existing, readable PNG, JPEG, or HEIC file.
 
 After every confirmed mutation, read the resource back and compare each intended field. A successful request without matching readback is unverified.
 
@@ -232,6 +241,12 @@ asa v5 keywords promote 'winning term' --target category
 asa v5 reports custom --days 30
 asa v5 optimize --dry-run
 ```
+
+Comparable v5 performance reports use completed `ORTZ` date windows and fetch
+every Apple page. Stable JSON keeps returned-row `totals` for compatibility and
+adds `source_totals` plus explicit filter/limit/page `coverage`. See the
+[reporting and automation contract](docs/REPORTING-AND-CPP.md) before comparing
+campaign, keyword, ad, search-term, or fixed-UTC Insights data.
 
 The Python import path `asa_cli.api` remains a compatibility re-export of `asa_cli.v5.api`. New compatibility code should import `asa_cli.v5.api` explicitly.
 
