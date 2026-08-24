@@ -3,9 +3,10 @@
 import json
 import os
 import re
+from collections.abc import Iterable
 from enum import Enum
 from pathlib import Path
-from typing import Optional
+from typing import Any, Optional
 
 from pydantic import BaseModel, Field
 from rich.console import Console
@@ -65,7 +66,9 @@ CAMPAIGN_STRUCTURE: dict[CampaignType, CampaignConfig] = {
         name_suffix="Brand",
         description="Target keywords related to your app/company name",
         ad_groups=[
-            AdGroupConfig(name="Brand-Exact", match_type=MatchType.EXACT, search_match_enabled=False)
+            AdGroupConfig(
+                name="Brand-Exact", match_type=MatchType.EXACT, search_match_enabled=False
+            )
         ],
         recommended_budget=50.0,
     ),
@@ -203,6 +206,7 @@ def save_credentials(credentials: Credentials) -> None:
 # Multi-app config load / save with legacy migration
 # ---------------------------------------------------------------------------
 
+
 def load_multi_app_config() -> MultiAppConfig:
     """Load multi-app config from config file, migrating legacy format if needed.
 
@@ -286,6 +290,7 @@ def is_multi_app() -> bool:
 # Backward-compatible load/save wrappers
 # ---------------------------------------------------------------------------
 
+
 def load_app_config() -> Optional[AppConfig]:
     """Load app configuration from config file.
 
@@ -313,6 +318,7 @@ def save_app_config(config: AppConfig) -> None:
 # ---------------------------------------------------------------------------
 # Campaign naming (with optional app prefix for multi-app)
 # ---------------------------------------------------------------------------
+
 
 def get_campaign_name(campaign_type: CampaignType, app_name: Optional[str] = None) -> str:
     """Get the campaign name for a type, optionally prefixed with app name.
@@ -352,7 +358,9 @@ def detect_campaign_type(name: str, app_name: Optional[str] = None) -> Optional[
     return None
 
 
-def parse_campaign_name(name: str, app_name: Optional[str] = None) -> Optional[tuple[str, CampaignType, list[str]]]:
+def parse_campaign_name(
+    name: str, app_name: Optional[str] = None
+) -> Optional[tuple[str, CampaignType, list[str]]]:
     """Parse a campaign name to detect its type.
 
     This function provides backward compatibility. It now uses simple name detection.
@@ -370,11 +378,44 @@ def parse_campaign_name(name: str, app_name: Optional[str] = None) -> Optional[t
     return None
 
 
+def campaign_belongs_to_app(campaign: dict[str, Any], app_config: Optional[AppConfig]) -> bool:
+    """Return whether a campaign belongs to the configured app.
+
+    Apple campaign payloads include ``adamId``. Older fixtures and a few legacy
+    response shapes may omit it, so retain the generated multi-app name prefix
+    as a compatibility fallback without requiring a managed campaign type.
+    """
+    if app_config is None:
+        return True
+
+    adam_id = campaign.get("adamId")
+    if adam_id not in (None, ""):
+        return str(adam_id) == str(app_config.app_id)
+
+    name_prefix, separator, _suffix = str(campaign.get("name", "")).partition(" - ")
+    if not separator:
+        return False
+
+    def normalize(value: str) -> str:
+        return re.sub(r"[^a-z0-9]", "", value.lower())
+
+    return normalize(name_prefix) == normalize(app_config.app_name)
+
+
+def campaigns_for_app(
+    campaigns: Iterable[dict[str, Any]], app_config: Optional[AppConfig]
+) -> list[dict[str, Any]]:
+    """Filter campaign payloads to one app without classifying campaign intent."""
+    return [campaign for campaign in campaigns if campaign_belongs_to_app(campaign, app_config)]
+
+
 def prompt_for_credentials() -> Credentials:
     """Interactively prompt for API credentials."""
     console.print("\n[bold]Apple Ads API Credentials Setup[/bold]\n")
     console.print("You'll need to create API credentials in Apple Ads dashboard first.")
-    console.print("See: https://ads.apple.com/help/campaigns/0022-use-the-campaign-management-api\n")
+    console.print(
+        "See: https://ads.apple.com/help/campaigns/0022-use-the-campaign-management-api\n"
+    )
 
     org_id_input = Prompt.ask(
         "Organization ID (legacy API v5, optional)",

@@ -7,7 +7,13 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
 
-from ..config import detect_campaign_type, get_current_app_config, is_multi_app, load_credentials
+from ..config import (
+    campaigns_for_app,
+    detect_campaign_type,
+    get_current_app_config,
+    is_multi_app,
+    load_credentials,
+)
 from ..v5.api import SearchAdsClient
 
 app = typer.Typer(help="Budget management commands")
@@ -117,6 +123,7 @@ def budget_status():
 
     client = SearchAdsClient(credentials)
     app_name = _resolve_app_name()
+    app_config = get_current_app_config() if app_name is not None else None
 
     with console.status("[bold blue]Fetching campaign budget status..."):
         statuses = client.get_campaign_budget_status()
@@ -133,12 +140,7 @@ def budget_status():
             "complete[/dim]\n"
         )
 
-    # Filter to current app if multi-app
-    if app_name:
-        statuses = [
-            s for s in statuses
-            if detect_campaign_type(s.get("name", ""), app_name=app_name) is not None
-        ]
+    statuses = campaigns_for_app(statuses, app_config)
 
     table = Table(
         title="Campaign Budget Health",
@@ -162,9 +164,7 @@ def budget_status():
         daily_amount = daily.get("amount", "-")
         daily_currency = daily.get("currency", "")
         daily_str = (
-            _format_money(daily_amount, daily_currency)
-            if daily_amount != "-"
-            else "[dim]-[/dim]"
+            _format_money(daily_amount, daily_currency) if daily_amount != "-" else "[dim]-[/dim]"
         )
 
         lifetime = entry.get("budgetAmount") or {}
@@ -221,7 +221,9 @@ def budget_status():
 @app.command("create")
 def create_budget_order(
     name: str = typer.Option(..., "--name", "-n", help="Budget order name"),
-    budget: float = typer.Option(..., "--budget", "-b", help="Budget amount (organization currency)"),
+    budget: float = typer.Option(
+        ..., "--budget", "-b", help="Budget amount (organization currency)"
+    ),
     start_date: str = typer.Option(..., "--start", "-s", help="Start date (YYYY-MM-DD)"),
     end_date: str = typer.Option(..., "--end", "-e", help="End date (YYYY-MM-DD)"),
     client_name: Optional[str] = typer.Option(None, "--client-name", help="Client name"),

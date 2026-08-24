@@ -157,6 +157,79 @@ def test_keyword_json_can_certify_complete_inventory():
     assert payload["rows"][1]["impressions"] == 0
 
 
+class AppScopedSummaryClient:
+    campaigns = [
+        {
+            "id": 1,
+            "name": "FaxIt - Discovery",
+            "adamId": 1458261691,
+            "displayStatus": "RUNNING",
+        },
+        {
+            "id": 2,
+            "name": "FaxIt - Number Intent",
+            "adamId": 1458261691,
+            "displayStatus": "RUNNING",
+        },
+        {
+            "id": 3,
+            "name": "StitchIt - Discovery",
+            "adamId": 554594252,
+            "displayStatus": "RUNNING",
+        },
+    ]
+
+    def __init__(self):
+        self.reported_campaign_ids = []
+
+    def get_campaigns(self):
+        return self.campaigns
+
+    def get_campaign_report(self, campaign_id, start, end, granularity="DAILY"):
+        assert start.strftime("%Y-%m-%d") == "2024-01-01"
+        assert end.strftime("%Y-%m-%d") == "2024-01-07"
+        assert granularity == "DAILY"
+        self.reported_campaign_ids.append(campaign_id)
+        metrics = {
+            "impressions": 10 if campaign_id == 1 else 5,
+            "taps": 1,
+            "totalInstalls": 1,
+            "localSpend": {"amount": "1.00" if campaign_id == 1 else "0.50"},
+        }
+        return ReportRows([{"total": metrics}], grand_totals=metrics)
+
+
+def test_summary_includes_custom_campaigns_for_app_and_certifies_inventory():
+    client = AppScopedSummaryClient()
+    app_config = SimpleNamespace(app_id=1458261691, app_name="Fax It")
+    with (
+        patch("asa_cli.commands.reports.load_credentials", return_value=object()),
+        patch("asa_cli.commands.reports.SearchAdsClient", return_value=client),
+        patch("asa_cli.commands.reports._resolve_app_name", return_value="Fax It"),
+        patch("asa_cli.commands.reports.get_current_app_config", return_value=app_config),
+    ):
+        result = runner.invoke(
+            app,
+            [
+                "summary",
+                "--start",
+                "2024-01-01",
+                "--end",
+                "2024-01-07",
+                "--json",
+            ],
+        )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert [row["campaign_id"] for row in payload["rows"]] == [1, 2]
+    assert payload["rows"][1]["campaign_type"] == "custom"
+    assert client.reported_campaign_ids == [1, 2]
+    assert payload["inventory_complete"] is True
+    assert payload["coverage"]["selection_complete"] is True
+    assert payload["source_totals"]["impressions"] == 15
+
+
 class ImpressionShareClient:
     def get_custom_report(self, report_id):
         return {
@@ -178,9 +251,7 @@ class ImpressionShareClient:
 def test_impression_share_json_downloads_completed_custom_report():
     with (
         patch("asa_cli.commands.reports.load_credentials", return_value=object()),
-        patch(
-            "asa_cli.commands.reports.SearchAdsClient", return_value=ImpressionShareClient()
-        ),
+        patch("asa_cli.commands.reports.SearchAdsClient", return_value=ImpressionShareClient()),
         patch(
             "asa_cli.commands.reports.get_current_app_config",
             return_value=SimpleNamespace(app_id=999),
@@ -276,12 +347,16 @@ class FaxItMismatchClient:
         assert start.strftime("%Y-%m-%d") == "2026-08-10"
         assert end.strftime("%Y-%m-%d") == "2026-08-16"
         assert granularity == "DAILY"
-        total = self.ortz_grand_totals if campaign_id == 3 else {
-            "impressions": 0,
-            "taps": 0,
-            "totalInstalls": 0,
-            "localSpend": {"amount": "0"},
-        }
+        total = (
+            self.ortz_grand_totals
+            if campaign_id == 3
+            else {
+                "impressions": 0,
+                "taps": 0,
+                "totalInstalls": 0,
+                "localSpend": {"amount": "0"},
+            }
+        )
         return ReportRows(
             [{"metadata": {"campaignId": campaign_id}, "total": total}],
             grand_totals=total,
@@ -352,6 +427,7 @@ def test_fax_it_mismatch_uses_ortz_grand_totals_for_cross_report_comparison():
     assert search_terms["coverage"]["totals_scope"] == "returned_rows"
     assert search_terms["coverage"]["source_totals_scope"] == "apple_grand_totals"
     assert search_terms["coverage"]["selection_complete"] is True
+    assert search_terms["inventory_complete"] is True
 
 
 def test_search_term_coverage_marks_filtering_and_limit_truncation():
@@ -372,6 +448,7 @@ def test_search_term_coverage_marks_filtering_and_limit_truncation():
 
     assert result.exit_code == 0, result.output
     payload = json.loads(result.output)
+    assert payload["inventory_complete"] is False
     assert payload["coverage"] == {
         "api_pages": 1,
         "api_pages_complete": True,

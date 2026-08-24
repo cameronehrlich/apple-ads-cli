@@ -12,6 +12,8 @@ from asa_cli.config import (
     CampaignType,
     Credentials,
     MultiAppConfig,
+    campaign_belongs_to_app,
+    campaigns_for_app,
     detect_campaign_type,
     get_active_app_config,
     get_app_slug,
@@ -116,13 +118,48 @@ class TestCampaignTypeDetection:
 
     def test_detect_scoped_accepts_own_app(self):
         """Test scoped detection accepts campaigns for the specified app."""
-        assert detect_campaign_type("ColorCub - Discovery", app_name="ColorCub") == CampaignType.DISCOVERY
-        assert detect_campaign_type("ColorCub - Category", app_name="ColorCub") == CampaignType.CATEGORY
+        assert (
+            detect_campaign_type("ColorCub - Discovery", app_name="ColorCub")
+            == CampaignType.DISCOVERY
+        )
+        assert (
+            detect_campaign_type("ColorCub - Category", app_name="ColorCub")
+            == CampaignType.CATEGORY
+        )
 
     def test_detect_unscoped_matches_any(self):
         """Test unscoped detection matches any campaign with type keyword."""
         assert detect_campaign_type("StitchIt - Brand") == CampaignType.BRAND
         assert detect_campaign_type("ColorCub - Discovery") == CampaignType.DISCOVERY
+
+
+class TestCampaignAppScoping:
+    def test_adam_id_is_authoritative_for_custom_campaigns(self):
+        fax_it = AppConfig(app_id=1458261691, app_name="Fax It")
+
+        assert campaign_belongs_to_app(
+            {"name": "FaxIt - Number Intent", "adamId": 1458261691}, fax_it
+        )
+        assert not campaign_belongs_to_app(
+            {"name": "FaxIt - Number Intent", "adamId": 554594252}, fax_it
+        )
+
+    def test_name_prefix_fallback_does_not_require_a_managed_type(self):
+        fax_it = AppConfig(app_id=1458261691, app_name="Fax It")
+
+        assert campaign_belongs_to_app({"name": "FaxIt - Number Intent"}, fax_it)
+        assert not campaign_belongs_to_app({"name": "StitchIt - Canada Exact Pilot"}, fax_it)
+        assert not campaign_belongs_to_app({"name": "FaxIt Number Intent"}, fax_it)
+
+    def test_campaign_filter_keeps_only_the_configured_app(self):
+        fax_it = AppConfig(app_id=1458261691, app_name="Fax It")
+        campaigns = [
+            {"id": 1, "name": "FaxIt - Discovery", "adamId": 1458261691},
+            {"id": 2, "name": "FaxIt - Number Intent", "adamId": 1458261691},
+            {"id": 3, "name": "StitchIt - Discovery", "adamId": 554594252},
+        ]
+
+        assert [campaign["id"] for campaign in campaigns_for_app(campaigns, fax_it)] == [1, 2]
 
 
 class TestCampaignStructure:

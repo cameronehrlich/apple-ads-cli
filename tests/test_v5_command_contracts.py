@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 from click import unstyle
 from typer.testing import CliRunner
 
-from asa_cli.commands import campaigns, config, keywords, optimize, reports
+from asa_cli.commands import budget, campaigns, config, keywords, optimize, reports
 from asa_cli.config import AppConfig
 
 runner = CliRunner()
@@ -57,6 +57,63 @@ def test_campaign_list_reads_and_filters_to_managed_campaigns_by_default():
     assert "Brand" in result.output
     assert "Unrelated experiment" not in result.output
     client.get_campaigns.assert_called_once_with()
+
+
+def test_campaign_list_all_includes_custom_campaigns_only_for_current_app():
+    client = MagicMock()
+    number_intent = campaign(1, "FaxIt - Number Intent")
+    number_intent["adamId"] = 1458261691
+    other_app = campaign(2, "StitchIt - Canada Exact Pilot")
+    other_app["adamId"] = 554594252
+    client.get_campaigns.return_value = [number_intent, other_app]
+    app_config = AppConfig(app_id=1458261691, app_name="Fax It")
+
+    with (
+        patch.object(campaigns, "load_credentials", return_value=object()),
+        patch.object(campaigns, "SearchAdsClient", return_value=client),
+        patch.object(campaigns, "_resolve_app_name", return_value="Fax It"),
+        patch.object(campaigns, "get_current_app_config", return_value=app_config),
+    ):
+        result = runner.invoke(campaigns.app, ["list", "--all"], terminal_width=200)
+
+    assert result.exit_code == 0, result.output
+    assert all(fragment in result.output for fragment in ("FaxIt -", "Number", "Intent"))
+    assert "StitchIt - Canada Exact Pilot" not in result.output
+
+
+def test_budget_status_includes_custom_campaign_for_current_app():
+    client = MagicMock()
+    client.get_campaign_budget_status.return_value = [
+        {
+            "id": 1,
+            "name": "FaxIt - Number Intent",
+            "dailyBudgetAmount": {"amount": "2", "currency": "USD"},
+            "status": "ENABLED",
+            "displayStatus": "RUNNING",
+            "totalSpend": 1.25,
+        },
+        {
+            "id": 2,
+            "name": "StitchIt - Canada Exact Pilot",
+            "dailyBudgetAmount": {"amount": "8", "currency": "USD"},
+            "status": "ENABLED",
+            "displayStatus": "RUNNING",
+            "totalSpend": 3.00,
+        },
+    ]
+    app_config = AppConfig(app_id=1458261691, app_name="Fax It")
+
+    with (
+        patch.object(budget, "load_credentials", return_value=object()),
+        patch.object(budget, "SearchAdsClient", return_value=client),
+        patch.object(budget, "_resolve_app_name", return_value="Fax It"),
+        patch.object(budget, "get_current_app_config", return_value=app_config),
+    ):
+        result = runner.invoke(budget.app, ["status"], terminal_width=200)
+
+    assert result.exit_code == 0, result.output
+    assert all(fragment in result.output for fragment in ("FaxIt -", "Number", "Intent"))
+    assert "StitchIt - Canada Exact Pilot" not in result.output
 
 
 def test_campaign_audit_reads_without_mutating():

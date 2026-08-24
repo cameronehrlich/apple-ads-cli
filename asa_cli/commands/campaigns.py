@@ -11,6 +11,7 @@ from rich.table import Table
 from ..config import (
     CAMPAIGN_STRUCTURE,
     CampaignType,
+    campaigns_for_app,
     detect_campaign_type,
     get_campaign_name,
     get_current_app_config,
@@ -37,10 +38,18 @@ def list_campaigns(
     all_campaigns: bool = typer.Option(
         False, "--all", "-a", help="Show all campaigns, not just ASA CLI managed"
     ),
-    filter_name: Optional[str] = typer.Option(None, "--filter", "-f", help="Filter campaigns by name"),
-    status_filter: Optional[str] = typer.Option(None, "--status", "-s", help="Filter by status (RUNNING, PAUSED)"),
-    campaign_type: Optional[str] = typer.Option(None, "--type", "-t", help="Filter by type (brand, category, competitor, discovery)"),
-    show_bids: bool = typer.Option(False, "--bids", "-b", help="Show ad group default bids (slower)"),
+    filter_name: Optional[str] = typer.Option(
+        None, "--filter", "-f", help="Filter campaigns by name"
+    ),
+    status_filter: Optional[str] = typer.Option(
+        None, "--status", "-s", help="Filter by status (RUNNING, PAUSED)"
+    ),
+    campaign_type: Optional[str] = typer.Option(
+        None, "--type", "-t", help="Filter by type (brand, category, competitor, discovery)"
+    ),
+    show_bids: bool = typer.Option(
+        False, "--bids", "-b", help="Show ad group default bids (slower)"
+    ),
 ):
     """List all campaigns."""
     credentials = load_credentials()
@@ -50,9 +59,12 @@ def list_campaigns(
 
     client = SearchAdsClient(credentials)
     app_name = _resolve_app_name()
+    app_config = get_current_app_config() if app_name is not None else None
 
     with console.status("[bold blue]Fetching campaigns..."):
         campaigns = client.get_campaigns()
+
+    campaigns = campaigns_for_app(campaigns, app_config)
 
     if not campaigns:
         console.print("[yellow]No campaigns found.[/yellow]")
@@ -175,7 +187,9 @@ def list_campaigns(
 @app.command("setup")
 def setup_campaigns(
     countries: str = typer.Option("US", "--countries", "-c", help="Comma-separated country codes"),
-    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget per campaign (organization currency)"),
+    budget: float = typer.Option(
+        50.0, "--budget", "-b", help="Daily budget per campaign (organization currency)"
+    ),
     bid: float = typer.Option(1.50, "--bid", help="Default keyword bid (organization currency)"),
     dry_run: bool = typer.Option(False, "--dry-run", "-n", help="Preview without creating"),
 ):
@@ -229,7 +243,11 @@ def setup_campaigns(
     with console.status("[bold blue]Checking for existing campaigns..."):
         existing = client.get_campaigns()
 
-    existing_types = {parse_campaign_name(c.get("name", ""), app_name=app_name)[1] for c in existing if parse_campaign_name(c.get("name", ""), app_name=app_name)}
+    existing_types = {
+        parse_campaign_name(c.get("name", ""), app_name=app_name)[1]
+        for c in existing
+        if parse_campaign_name(c.get("name", ""), app_name=app_name)
+    }
 
     for ctype, config in CAMPAIGN_STRUCTURE.items():
         campaign_name = get_campaign_name(ctype, app_name=app_name)
@@ -350,7 +368,9 @@ def audit_campaigns(
     # Other campaigns (without recognized type in name)
     if unmanaged_campaigns:
         console.print(f"\n[bold]Other Campaigns:[/bold] {len(unmanaged_campaigns)}")
-        console.print("  [dim](Campaigns without Brand/Category/Competitor/Discovery in name)[/dim]")
+        console.print(
+            "  [dim](Campaigns without Brand/Category/Competitor/Discovery in name)[/dim]"
+        )
         for campaign in unmanaged_campaigns:
             status = campaign.get("displayStatus", "UNKNOWN")
             console.print(f"  - {campaign.get('name')} [{status}]")
@@ -362,7 +382,9 @@ def audit_campaigns(
             console.print(f"  [red]•[/red] {issue}")
         console.print("\nRun [cyan]asa v5 campaigns setup[/cyan] to create missing campaigns.")
     else:
-        console.print("\n[bold green]Campaign structure matches Apple's recommendations[/bold green]")
+        console.print(
+            "\n[bold green]Campaign structure matches Apple's recommendations[/bold green]"
+        )
 
 
 @app.command("pause")
@@ -381,7 +403,9 @@ def pause_campaign(
 
     if all_campaigns:
         campaigns = client.get_campaigns()
-        managed = [c for c in campaigns if parse_campaign_name(c.get("name", ""), app_name=app_name)]
+        managed = [
+            c for c in campaigns if parse_campaign_name(c.get("name", ""), app_name=app_name)
+        ]
 
         if not managed:
             console.print("[yellow]No managed campaigns found.[/yellow]")
@@ -423,7 +447,9 @@ def enable_campaign(
 
     if all_campaigns:
         campaigns = client.get_campaigns()
-        managed = [c for c in campaigns if parse_campaign_name(c.get("name", ""), app_name=app_name)]
+        managed = [
+            c for c in campaigns if parse_campaign_name(c.get("name", ""), app_name=app_name)
+        ]
 
         if not managed:
             console.print("[yellow]No managed campaigns found.[/yellow]")
@@ -452,9 +478,13 @@ def enable_campaign(
 @app.command("create")
 def create_campaign(
     name: str = typer.Argument(..., help="Campaign name"),
-    budget: float = typer.Option(50.0, "--budget", "-b", help="Daily budget (organization currency)"),
+    budget: float = typer.Option(
+        50.0, "--budget", "-b", help="Daily budget (organization currency)"
+    ),
     countries: str = typer.Option("US", "--countries", "-c", help="Comma-separated country codes"),
-    status: str = typer.Option("ENABLED", "--status", "-s", help="Initial status (ENABLED or PAUSED)"),
+    status: str = typer.Option(
+        "ENABLED", "--status", "-s", help="Initial status (ENABLED or PAUSED)"
+    ),
 ):
     """Create a new campaign with custom settings."""
     credentials = load_credentials()
@@ -504,16 +534,23 @@ def create_campaign(
 def update_campaign(
     campaign_id: int = typer.Argument(..., help="Campaign ID to update"),
     name: Optional[str] = typer.Option(None, "--name", "-n", help="New campaign name"),
-    budget: Optional[float] = typer.Option(None, "--budget", "-b", help="New daily budget (organization currency)"),
+    budget: Optional[float] = typer.Option(
+        None, "--budget", "-b", help="New daily budget (organization currency)"
+    ),
     lifetime_budget: Optional[float] = typer.Option(
-        None, "--lifetime-budget", "-L",
+        None,
+        "--lifetime-budget",
+        "-L",
         help="New lifetime budget (organization currency). NOTE: Apple is discontinuing lifetime budgets on 2026-06-16; prefer --clear-lifetime.",
     ),
     clear_lifetime: bool = typer.Option(
-        False, "--clear-lifetime",
+        False,
+        "--clear-lifetime",
         help="Remove the lifetime budget cap on the campaign (sets budgetAmount=null). Use this to unblock campaigns that silently stopped serving after hitting their lifetime cap.",
     ),
-    status: Optional[str] = typer.Option(None, "--status", "-s", help="New status (ENABLED or PAUSED)"),
+    status: Optional[str] = typer.Option(
+        None, "--status", "-s", help="New status (ENABLED or PAUSED)"
+    ),
 ):
     """Update a campaign's name, budget, lifetime budget, or status."""
     credentials = load_credentials()
@@ -522,7 +559,9 @@ def update_campaign(
         raise typer.Exit(1)
 
     if not any([name, budget, lifetime_budget, clear_lifetime, status]):
-        console.print("[red]No updates provided. Use --name, --budget, --lifetime-budget, --clear-lifetime, or --status.[/red]")
+        console.print(
+            "[red]No updates provided. Use --name, --budget, --lifetime-budget, --clear-lifetime, or --status.[/red]"
+        )
         raise typer.Exit(1)
 
     if lifetime_budget is not None and clear_lifetime:
@@ -600,12 +639,17 @@ def update_campaign(
 @app.command("clone")
 def clone_campaign(
     source_campaign_id: int = typer.Argument(..., help="Campaign ID to duplicate"),
-    new_name: Optional[str] = typer.Option(None, "--name", "-n",
-        help="Name for the clone (defaults to '<source> v2')"),
-    keep_lifetime: bool = typer.Option(False, "--keep-lifetime",
-        help="Copy the source's lifetime budget too. Default: drop it, since Apple is discontinuing lifetime budgets on 2026-06-16 and the most common reason to clone is to escape a stuck TOTAL_BUDGET_EXHAUSTED state."),
-    pause_source: bool = typer.Option(False, "--pause-source",
-        help="Pause the source campaign after a successful clone."),
+    new_name: Optional[str] = typer.Option(
+        None, "--name", "-n", help="Name for the clone (defaults to '<source> v2')"
+    ),
+    keep_lifetime: bool = typer.Option(
+        False,
+        "--keep-lifetime",
+        help="Copy the source's lifetime budget too. Default: drop it, since Apple is discontinuing lifetime budgets on 2026-06-16 and the most common reason to clone is to escape a stuck TOTAL_BUDGET_EXHAUSTED state.",
+    ),
+    pause_source: bool = typer.Option(
+        False, "--pause-source", help="Pause the source campaign after a successful clone."
+    ),
 ):
     """Duplicate a campaign (with ad groups, keywords, and negatives).
 
@@ -643,7 +687,9 @@ def clone_campaign(
         console.print("[red]Clone failed — no result returned.[/red]")
         raise typer.Exit(1)
 
-    console.print(f"\n[green]✓ Created campaign id={result['new_id']}[/green] name=[cyan]{result['new_name']}[/cyan]")
+    console.print(
+        f"\n[green]✓ Created campaign id={result['new_id']}[/green] name=[cyan]{result['new_name']}[/cyan]"
+    )
     total_kw = 0
     total_attempted = 0
     for ag in result["ad_groups"]:
@@ -690,14 +736,19 @@ def delete_campaign(
     app_name = _resolve_app_name()
 
     if all_unmanaged:
-        campaigns = client.get_campaigns()
-        unmanaged = [c for c in campaigns if not parse_campaign_name(c.get("name", ""), app_name=app_name)]
+        app_config = get_current_app_config() if app_name is not None else None
+        campaigns = campaigns_for_app(client.get_campaigns(), app_config)
+        unmanaged = [
+            c for c in campaigns if not parse_campaign_name(c.get("name", ""), app_name=app_name)
+        ]
 
         if not unmanaged:
             console.print("[yellow]No unmanaged campaigns found.[/yellow]")
             return
 
-        console.print(f"\n[bold red]WARNING: About to delete {len(unmanaged)} unmanaged campaigns:[/bold red]")
+        console.print(
+            f"\n[bold red]WARNING: About to delete {len(unmanaged)} unmanaged campaigns:[/bold red]"
+        )
         for campaign in unmanaged:
             console.print(f"  - {campaign.get('name')} (ID: {campaign.get('id')})")
 
