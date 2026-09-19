@@ -172,6 +172,27 @@ def test_discovery_scope_uses_campaign_type_contract():
     assert CampaignType.DISCOVERY.value == "discovery"
 
 
+@pytest.mark.parametrize("text", [None, "", "  ", 123, False, [], {"text": "hidden"}])
+def test_undisclosed_search_terms_never_become_optimizer_actions(text):
+    rows = [report_row("visible winner", 3, 1.2), report_row("visible loser", 0, 2)]
+    for installs in (3, 0):
+        hidden = report_row(text, installs, 2)
+        hidden["metadata"]["keyword"] = "never promote or negate this keyword"
+        rows.append(hidden)
+    result, fake = invoke_with_fake_client(["--auto-approve"], rows=rows)
+    assert result.exit_code == 0, result.output
+    assert fake.mutations == [
+        ("keywords", 2, ["visible winner"]),
+        ("negatives", 4, ["visible winner"]),
+        ("negatives", 4, ["visible loser"]),
+    ]
+    result, _ = invoke_with_fake_client(["--json"], rows=rows)
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["source_totals"]["spend"] == pytest.approx(7.2)
+    assert payload["coverage"]["returned_action_candidates"] == 2
+
+
 def test_analysis_uses_exact_completed_window_instead_of_partial_today():
     client = FakeClient(object())
     window = CompleteDateWindow(start=date(2026, 8, 10), end=date(2026, 8, 16))

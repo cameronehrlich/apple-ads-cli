@@ -94,6 +94,15 @@ aggregate low-volume traffic as `other`. Complete API pagination therefore
 means complete coverage of Apple's report response, not an unsuppressed query
 log.
 
+The v5 search-term report preserves an undisclosed query as `search_term: null`
+and retains the matched targeting keyword separately in `keyword`. Human output
+labels these rows `Undisclosed`. Missing, empty, whitespace-only, or non-string
+query text must never fall back to a targeting keyword. These rows remain in
+unfiltered report totals, but are excluded from `--winners`, `--negatives`, and
+legacy optimizer promotion/negative candidates. Complete pagination does not
+imply that every query is disclosed. Consumers of older reports must not treat
+substituted keyword labels as verified queries; re-pull before proposing actions.
+
 ## Experiments and custom product pages
 
 App Store Connect remains the custom-product-page authoring system. A workflow may validate an existing creative and attach it to an ad group, but attachment is a mutation and requires immediate readback of ad ID, name, creative ID, and status. Measurement policy belongs to the caller; the general CLI should return complete-window evidence rather than make unsupported causal claims.

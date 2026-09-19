@@ -1081,13 +1081,17 @@ def report_search_terms(
 
     if show_winners:
         # Filter to terms with installs and reasonable CPA
-        winners = [t for t in terms if t["installs"] >= 1]
+        winners = [t for t in terms if t["search_term"] is not None and t["installs"] >= 1]
         winners.sort(key=lambda x: x["cpa"] if x["cpa"] is not None else 999999)
         terms = winners
         title = "Potential Keywords to Promote"
     elif show_negatives:
         # Filter to terms with spend but no installs
-        losers = [t for t in terms if t["installs"] == 0 and t["spend"] > 0]
+        losers = [
+            t
+            for t in terms
+            if t["search_term"] is not None and t["installs"] == 0 and t["spend"] > 0
+        ]
         losers.sort(key=lambda x: -x["spend"])
         terms = losers
         title = "Potential Negative Keywords"
@@ -1152,6 +1156,7 @@ def report_search_terms(
 
     table = Table(show_header=True, header_style="bold magenta")
     table.add_column("Search Term")
+    table.add_column("Matched keyword", style="dim")
     table.add_column("Source", style="dim")
     table.add_column("Impr", justify="right")
     table.add_column("Taps", justify="right")
@@ -1170,13 +1175,14 @@ def report_search_terms(
         else:
             term_style = ""
 
-        term_text = t["search_term"] or "?"
+        term_text = t["search_term"] or "Undisclosed"
         term_display = (
             f"[{term_style}]{term_text[:35]}[/{term_style}]" if term_style else term_text[:35]
         )
 
         table.add_row(
             term_display,
+            (t["keyword"] or "-")[:35],
             (t["source"] or "?")[:10],
             format_number(t["impressions"]),
             format_number(t["taps"]),

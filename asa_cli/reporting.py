@@ -125,6 +125,12 @@ def _first(mapping: dict[str, Any], *keys: str) -> Any:
     return None
 
 
+def disclosed_search_term(metadata: dict[str, Any]) -> str | None:
+    """Return only Apple's disclosed query, never its matched targeting keyword."""
+    value = metadata.get("searchTermText")
+    return value if isinstance(value, str) and value.strip() else None
+
+
 def normalize_performance_row(
     row: dict[str, Any],
     *,
@@ -178,7 +184,7 @@ def normalize_performance_row(
     elif kind == "search_term":
         normalized.update(
             {
-                "search_term": _first(metadata, "searchTermText", "keyword"),
+                "search_term": disclosed_search_term(metadata),
                 "source": _first(metadata, "searchTermSource"),
                 "keyword_id": _first(metadata, "keywordId"),
                 "keyword": _first(metadata, "keyword", "keywordText"),

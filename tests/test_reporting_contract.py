@@ -19,6 +19,85 @@ from asa_cli.v5.api import ReportRows
 runner = CliRunner()
 
 
+@pytest.mark.parametrize("text", [None, "", "  ", 123, False, [], {"text": "hidden"}])
+def test_search_term_never_falls_back_to_targeting_keyword(text):
+    raw = {
+        "metadata": {"searchTermText": text, "keyword": "matched keyword", "keywordId": 7},
+        "total": {"totalInstalls": 3, "localSpend": {"amount": "1.20"}},
+    }
+    row = normalize_performance_row(raw, kind="search_term")
+    assert row["search_term"] is None
+    assert row["keyword"] == "matched keyword"
+    assert row["keyword_id"] == 7
+    assert row["installs"] == 3
+    assert row["spend"] == 1.2
+    del raw["metadata"]["searchTermText"]
+    assert normalize_performance_row(raw, kind="search_term")["search_term"] is None
+
+
+@pytest.mark.parametrize("text", ["scrolling screenshot", "滚动截屏", "other"])
+def test_disclosed_search_term_is_preserved_verbatim(text):
+    row = normalize_performance_row(
+        {"metadata": {"searchTermText": text, "keyword": "matched keyword"}},
+        kind="search_term",
+    )
+    assert row["search_term"] == text
+
+
+@pytest.mark.parametrize("mode", [None, "--winners", "--negatives"])
+def test_search_term_command_preserves_hidden_totals_but_excludes_action_candidates(mode):
+    class Client:
+        def get_campaign(self, campaign_id):
+            return {"id": campaign_id, "name": "Example - Discovery"}
+
+        def get_search_terms_report(self, *_args):
+            return [
+                {
+                    "metadata": {"searchTermText": text, "keyword": "matched keyword"},
+                    "total": {
+                        "impressions": 100,
+                        "taps": 10,
+                        "totalInstalls": installs,
+                        "localSpend": {"amount": "2"},
+                    },
+                }
+                for text, installs in [
+                    (None, 4),
+                    (None, 0),
+                    ("visible winner", 4),
+                    ("visible loser", 0),
+                ]
+            ]
+
+    args = ["search-terms", "--campaign", "1", "--start", "2024-01-01", "--end", "2024-01-07"]
+    if mode:
+        args.append(mode)
+    with (
+        patch("asa_cli.commands.reports.load_credentials", return_value=object()),
+        patch("asa_cli.commands.reports.SearchAdsClient", return_value=Client()),
+        patch("asa_cli.commands.reports._resolve_app_name", return_value=None),
+    ):
+        result = runner.invoke(app, [*args, "--json"])
+        human = runner.invoke(app, args)
+    assert result.exit_code == 0, result.output
+    assert human.exit_code == 0, human.output
+    payload = json.loads(result.output)
+    assert payload["source_totals"]["spend"] == 8
+    assert payload["source_totals"]["installs"] == 8
+    if mode is None:
+        assert len(payload["rows"]) == 4
+        assert sum(row["search_term"] is None for row in payload["rows"]) == 2
+        assert payload["totals"]["spend"] == 8
+        assert payload["inventory_complete"] is True
+        assert "Undisclosed" in human.output
+        assert "Matched" in human.output and "keyword" in human.output
+    else:
+        expected = "visible winner" if mode == "--winners" else "visible loser"
+        assert [row["search_term"] for row in payload["rows"]] == [expected]
+        assert payload["inventory_complete"] is False
+        assert "Undisclosed" not in human.output
+
+
 def test_complete_window_is_exact_and_excludes_today():
     window = complete_date_window(7, today=date(2026, 8, 9))
 
