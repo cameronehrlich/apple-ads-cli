@@ -20,6 +20,7 @@ from ..config import (
 from ..reporting import (
     CompleteDateWindow,
     complete_date_window,
+    disclosed_search_term,
     normalize_performance_row,
     performance_totals,
     performance_totals_from_metrics,
@@ -143,7 +144,7 @@ def analyze_search_terms(
         spend_data = metrics.get("localSpend")
         spend = float(spend_data.get("amount", 0)) if isinstance(spend_data, dict) else 0.0
 
-        term_text = metadata.get("searchTermText") or metadata.get("keyword") or ""
+        term_text = disclosed_search_term(metadata)
         if not term_text:
             result.skipped_no_text += 1
             continue
