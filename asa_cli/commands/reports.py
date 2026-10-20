@@ -1,8 +1,9 @@
 """Reporting commands."""
 
 import json
+from collections.abc import Mapping
 from contextlib import nullcontext
-from typing import Optional
+from typing import Any, Optional
 
 import typer
 from rich.console import Console
@@ -106,9 +107,79 @@ def _coverage(
     return payload
 
 
-def format_currency(amount: float, currency: str = "USD") -> str:
-    """Format currency for display."""
-    return f"${amount:,.2f}"
+def format_currency(amount: float, currency: Optional[str] = None) -> str:
+    """Format currency for display without assuming US dollars."""
+    code = (currency or "").strip().upper()
+    if code == "USD":
+        return f"${amount:,.2f}"
+    if not code:
+        return f"{amount:,.2f}"
+    return f"{amount:,.2f} {code}"
+
+
+def _reported_currency(payload: Any) -> Optional[str]:
+    """Return the first currency Apple reported alongside a money amount."""
+    if isinstance(payload, Mapping):
+        amount = payload.get("amount")
+        currency = payload.get("currency")
+        if amount is not None and isinstance(currency, str) and currency.strip():
+            return currency.strip().upper()
+        for value in payload.values():
+            found = _reported_currency(value)
+            if found is not None:
+                return found
+    elif isinstance(payload, (list, tuple)):
+        for value in payload:
+            found = _reported_currency(value)
+            if found is not None:
+                return found
+    return None
+
+
+def _organization_currency(client: Any) -> Optional[str]:
+    """Return the configured organization currency when the client resolves one.
+
+    A client that cannot resolve a currency at all is not a report failure:
+    the money is then rendered without a currency label rather than with a
+    wrong one. A currency lookup that *fails* is a different thing and is
+    left to propagate — see the comment below.
+    """
+    resolver = getattr(client, "get_org_currency", None)
+    if not callable(resolver):
+        return None
+    try:
+        currency = resolver()
+    except ValueError:
+        # No credentials configured. The commands already guard for that
+        # before reaching the report path, so it is not a report failure.
+        return None
+    # A failed ACL request is a failure, not missing data, and it is left to
+    # propagate. SearchAdsClient._request prints the error to stdout before
+    # raising, so swallowing it here would emit invalid JSON and still exit 0
+    # — which the repository's own contract
+    # (references/safety-and-output-contracts.md) forbids: HTTP failures must
+    # exit nonzero, never a healthy no-op. Every other API call in this module
+    # already propagates, and this one now does the same.
+    return currency.strip().upper() if isinstance(currency, str) and currency.strip() else None
+
+
+def _report_currency(client: Any, *payloads: Any) -> Optional[str]:
+    """Resolve the currency of reported money without assuming US dollars.
+
+    Apple reports the currency on every money object, so the reported currency
+    wins. The organization currency is only a fallback for payloads that omit
+    it. ``None`` means the currency is unknown and must not be labelled.
+    """
+    for payload in payloads:
+        found = _reported_currency(payload)
+        if found is not None:
+            return found
+        grand_totals = getattr(payload, "grand_totals", None)
+        if grand_totals is not None:
+            found = _reported_currency(grand_totals)
+            if found is not None:
+                return found
+    return _organization_currency(client)
 
 
 def format_number(num: float) -> str:
@@ -251,12 +322,14 @@ def report_summary(
     source_rows = 0
     source_pages = 0
     source_total_kinds = set()
+    currency: Optional[str] = None
     for campaign, ctype_label in campaign_list:
         campaign_id = campaign.get("id")
         campaign_name = campaign.get("name", "Unknown")
 
         with _status(f"[bold blue]Fetching {campaign_name} report...", json_output=json_output):
             report_data = client.get_campaign_report(campaign_id, start, end, granularity="DAILY")
+        currency = _report_currency(client, report_data)
         source_part, source_kind = _apple_source_totals(report_data)
         source_total_parts.append(source_part)
         source_total_kinds.add(source_kind)
@@ -311,8 +384,8 @@ def report_summary(
             f"{ttr:.2f}%",
             format_number(installs),
             f"{cvr:.2f}%",
-            format_currency(spend),
-            format_currency(cpa) if installs > 0 else "-",
+            format_currency(spend, currency),
+            format_currency(cpa, currency) if installs > 0 else "-",
         )
 
         # Accumulate totals
@@ -334,8 +407,8 @@ def report_summary(
         f"[bold]{total_ttr:.2f}%[/bold]",
         f"[bold]{format_number(totals['installs'])}[/bold]",
         f"[bold]{total_cvr:.2f}%[/bold]",
-        f"[bold]{format_currency(totals['spend'])}[/bold]",
-        f"[bold]{format_currency(total_cpa)}[/bold]" if totals["installs"] > 0 else "-",
+        f"[bold]{format_currency(totals['spend'], currency)}[/bold]",
+        f"[bold]{format_currency(total_cpa, currency)}[/bold]" if totals["installs"] > 0 else "-",
     )
 
     if json_output:
@@ -356,6 +429,7 @@ def report_summary(
                 ),
                 inventory_complete=all_campaigns,
                 time_zone=REPORTING_TIME_ZONE,
+                currency=currency,
             )
         )
     else:
@@ -432,6 +506,7 @@ def report_keywords(
     source_pages = 0
     source_total_parts = []
     source_total_kinds = set()
+    currency: Optional[str] = None
     for campaign in campaigns:
         cid = campaign.get("id")
         with _status(
@@ -439,6 +514,7 @@ def report_keywords(
             json_output=json_output,
         ):
             report_data = client.get_keyword_report(cid, start, end)
+        currency = _report_currency(client, report_data)
         source_part, source_kind = _apple_source_totals(report_data)
         source_total_parts.append(source_part)
         source_total_kinds.add(source_kind)
@@ -539,6 +615,7 @@ def report_keywords(
                 ),
                 inventory_complete=include_zero and min_impressions == 0,
                 time_zone=REPORTING_TIME_ZONE,
+                currency=currency,
             )
         )
         return
@@ -568,7 +645,7 @@ def report_keywords(
     table.add_column("CPA", justify="right")
 
     for kw in keywords:
-        cpa_str = format_currency(kw["cpa"]) if kw["cpa"] is not None else "-"
+        cpa_str = format_currency(kw["cpa"], currency) if kw["cpa"] is not None else "-"
         table.add_row(
             (kw["keyword"] or "?")[:30],
             (kw["match_type"] or "?")[:5],
@@ -577,7 +654,7 @@ def report_keywords(
             f"{kw['ttr'] * 100:.1f}%" if kw["ttr"] is not None else "-",
             format_number(kw["installs"]),
             f"{kw['conversion_rate'] * 100:.1f}%" if kw["conversion_rate"] is not None else "-",
-            format_currency(kw["spend"]),
+            format_currency(kw["spend"], currency),
             cpa_str,
         )
 
@@ -672,6 +749,8 @@ def report_adgroups(
             console.print(f"[yellow]{ctype}: No ad group data[/yellow]")
             continue
 
+        currency = _report_currency(client, report_data)
+
         table = Table(title=f"{ctype} - Ad Groups", show_header=True, header_style="bold magenta")
         table.add_column("Ad Group")
         table.add_column("Status")
@@ -714,8 +793,8 @@ def report_adgroups(
                 f"{ttr:.1f}%",
                 format_number(installs),
                 f"{cvr:.1f}%",
-                format_currency(spend),
-                format_currency(cpa) if installs > 0 else "-",
+                format_currency(spend, currency),
+                format_currency(cpa, currency) if installs > 0 else "-",
             )
 
             campaign_totals["impressions"] += impressions
@@ -748,8 +827,8 @@ def report_adgroups(
             f"[bold]{total_ttr:.1f}%[/bold]",
             f"[bold]{format_number(campaign_totals['installs'])}[/bold]",
             f"[bold]{total_cvr:.1f}%[/bold]",
-            f"[bold]{format_currency(campaign_totals['spend'])}[/bold]",
-            f"[bold]{format_currency(total_cpa)}[/bold]"
+            f"[bold]{format_currency(campaign_totals['spend'], currency)}[/bold]",
+            f"[bold]{format_currency(total_cpa, currency)}[/bold]"
             if campaign_totals["installs"] > 0
             else "-",
         )
@@ -1035,6 +1114,7 @@ def report_search_terms(
     source_pages = int(getattr(report_data, "page_count", 1))
     api_pages_complete = bool(getattr(report_data, "api_pages_complete", True))
     source_row_count = len(report_data)
+    currency = _report_currency(client, report_data)
     filter_name = "winners" if show_winners else "negatives" if show_negatives else "all"
 
     if not report_data:
@@ -1067,6 +1147,7 @@ def report_search_terms(
                         api_pages_complete and filter_name == "all" and min_impressions <= 10
                     ),
                     time_zone=REPORTING_TIME_ZONE,
+                    currency=currency,
                     extra={"filter": filter_name},
                 )
             )
@@ -1141,6 +1222,7 @@ def report_search_terms(
                 ),
                 inventory_complete=selection_complete,
                 time_zone=REPORTING_TIME_ZONE,
+                currency=currency,
                 extra={"filter": filter_name},
             )
         )
@@ -1165,7 +1247,7 @@ def report_search_terms(
     table.add_column("CPA", justify="right")
 
     for t in terms:
-        cpa_str = format_currency(t["cpa"]) if t["cpa"] is not None else "-"
+        cpa_str = format_currency(t["cpa"], currency) if t["cpa"] is not None else "-"
 
         # Color code based on performance
         if t["installs"] > 0 and t["cpa"] is not None:
@@ -1187,7 +1269,7 @@ def report_search_terms(
             format_number(t["impressions"]),
             format_number(t["taps"]),
             format_number(t["installs"]),
-            format_currency(t["spend"]),
+            format_currency(t["spend"], currency),
             cpa_str,
         )
 
@@ -1478,6 +1560,7 @@ def report_ads(
     source_total_kinds = set()
     source_rows = 0
     source_pages = 0
+    currency: Optional[str] = None
     for campaign in campaigns_to_report:
         cid = campaign.get("id")
         cname = campaign.get("name", "Unknown")
@@ -1485,6 +1568,7 @@ def report_ads(
 
         with _status(f"[bold blue]Fetching {cname} ad report...", json_output=json_output):
             report_data = client.get_ad_report(cid, start, end)
+        currency = _report_currency(client, report_data)
         source_part, source_kind = _apple_source_totals(report_data)
         source_total_parts.append(source_part)
         source_total_kinds.add(source_kind)
@@ -1540,8 +1624,8 @@ def report_ads(
                 f"{ttr:.1f}%",
                 format_number(installs),
                 f"{cvr:.1f}%",
-                format_currency(spend),
-                format_currency(cpa) if installs > 0 else "-",
+                format_currency(spend, currency),
+                format_currency(cpa, currency) if installs > 0 else "-",
             )
 
         if not json_output:
@@ -1572,6 +1656,7 @@ def report_ads(
                     pages=source_pages,
                 ),
                 time_zone=REPORTING_TIME_ZONE,
+                currency=currency,
             )
         )
 
@@ -1681,6 +1766,8 @@ def report_bid_recommendations(
             if not report_data:
                 continue
 
+            currency = _report_currency(client, report_data)
+
             # Build keyword rows with bid recommendations
             rows = []
             for row in report_data:
@@ -1750,13 +1837,17 @@ def report_bid_recommendations(
                     bid_style = "red"
                     below_suggestion += 1
 
-                diff_str = f"[{bid_style}]{'+' if diff <= 0 else ''}{format_currency(abs(diff))}[/{bid_style}]"
+                diff_str = f"[{bid_style}]{'+' if diff <= 0 else ''}{format_currency(abs(diff), currency)}[/{bid_style}]"
                 if diff > 0:
-                    diff_str = f"[{bid_style}]-{format_currency(diff)}[/{bid_style}]"
+                    diff_str = f"[{bid_style}]-{format_currency(diff, currency)}[/{bid_style}]"
 
-                current_str = format_currency(r["current_bid"]) if r["current_bid"] > 0 else "-"
+                current_str = (
+                    format_currency(r["current_bid"], currency) if r["current_bid"] > 0 else "-"
+                )
                 suggested_str = (
-                    format_currency(r["suggested_bid"]) if r["suggested_bid"] > 0 else "-"
+                    format_currency(r["suggested_bid"], currency)
+                    if r["suggested_bid"] > 0
+                    else "-"
                 )
 
                 table.add_row(

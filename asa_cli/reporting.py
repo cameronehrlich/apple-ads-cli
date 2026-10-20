@@ -86,6 +86,7 @@ def machine_report(
     coverage: Optional[dict[str, Any]] = None,
     inventory_complete: Optional[bool] = None,
     time_zone: str = "UTC",
+    currency: Optional[str] = None,
     extra: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """Build the stable versioned JSON envelope used by integrations."""
@@ -95,6 +96,8 @@ def machine_report(
         "window": window.as_dict(time_zone=time_zone),
         "rows": rows,
     }
+    if currency is not None:
+        payload["currency"] = currency
     if totals is not None:
         payload["totals"] = totals
     if source_totals is not None:

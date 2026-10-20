@@ -1,13 +1,15 @@
 """Currency safety contracts for legacy Campaign Management API v5 writes."""
 
 import ast
+import json
 from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 from click import unstyle
 from typer.testing import CliRunner
 
-from asa_cli.commands import adgroups, budget, campaigns, keywords
+from asa_cli.commands import adgroups, budget, campaigns, keywords, reports
+from asa_cli.v5.api import ReportRows, SearchAdsAPIError
 
 ROOT = Path(__file__).resolve().parents[1]
 runner = CliRunner()
@@ -149,3 +151,158 @@ def test_budget_order_preview_uses_resolved_eur_currency():
     assert result.exit_code == 0, result.output
     assert "1,000.00 EUR" in unstyle(result.output)
     assert "$" not in unstyle(result.output)
+
+
+class ReportsClient:
+    """Report fixture whose money is denominated in a non-USD organization currency."""
+
+    campaigns = [{"id": 42, "name": "DE Exact", "displayStatus": "RUNNING"}]
+
+    def get_campaigns(self):
+        return self.campaigns
+
+    def get_campaign_report(self, campaign_id, start, end, granularity="DAILY"):
+        total = {
+            "impressions": 100,
+            "taps": 10,
+            "totalInstalls": 2,
+            "localSpend": {"amount": "25.00", "currency": "EUR"},
+        }
+        return ReportRows(
+            [{"metadata": {"campaignId": campaign_id}, "total": total}],
+            grand_totals=total,
+        )
+
+
+def _invoke_reports(arguments):
+    client = ReportsClient()
+    with (
+        patch.object(reports, "load_credentials", return_value=object()),
+        patch.object(reports, "SearchAdsClient", return_value=client),
+        patch.object(reports, "_resolve_app_name", return_value=None),
+    ):
+        return runner.invoke(reports.app, arguments), client
+
+
+def test_report_summary_labels_spend_with_the_reported_currency(monkeypatch):
+    # Give the table room so currency labels are not wrapped across lines.
+    monkeypatch.setenv("COLUMNS", "200")
+    result, _ = _invoke_reports(
+        ["summary", "--start", "2024-01-01", "--end", "2024-01-07"]
+    )
+
+    assert result.exit_code == 0, result.output
+    output = unstyle(result.output)
+    assert "$" not in output
+    assert "25.00 EUR" in output
+    assert "12.50 EUR" in output
+
+
+def test_report_summary_json_output_carries_the_money_currency():
+    result, _ = _invoke_reports(
+        ["summary", "--start", "2024-01-01", "--end", "2024-01-07", "--json"]
+    )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads(result.output)
+    assert payload["currency"] == "EUR"
+    assert payload["totals"]["spend"] == 25.0
+
+
+class CurrencylessReportsClient(ReportsClient):
+    """Report fixture whose money carries no currency of its own."""
+
+    def get_campaign_report(self, campaign_id, start, end, granularity="DAILY"):
+        total = {
+            "impressions": 100,
+            "taps": 10,
+            "totalInstalls": 2,
+            "localSpend": {"amount": "25.00"},
+        }
+        return ReportRows(
+            [{"metadata": {"campaignId": campaign_id}, "total": total}],
+            grand_totals=total,
+        )
+
+    def get_org_currency(self):
+        raise SearchAdsAPIError(
+            "Apple Ads ACL did not return a currency for organization 42"
+        )
+
+
+def _invoke_currencyless_reports(arguments):
+    client = CurrencylessReportsClient()
+    with (
+        patch.object(reports, "load_credentials", return_value=object()),
+        patch.object(reports, "SearchAdsClient", return_value=client),
+        patch.object(reports, "_resolve_app_name", return_value=None),
+    ):
+        return runner.invoke(reports.app, arguments), client
+
+
+def test_report_summary_surfaces_a_failed_currency_lookup(monkeypatch):
+    """A failed currency lookup must not be reported as a successful report.
+
+    The legacy v5 client fails closed when the ACL carries no currency, and
+    every other command lets that error reach the caller. Reports must not
+    paper over it by emitting money without a known currency.
+    """
+    monkeypatch.setenv("COLUMNS", "200")
+    result, _ = _invoke_currencyless_reports(
+        ["summary", "--start", "2024-01-01", "--end", "2024-01-07"]
+    )
+
+    assert result.exit_code != 0
+    assert isinstance(result.exception, SearchAdsAPIError)
+    assert "currency" in str(result.exception)
+
+
+def test_report_summary_json_output_never_reports_success_without_a_currency():
+    """Machine output must not claim success when the currency is unknown."""
+    result, _ = _invoke_currencyless_reports(
+        ["summary", "--start", "2024-01-01", "--end", "2024-01-07", "--json"]
+    )
+
+    assert result.exit_code != 0
+    assert "25.00" not in result.output
+
+
+class FailingAclReportsClient(CurrencylessReportsClient):
+    """Report fixture whose ACL request fails the way the client really fails.
+
+    SearchAdsClient._request prints the error to stdout before it raises, so
+    a report that swallows the failure emits that line in front of the JSON
+    envelope and still exits 0.
+    """
+
+    def get_org_currency(self):
+        print("API error 403: Forbidden")
+        raise SearchAdsAPIError("API error 403: Forbidden")
+
+
+def _invoke_failing_acl_reports(arguments):
+    client = FailingAclReportsClient()
+    with (
+        patch.object(reports, "load_credentials", return_value=object()),
+        patch.object(reports, "SearchAdsClient", return_value=client),
+        patch.object(reports, "_resolve_app_name", return_value=None),
+    ):
+        return runner.invoke(reports.app, arguments), client
+
+
+def test_report_summary_does_not_swallow_a_failed_acl_request():
+    """A failed ACL request must not become a successful report.
+
+    The repository's contract requires HTTP failures to exit nonzero, never a
+    healthy no-op. The client prints the error to stdout before raising, so
+    swallowing the failure would also put a non-JSON line in front of the
+    machine envelope.
+    """
+    result, _ = _invoke_failing_acl_reports(
+        ["summary", "--start", "2024-01-01", "--end", "2024-01-07", "--json"]
+    )
+
+    assert result.exit_code != 0
+    assert isinstance(result.exception, SearchAdsAPIError)
+    assert '"schema_version"' not in result.output
+    assert "25.00" not in result.output

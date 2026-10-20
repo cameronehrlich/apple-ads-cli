@@ -52,6 +52,7 @@ Stable machine output should include:
 - A schema version and report type.
 - Inclusive start and end dates, day count, time zone, and completeness.
 - Numeric money and rates, with missing ratios represented as `null`.
+- The currency of reported money, so a consumer never has to assume US dollars.
 - Deterministically ordered rows.
 - An `inventory_complete` indicator when absence-based analysis is allowed.
 
